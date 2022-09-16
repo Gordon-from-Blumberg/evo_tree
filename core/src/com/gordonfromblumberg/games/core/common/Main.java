@@ -18,7 +18,7 @@ public class Main extends Game {
 	public static boolean DEBUG;
 	public static boolean DEBUG_UI;
 
-	public static final String NAME = "game_template";
+	public static final String NAME = "evo_tree";
 
 	private static Main instance;
 

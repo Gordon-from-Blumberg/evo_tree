@@ -18,7 +18,7 @@ allprojects {
 
     version = '1.0'
     ext {
-        appName = "game_template"
+        appName = "evo_tree"
         gdxVersion = '1.9.14'
         roboVMVersion = '2.3.8'
         box2DLightsVersion = '1.4'
