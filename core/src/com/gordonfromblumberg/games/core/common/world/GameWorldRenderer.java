@@ -18,6 +18,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.gordonfromblumberg.games.core.common.Main;
 import com.gordonfromblumberg.games.core.common.animation.AnimatedParameterFloat;
 import com.gordonfromblumberg.games.core.common.animation.GbAnimation;
+import com.gordonfromblumberg.games.core.common.model.Cell;
 import com.gordonfromblumberg.games.core.common.screens.FBORenderer;
 import com.gordonfromblumberg.games.core.common.model.GameObject;
 
@@ -31,7 +32,6 @@ public class GameWorldRenderer extends FBORenderer {
     private final Batch batch;
     private Viewport viewport;
     private final Rectangle worldArea = new Rectangle();
-    private IsometricTiledMapRenderer mapRenderer;
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
     private final Matrix3 viewToWorld = new Matrix3();
     private final Matrix3 worldToView = new Matrix3();
@@ -58,22 +58,20 @@ public class GameWorldRenderer extends FBORenderer {
                 .get("image/texture_pack.atlas", TextureAtlas.class)
                 .findRegion("background");
 
-        this.mapRenderer = new IsometricTiledMapRenderer(world.map, batch);
-        TiledMapTileLayer l = (TiledMapTileLayer) world.map.getLayers().get("map");
-        viewport.getCamera().position.set(l.getWidth() * l.getTileWidth() / 2f, 0, 0);
-        viewToWorld.set(new float[] {
-                 1.0f / l.getTileWidth(),  1.0f / l.getTileWidth(),  0.0f,
-                -1.0f / l.getTileHeight(), 1.0f / l.getTileHeight(), 0.0f,
-                 0.5f,                    -0.5f,                     1.0f
-        });
-        worldToView.set(viewToWorld).inv();
+//        viewport.getCamera().position.set(l.getWidth() * l.getTileWidth() / 2f, 0, 0);
+//        viewToWorld.set(new float[] {
+//                 1.0f / l.getTileWidth(),  1.0f / l.getTileWidth(),  0.0f,
+//                -1.0f / l.getTileHeight(), 1.0f / l.getTileHeight(), 0.0f,
+//                 0.5f,                    -0.5f,                     1.0f
+//        });
+//        worldToView.set(viewToWorld).inv();
 
         world.onClick = this::click;
     }
 
     @Override
     public void render(float dt) {
-        batch.begin();
+//        batch.begin();
         final Color origColor = TEMP_COLOR.set(batch.getColor());
         if (world.paused) {
             batch.setColor(pauseColor);
@@ -81,60 +79,63 @@ public class GameWorldRenderer extends FBORenderer {
 
 //        batch.draw(background, 0, 0);
 
-        mapRenderer.setView((OrthographicCamera) viewport.getCamera());
-        mapRenderer.renderTileLayer((TiledMapTileLayer) world.map.getLayers().get(0));
-
-        if (world.paused) {
-            for (GameObject gameObject : world.getGameObjects()) {
-                gameObject.getSprite().setColor(pauseColor);
-                gameObject.render(batch);
-                gameObject.getSprite().setColor(Color.WHITE);
+        shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        int cellSize = world.cellSize;
+        for (int i = 0, w = world.width; i < w; ++i) {
+            for (int j = 0, h = world.height; j < h; ++j) {
+                shapeRenderer.setColor((float) i / w, 0f, (float) j / h, 1f);
+                shapeRenderer.rect(i * cellSize, j * cellSize, cellSize, cellSize);
             }
-        } else {
-            for (GameObject gameObject : world.getGameObjects()) {
-                gameObject.render(batch);
+        }
+        shapeRenderer.end();
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(0f, 0f, 0f, 1f);
+        for (int i = 0, w = world.width; i < w; ++i) {
+            for (int j = 0, h = world.height; j < h; ++j) {
+                shapeRenderer.rect(i * cellSize, j * cellSize, cellSize, cellSize);
             }
-            batch.end();
-
-            shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
-            shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-            shapeRenderer.setColor(0f, 1f, 0f, 1f);
-            final Iterator<ClickPoint> it = clickPoints.iterator();
-            while (it.hasNext()) {
-                ClickPoint cp = it.next();
-                worldToScreen(tempVec3.set(cp.x, cp.y, 1));
-                cp.animation.update(dt);
-                final float circleMul = cp.getCircle();
-                Gdx.app.log("RENDER", "render click at " + cp.x + ", " + cp.y + ", mul = " + circleMul);
-                final float clickWidth = circleMul * ClickPoint.WIDTH;
-                final float clickHeight = circleMul * ClickPoint.HEIGHT;
-                shapeRenderer.ellipse(cp.x - clickWidth / 2, cp.y - clickHeight / 2, clickWidth, clickHeight);
-
-                if (cp.animation.isFinished()) {
-                    it.remove();
-                    cp.release();
-                }
-            }
-            shapeRenderer.end();
-
-            batch.begin();
         }
 
-        if (world.paused) {
-            world.pauseText.draw(batch);
-            batch.setColor(origColor);
-        }
+        final Iterator<ClickPoint> it = clickPoints.iterator();
+        while (it.hasNext()) {
+            ClickPoint cp = it.next();
+            worldToScreen(tempVec3.set(cp.x, cp.y, 1));
+            cp.animation.update(dt);
+            final float circleMul = cp.getCircle();
+            Gdx.app.log("RENDER", "render click at " + cp.x + ", " + cp.y + ", mul = " + circleMul);
+            final float clickWidth = circleMul * ClickPoint.WIDTH;
+            final float clickHeight = circleMul * ClickPoint.HEIGHT;
+            shapeRenderer.ellipse(cp.x - clickWidth / 2, cp.y - clickHeight / 2, clickWidth, clickHeight);
 
-        batch.end();
+            if (cp.animation.isFinished()) {
+                it.remove();
+                cp.release();
+            }
+        }
+        shapeRenderer.end();
+
+//        batch.begin();
+//
+//        if (world.paused) {
+//            world.pauseText.draw(batch);
+//            batch.setColor(origColor);
+//        }
+//
+//        batch.end();
     }
 
-    // transforms viewport coordinates to isometric world
+    /**
+     * Transforms viewport coordinates to isometric world
+     */
     public void screenToWorld(Vector3 coords) {
         coords.z = 1.0f;
         coords.mul(viewToWorld);
     }
 
-    // transforms isometric world to viewport coordinates
+    /**
+     * Transforms isometric world to viewport coordinates
+     */
     public void worldToScreen(Vector3 coords) {
         coords.z = 1.0f;
         coords.mul(worldToView);

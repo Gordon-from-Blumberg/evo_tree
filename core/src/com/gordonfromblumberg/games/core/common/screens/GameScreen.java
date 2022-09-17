@@ -2,6 +2,7 @@ package com.gordonfromblumberg.games.core.common.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Vector2;
@@ -11,6 +12,8 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.world.GameWorld;
@@ -97,6 +100,18 @@ public class GameScreen extends AbstractScreen {
         gameWorld.dispose();
 
         super.dispose();
+    }
+
+    @Override
+    protected void createWorldViewport() {
+        final ConfigManager configManager = AbstractFactory.getInstance().configManager();
+        final float worldWidth = configManager.getFloat("worldWidth");
+        final float minRatio = configManager.getFloat("minRatio");
+        final float maxWorldHeight = worldWidth / minRatio;
+        camera = new OrthographicCamera();
+        camera.setToOrtho(false);
+        viewport = new FillViewport(worldWidth, maxWorldHeight, camera);
+        viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
     }
 
     @Override

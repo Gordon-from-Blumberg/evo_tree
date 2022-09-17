@@ -25,10 +25,6 @@ public class MainMenuScreen extends AbstractScreen {
     }
 
     @Override
-    protected void createWorldViewport() {
-    }
-
-    @Override
     protected void createUI() {
         super.createUI();
 

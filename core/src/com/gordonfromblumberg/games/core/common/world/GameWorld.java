@@ -20,6 +20,7 @@ import com.gordonfromblumberg.games.core.common.animation.GbAnimation;
 import com.gordonfromblumberg.games.core.common.event.Event;
 import com.gordonfromblumberg.games.core.common.event.EventHandler;
 import com.gordonfromblumberg.games.core.common.event.EventProcessor;
+import com.gordonfromblumberg.games.core.common.model.Cell;
 import com.gordonfromblumberg.games.core.common.screens.AbstractScreen;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
 import com.gordonfromblumberg.games.core.common.model.GameObject;
@@ -35,13 +36,13 @@ public class GameWorld implements Disposable {
 
     private final Array<GameObject> gameObjects = new Array<>();
 
-    private final BSPTree tree;
     private final EventProcessor eventProcessor = new EventProcessor();
 
     public Rectangle visibleArea;
-    private float width, height;
 
-    TiledMap map;
+    int width, height;
+    Cell[][] cells;
+    int cellSize;
 
     boolean paused;
     private final Color pauseColor = Color.GRAY;
@@ -55,38 +56,33 @@ public class GameWorld implements Disposable {
     BiFloatConsumer onClick;
 
     public GameWorld() {
-        final AssetManager assets = Main.getInstance().assets();
-
-        visibleArea = new Rectangle();
-        tree = new BSPTree(0, 0, 0, 0);
-
-        pauseText = new BitmapFontCache(assets.get("ui/uiskin.json", Skin.class).getFont("default-font"));
-        pauseText.setText("PAUSE", 100, 100);
+        this(new GameWorldParams());
     }
-    public void initialize() {
+
+    public GameWorld(GameWorldParams params) {
+        visibleArea = new Rectangle();
+
         final AssetManager assets = Main.getInstance().assets();
-        final RandomUtils.RandomGen rand = RandomUtils.randomGen(100389 + 90492);
-        map = new TiledMap();
-        int width = 20;
-        int height = 40;
-        TiledMapTileLayer layer = new TiledMapTileLayer(width, height, 48, 32);
-        layer.setName("map");
-        for (int i = 0; i < width; ++i) {
-            for (int j = 0; j < height; ++j) {
-                TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
-                int randTile = rand.nextInt(1, 4);
-                cell.setTile(new StaticTiledMapTile(assets
-                        .get("image/texture_pack.atlas", TextureAtlas.class)
-                        .findRegion("tile2" + randTile)));
-                layer.setCell(i, j, cell);
+        pauseText = new BitmapFontCache(assets.get("ui/uiskin.json", Skin.class).getFont("default-font"));
+
+        width = params.width;
+        height = params.height;
+        cells = new Cell[params.width][params.height];
+
+        for (int i = 0, w = width; i < w; ++i) {
+            for (int j = 0, h = height; j < h; ++j) {
+                cells[i][j] = new Cell();
             }
         }
-        map.getLayers().add(layer);
 
+        cellSize = params.cellSize;
+    }
+
+    public void initialize() {
 
     }
 
-    public void setSize(float width, float height) {
+    public void setSize(int width, int height) {
         this.width = width;
         this.height = height;
         visibleArea.setSize(width, height);
@@ -121,8 +117,6 @@ public class GameWorld implements Disposable {
 //                  tree.addObject(gameObject);
 //                }
             }
-
-            detectCollisions();
 
             eventProcessor.process();
 
@@ -165,33 +159,6 @@ public class GameWorld implements Disposable {
 
     public void pushEvent(Event event) {
         eventProcessor.push(event);
-    }
-
-    private void detectCollisions() {
-        while (tree.hasNext()) {
-            final Iterator<GameObject> iterator = tree.next();
-            final Iterator<GameObject> internalIterator = tree.internalIterator();
-            while (iterator.hasNext()) {
-                final GameObject gameObject = iterator.next();
-                if (!gameObject.isActive())
-                    continue;
-
-                while (internalIterator.hasNext()) {
-                    final GameObject internalGameObject = internalIterator.next();
-                    if (!internalGameObject.isActive())
-                        continue;
-
-                    if (detectCollision(gameObject, internalGameObject)) {
-                        gameObject.collide(internalGameObject);
-                    }
-                }
-            }
-        }
-    }
-
-    private boolean detectCollision(GameObject obj1, GameObject obj2) {
-        return obj1.getBoundingRectangle().overlaps(obj2.getBoundingRectangle())
-                && Intersector.intersectPolygons(obj1.getPolygon(), obj2.getPolygon(), null);
     }
 
     @Override
