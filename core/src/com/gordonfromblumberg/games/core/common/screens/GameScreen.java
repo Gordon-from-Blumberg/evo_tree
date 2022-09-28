@@ -25,7 +25,7 @@ public class GameScreen extends AbstractScreen {
 
     private final Vector2 coords2 = new Vector2();
     private final Vector3 coords3 = new Vector3();
-    private Label cameraPos, zoom, screenCoord, viewCoord, worldCoord, viewFromWorldCoord;
+    private Label cameraPos, zoom, screenCoord, viewCoord, worldCoord;
 
     protected GameScreen(SpriteBatch batch) {
         super(batch);
@@ -42,6 +42,8 @@ public class GameScreen extends AbstractScreen {
         worldRenderer = renderer = new GameWorldRenderer(gameWorld, batch, viewport);
         renderer.initialize(viewport, viewport.getWorldHeight(), viewport.getWorldHeight());
 
+        final float minZoom = configManager.getFloat("minZoom");
+        final float maxZoom = configManager.getFloat("maxZoom");
         stage.addListener(new InputListener() {
             @Override
             public boolean scrolled(InputEvent event, float x, float y, float amountX, float amountY) {
@@ -49,13 +51,15 @@ public class GameScreen extends AbstractScreen {
                     camera.zoom *= 1.25f;
                 else if (amountY < 0)
                     camera.zoom /= 1.25f;
-                if (camera.zoom <= 0.1f)
-                    camera.zoom = 0.1f;
+                if (camera.zoom < minZoom)
+                    camera.zoom = minZoom;
+                if (camera.zoom > maxZoom)
+                    camera.zoom = maxZoom;
                 return true;
             }
         });
 
-        stage.addListener(new ClickListener() {
+        stage.addListener(new ClickListener(Input.Buttons.LEFT) {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 x = Gdx.input.getX();
@@ -64,10 +68,15 @@ public class GameScreen extends AbstractScreen {
                 screenToWorld(x, y, coords3);
                 worldCoord.setText(coords3.x + ", " + coords3.y);
                 gameWorld.click(coords3.x, coords3.y);
-                renderer.worldToScreen(coords3);
-                viewFromWorldCoord.setText(coords3.x + ", " + coords3.y);
             }
         });
+
+//        stage.addListener(new ClickListener(Input.Buttons.RIGHT) {
+//            @Override
+//            public void clicked(InputEvent event, float x, float y) {
+//
+//            }
+//        });
     }
 
     void screenToWorld(float x, float y, Vector3 out) {
@@ -136,7 +145,6 @@ public class GameScreen extends AbstractScreen {
         screenCoord = new Label("", uiSkin);
         viewCoord = new Label("", uiSkin);
         worldCoord = new Label("", uiSkin);
-        viewFromWorldCoord = new Label("", uiSkin);
 
         uiRootTable.add(new Label("Camera pos", uiSkin));
         uiRootTable.add(cameraPos);
@@ -152,9 +160,6 @@ public class GameScreen extends AbstractScreen {
         uiRootTable.row();
         uiRootTable.add(new Label("World", uiSkin));
         uiRootTable.add(worldCoord);
-        uiRootTable.row();
-        uiRootTable.add(new Label("View from world", uiSkin));
-        uiRootTable.add(viewFromWorldCoord);
         uiRootTable.row();
         uiRootTable.add();
         uiRootTable.add();

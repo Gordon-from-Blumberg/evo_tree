@@ -8,24 +8,21 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.maps.tiled.renderers.IsometricTiledMapRenderer;
 import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.gordonfromblumberg.games.core.common.Main;
-import com.gordonfromblumberg.games.core.common.animation.AnimatedParameterFloat;
-import com.gordonfromblumberg.games.core.common.animation.GbAnimation;
-import com.gordonfromblumberg.games.core.common.model.Cell;
 import com.gordonfromblumberg.games.core.common.screens.FBORenderer;
-import com.gordonfromblumberg.games.core.common.model.GameObject;
+import com.gordonfromblumberg.games.core.evotree.model.Cell;
 
 import java.util.Iterator;
 
 public class GameWorldRenderer extends FBORenderer {
     private static final Color TEMP_COLOR = new Color();
+    private static final Color SKY_COLOR = new Color(0.4f, 0.8f, 1f, 1f);
+    private static final float MAX_SUN_LIGHT = 30;
     private static final Vector3 tempVec3 = new Vector3();
 
     private final GameWorld world;
@@ -82,17 +79,22 @@ public class GameWorldRenderer extends FBORenderer {
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         int cellSize = world.cellSize;
-        for (int i = 0, w = world.width; i < w; ++i) {
-            for (int j = 0, h = world.height; j < h; ++j) {
-                shapeRenderer.setColor((float) i / w, 0f, (float) j / h, 1f);
+        Cell[][] cells = world.cellGrid.cells;
+        for (int i = 0, w = world.cellGrid.getWidth(); i < w; ++i) {
+            for (int j = 0, h = world.cellGrid.getHeight(); j < h; ++j) {
+                float k = cells[i][j].getSunLight() / MAX_SUN_LIGHT;
+                shapeRenderer.setColor(SKY_COLOR.r * k, SKY_COLOR.g * k, SKY_COLOR.g * k, SKY_COLOR.a);
                 shapeRenderer.rect(i * cellSize, j * cellSize, cellSize, cellSize);
             }
         }
         shapeRenderer.end();
+
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        shapeRenderer.setColor(0f, 0f, 0f, 1f);
-        for (int i = 0, w = world.width; i < w; ++i) {
-            for (int j = 0, h = world.height; j < h; ++j) {
+//        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl20.glLineWidth(0.3f / ((OrthographicCamera) viewport.getCamera()).zoom);
+        shapeRenderer.setColor(0.4f, 0.4f, 0.3f, 0.5f);
+        for (int i = 0, w = world.cellGrid.getWidth(); i < w; ++i) {
+            for (int j = 0, h = world.cellGrid.getHeight(); j < h; ++j) {
                 shapeRenderer.rect(i * cellSize, j * cellSize, cellSize, cellSize);
             }
         }
