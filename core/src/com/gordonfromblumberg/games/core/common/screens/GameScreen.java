@@ -93,10 +93,10 @@ public class GameScreen extends AbstractScreen {
             camera.translate(-cameraSpeed, 0);
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
             camera.translate(cameraSpeed, 0);
-        if (Gdx.input.isKeyPressed(Input.Keys.UP))
-            camera.translate(0, cameraSpeed);
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN))
-            camera.translate(0, -cameraSpeed);
+//        if (Gdx.input.isKeyPressed(Input.Keys.UP))
+//            camera.translate(0, cameraSpeed);
+//        if (Gdx.input.isKeyPressed(Input.Keys.DOWN))
+//            camera.translate(0, -cameraSpeed);
 
         super.update(delta);            // apply camera moving and update batch projection matrix
         gameWorld.update(delta);        // update game state
