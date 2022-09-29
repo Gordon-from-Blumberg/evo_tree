@@ -20,6 +20,7 @@ import com.gordonfromblumberg.games.core.evotree.model.CellGrid;
 
 public class GameWorld implements Disposable {
     private static int nextId = 1;
+    private int turn = 0;
 
     private final Array<GameObject> gameObjects = new Array<>();
 
@@ -87,6 +88,8 @@ public class GameWorld implements Disposable {
 
     public void update(float delta) {
         if (!paused) {
+            ++turn;
+
             time += delta;
 
             if (time < updateDelay) {
@@ -94,7 +97,7 @@ public class GameWorld implements Disposable {
             }
             time = 0;
 
-            cellGrid.updateSunLight(sunLight);
+            cellGrid.updateSunLight(turn, sunLight);
 
             for (GameObject gameObject : gameObjects) {
                 gameObject.update(delta);
