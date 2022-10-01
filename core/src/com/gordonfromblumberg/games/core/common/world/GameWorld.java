@@ -13,10 +13,13 @@ import com.gordonfromblumberg.games.core.common.Main;
 import com.gordonfromblumberg.games.core.common.event.Event;
 import com.gordonfromblumberg.games.core.common.event.EventHandler;
 import com.gordonfromblumberg.games.core.common.event.EventProcessor;
-import com.gordonfromblumberg.games.core.evotree.model.Cell;
+import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
+import com.gordonfromblumberg.games.core.common.utils.ClickHandler;
 import com.gordonfromblumberg.games.core.common.model.GameObject;
-import com.gordonfromblumberg.games.core.common.utils.BiFloatConsumer;
+import com.gordonfromblumberg.games.core.evotree.model.Cell;
 import com.gordonfromblumberg.games.core.evotree.model.CellGrid;
+import com.gordonfromblumberg.games.core.evotree.model.LightingTest;
+import com.gordonfromblumberg.games.core.evotree.model.TreePart;
 
 public class GameWorld implements Disposable {
     private static int nextId = 1;
@@ -30,7 +33,6 @@ public class GameWorld implements Disposable {
 
     int sunLight;
     CellGrid cellGrid;
-    int cellSize;
 
     boolean paused;
     private final Color pauseColor = Color.GRAY;
@@ -42,7 +44,7 @@ public class GameWorld implements Disposable {
     private float time = 0;
     private int score = 0;
 
-    BiFloatConsumer onClick;
+    final Array<ClickHandler> clickHandlers = new Array<>(1);
 
     public GameWorld() {
         this(new GameWorldParams());
@@ -54,13 +56,14 @@ public class GameWorld implements Disposable {
         final AssetManager assets = Main.getInstance().assets();
         pauseText = new BitmapFontCache(assets.get("ui/uiskin.json", Skin.class).getFont("default-font"));
 
-        cellGrid = new CellGrid(params.width, params.height);
+        cellGrid = new CellGrid(params.width, params.height, params.cellSize);
         sunLight = params.sunLight;
-        cellSize = params.cellSize;
     }
 
     public void initialize() {
-
+        if (AbstractFactory.getInstance().configManager().getBoolean("lightingTest")) {
+            addClickHandler(this::testLighting);
+        }
     }
 
     public void setSize(int width, int height) {
@@ -97,7 +100,7 @@ public class GameWorld implements Disposable {
             }
             time = 0;
 
-            cellGrid.updateSunLight(turn, sunLight);
+            cellGrid.updateSunLight(sunLight);
 
             for (GameObject gameObject : gameObjects) {
                 gameObject.update(delta);
@@ -113,9 +116,13 @@ public class GameWorld implements Disposable {
     }
 
     // world coords
-    public void click(float x, float y) {
-        if (onClick != null)
-            onClick.accept(x, y);
+    public void click(int button, float x, float y) {
+        for (ClickHandler handler : clickHandlers)
+            handler.onClick(button, x, y);
+    }
+
+    public void addClickHandler(ClickHandler handler) {
+        clickHandlers.add(handler);
     }
 
     //    public float getMinVisibleX() {
@@ -136,6 +143,24 @@ public class GameWorld implements Disposable {
 
     public void pause() {
         this.paused = !this.paused;
+    }
+
+    private void testLighting(int b, float x, float y) {
+        Cell cell = cellGrid.findCell((int) x, (int) y);
+        if (cell != null) {
+            TreePart treePart = cell.getTreePart();
+            if (treePart == null) {
+                treePart = new LightingTest(4);
+                cell.setTreePart(treePart);
+            } else {
+                int absorption = treePart.getLightAbsorption() + 4;
+                if (absorption > 20) {
+                    cell.setTreePart(null);
+                } else {
+                    ((LightingTest) treePart).setLightAbsorption(absorption);
+                }
+            }
+        }
     }
 
     public void registerHandler(String type, EventHandler handler) {

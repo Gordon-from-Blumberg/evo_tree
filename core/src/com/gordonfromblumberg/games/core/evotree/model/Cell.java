@@ -1,30 +1,39 @@
 package com.gordonfromblumberg.games.core.evotree.model;
 
 public class Cell {
-    int lastTurnUpdated;
     int x, y;
     int sunLight;
     boolean underSun;
     TreePart treePart;
-    boolean calcLightInProcess;
 
     Cell(int x, int y) {
         this.x = x;
         this.y = y;
     }
 
-    void updateSunLight(int turn, int light) {
+    int updateSunLight(int light) {
         TreePart tp = treePart;
         if (tp == null) {
             sunLight = light;
         } else {
             light -= tp.getLightAbsorption();
-            sunLight = light < 0 ? 0 : light;
+            sunLight = light;
         }
-        lastTurnUpdated = turn;
+        if (sunLight < 0) {
+            sunLight = 0;
+        }
+        return sunLight;
     }
 
     public int getSunLight() {
         return sunLight;
+    }
+
+    public TreePart getTreePart() {
+        return treePart;
+    }
+
+    public void setTreePart(TreePart treePart) {
+        this.treePart = treePart;
     }
 }

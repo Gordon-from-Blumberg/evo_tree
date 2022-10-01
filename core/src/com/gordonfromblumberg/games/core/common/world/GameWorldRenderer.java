@@ -5,8 +5,6 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Rectangle;
@@ -16,13 +14,18 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.gordonfromblumberg.games.core.common.Main;
 import com.gordonfromblumberg.games.core.common.screens.FBORenderer;
 import com.gordonfromblumberg.games.core.evotree.model.Cell;
+import com.gordonfromblumberg.games.core.evotree.model.TreePart;
 
 import java.util.Iterator;
 
 public class GameWorldRenderer extends FBORenderer {
     private static final Color TEMP_COLOR = new Color();
     private static final Color SKY_COLOR = new Color(0.4f, 0.8f, 1f, 1f);
+    private static final Color NIGHT_COLOR = new Color(0f, 0.12f, 0.07f, 1f);
     private static final float MAX_SUN_LIGHT = 30;
+    private static final Color MIN_ABS_COLOR = new Color(0.5f, 1f, 0.7f, 1f);
+    private static final Color MAX_ABS_COLOR = new Color(0f, 0.6f, 0.1f, 1f);
+    private static final float MAX_ABSORPTION = 20;
     private static final Vector3 tempVec3 = new Vector3();
 
     private final GameWorld world;
@@ -36,7 +39,6 @@ public class GameWorldRenderer extends FBORenderer {
     final Array<ClickPoint> clickPoints = new Array<>();
 
     private final Color pauseColor = Color.GRAY;
-    TextureRegion background;
 
     public GameWorldRenderer(GameWorld world, Batch batch, Viewport viewport) {
         super(viewport);
@@ -51,10 +53,6 @@ public class GameWorldRenderer extends FBORenderer {
         this.viewport = viewport;
         worldArea.setSize(width, height);
 
-        background = assets
-                .get("image/texture_pack.atlas", TextureAtlas.class)
-                .findRegion("background");
-
 //        viewport.getCamera().position.set(l.getWidth() * l.getTileWidth() / 2f, 0, 0);
 //        viewToWorld.set(new float[] {
 //                 1.0f / l.getTileWidth(),  1.0f / l.getTileWidth(),  0.0f,
@@ -62,8 +60,6 @@ public class GameWorldRenderer extends FBORenderer {
 //                 0.5f,                    -0.5f,                     1.0f
 //        });
 //        worldToView.set(viewToWorld).inv();
-
-        world.onClick = this::click;
     }
 
     @Override
@@ -74,16 +70,38 @@ public class GameWorldRenderer extends FBORenderer {
             batch.setColor(pauseColor);
         }
 
-//        batch.draw(background, 0, 0);
-
+        final ShapeRenderer shapeRenderer = this.shapeRenderer;
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        int cellSize = world.cellSize;
+        int cellSize = world.cellGrid.getCellSize();
         Cell[][] cells = world.cellGrid.cells;
+        final float nightR = NIGHT_COLOR.r, nightG = NIGHT_COLOR.g, nightB = NIGHT_COLOR.b;
+        final float diffR = SKY_COLOR.r - NIGHT_COLOR.r,
+                diffG = SKY_COLOR.g - NIGHT_COLOR.g,
+                diffB = SKY_COLOR.b - NIGHT_COLOR.b;
+        final float absR = MAX_ABS_COLOR.r, absG = MAX_ABS_COLOR.g, absB = MAX_ABS_COLOR.b;
+        final float daR = MIN_ABS_COLOR.r - MAX_ABS_COLOR.r,
+                daG = MIN_ABS_COLOR.g - MAX_ABS_COLOR.g,
+                daB = MIN_ABS_COLOR.b - MAX_ABS_COLOR.b;
         for (int i = 0, w = world.cellGrid.getWidth(); i < w; ++i) {
             for (int j = 0, h = world.cellGrid.getHeight(); j < h; ++j) {
-                float k = cells[i][j].getSunLight() / MAX_SUN_LIGHT;
-                shapeRenderer.setColor(SKY_COLOR.r * k, SKY_COLOR.g * k, SKY_COLOR.g * k, SKY_COLOR.a);
+                final Cell cell = cells[i][j];
+                final TreePart treePart = cell.getTreePart();
+                if (treePart == null) {
+                    float k = cell.getSunLight() / MAX_SUN_LIGHT;
+                    shapeRenderer.setColor(
+                            nightR + diffR * k,
+                            nightG + diffG * k,
+                            nightB + diffB * k,
+                            1);
+                } else {
+                    float k = 1 - treePart.getLightAbsorption() / MAX_ABSORPTION;
+                    shapeRenderer.setColor(
+                            absR + daR * k,
+                            absG + daG * k,
+                            absB + daB * k,
+                            1);
+                }
                 shapeRenderer.rect(i * cellSize, j * cellSize, cellSize, cellSize);
             }
         }
@@ -91,11 +109,13 @@ public class GameWorldRenderer extends FBORenderer {
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 //        Gdx.gl.glEnable(GL20.GL_BLEND);
-        Gdx.gl20.glLineWidth(0.3f / ((OrthographicCamera) viewport.getCamera()).zoom);
-        shapeRenderer.setColor(0.4f, 0.4f, 0.3f, 0.5f);
+        Gdx.gl20.glLineWidth(0.5f / ((OrthographicCamera) viewport.getCamera()).zoom);
+        shapeRenderer.setColor(0.3f, 0.3f, 0.3f, 1f);
         for (int i = 0, w = world.cellGrid.getWidth(); i < w; ++i) {
             for (int j = 0, h = world.cellGrid.getHeight(); j < h; ++j) {
-                shapeRenderer.rect(i * cellSize, j * cellSize, cellSize, cellSize);
+                if (cells[i][j].getTreePart() != null) {
+                    shapeRenderer.rect(i * cellSize + 1, j * cellSize + 1, cellSize - 2, cellSize - 2);
+                }
             }
         }
 
@@ -143,9 +163,9 @@ public class GameWorldRenderer extends FBORenderer {
         coords.mul(worldToView);
     }
 
-    void click(float x, float y) {
-        worldToScreen(tempVec3.set(x, y, 1));
-        ClickPoint cp = ClickPoint.getInstance();
-        clickPoints.add(cp.init(tempVec3.x, tempVec3.y));
+    public void click(int button, float x, float y) {
+//        worldToScreen(tempVec3.set(x, y, 1));
+//        ClickPoint cp = ClickPoint.getInstance();
+//        clickPoints.add(cp.init(tempVec3.x, tempVec3.y));
     }
 }

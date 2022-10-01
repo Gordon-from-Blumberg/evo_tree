@@ -27,6 +27,15 @@ public class ConfigManager {
         return configProperties.get(property);
     }
 
+    public boolean getBoolean(String propertyName) {
+        String property = configProperties.get(propertyName);
+        return Boolean.parseBoolean(property);
+    }
+
+    public void setBoolean(String propertyName, boolean value) {
+        configProperties.put(propertyName, String.valueOf(value));
+    }
+
     public int getInteger(String propertyName) {
         String property = configProperties.get(propertyName);
         if (property != null) {

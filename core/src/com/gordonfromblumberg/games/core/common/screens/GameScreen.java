@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -12,7 +11,6 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
@@ -25,6 +23,8 @@ public class GameScreen extends AbstractScreen {
 
     private final Vector2 coords2 = new Vector2();
     private final Vector3 coords3 = new Vector3();
+    private final Vector3 viewCoords3 = new Vector3();
+    private final Vector3 worldCoords3 = new Vector3();
     private Label cameraPos, zoom, screenCoord, viewCoord, worldCoord;
 
     protected GameScreen(SpriteBatch batch) {
@@ -65,23 +65,36 @@ public class GameScreen extends AbstractScreen {
                 x = Gdx.input.getX();
                 y = Gdx.input.getY();
                 screenCoord.setText(x + ", " + y);
-                screenToWorld(x, y, coords3);
-                worldCoord.setText(coords3.x + ", " + coords3.y);
-                gameWorld.click(coords3.x, coords3.y);
+                screenToViewport(x, y, viewCoords3);
+                renderer.screenToWorld(worldCoords3.set(viewCoords3));
+                renderer.click(Input.Buttons.LEFT, viewCoords3.x, viewCoords3.y);
+                worldCoord.setText(viewCoords3.x + ", " + viewCoords3.y);
+                gameWorld.click(Input.Buttons.LEFT, worldCoords3.x, worldCoords3.y);
             }
         });
 
-//        stage.addListener(new ClickListener(Input.Buttons.RIGHT) {
-//            @Override
-//            public void clicked(InputEvent event, float x, float y) {
-//
-//            }
-//        });
+        stage.addListener(new ClickListener(Input.Buttons.RIGHT) {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                x = Gdx.input.getX();
+                y = Gdx.input.getY();
+//                screenToViewport(x, y, viewCoords3);
+//                renderer.screenToWorld(worldCoords3.set(viewCoords3));
+//                renderer.click(Input.Buttons.LEFT, viewCoords3.x, viewCoords3.y);
+                screenToWorld(x, y, worldCoords3);
+                gameWorld.click(Input.Buttons.RIGHT, worldCoords3.x, worldCoords3.y);
+            }
+        });
+    }
+
+    void screenToViewport(float x, float y, Vector3 out) {
+        viewport.unproject(coords3.set(x, y, 0));
+        viewCoord.setText(coords3.x + ", " + coords3.y);
+        out.set(coords3);
     }
 
     void screenToWorld(float x, float y, Vector3 out) {
-        viewport.unproject(coords3.set(x, y, 0));
-        viewCoord.setText(coords3.x + ", " + coords3.y);
+        screenToViewport(x, y, coords3);
         renderer.screenToWorld(coords3);
         out.set(coords3);
     }

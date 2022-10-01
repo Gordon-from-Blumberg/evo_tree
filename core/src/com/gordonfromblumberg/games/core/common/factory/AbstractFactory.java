@@ -12,10 +12,9 @@ public abstract class AbstractFactory {
     }
 
     public ConfigManager configManager() {
-        if (configManager != null)
-            return configManager;
+        if (configManager == null)
+            configManager = createConfigManager();
 
-        configManager = createConfigManager();
         return configManager;
     }
 
