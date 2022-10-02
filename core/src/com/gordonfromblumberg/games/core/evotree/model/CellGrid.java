@@ -7,40 +7,6 @@ public class CellGrid {
             {0, -1},
             {-1, 0}
     };
-    private enum Direction {
-        up(0) {
-            @Override
-            Direction opposite() {
-                return down;
-            }
-        },
-        right(1) {
-            @Override
-            Direction opposite() {
-                return left;
-            }
-        },
-        down(2) {
-            @Override
-            Direction opposite() {
-                return up;
-            }
-        },
-        left(3) {
-            @Override
-            Direction opposite() {
-                return right;
-            }
-        };
-
-        static final Direction[] ALL = values();
-
-        private final int code;
-        Direction(int code) {
-            this.code = code;
-        }
-        abstract Direction opposite();
-    }
 
     int width, height;
     int cellSize;
@@ -141,8 +107,8 @@ public class CellGrid {
         return cells[cellX][cellY];
     }
 
-    private Cell getCell(Cell cell, Direction dir) {
-        int[] dc = NEIGHBORS[dir.code];
+    Cell getCell(Cell cell, Direction dir) {
+        int[] dc = NEIGHBORS[dir.getCode()];
         int y = cell.y + dc[1];
         if (y < 0 || y >= height) {
             return null;

@@ -17,6 +17,8 @@ import com.gordonfromblumberg.games.core.common.utils.ClickHandler;
 import com.gordonfromblumberg.games.core.evotree.model.*;
 import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
 
+import java.util.Iterator;
+
 public class GameWorld implements EvoTreeWorld, Disposable {
     private static int nextTreeId = 1;
     private static int nextPartId = 1;
@@ -93,15 +95,16 @@ public class GameWorld implements EvoTreeWorld, Disposable {
         trees.removeValue(tree, true);
         tree.release();
     }
-//
-//    public void removeGameObject(GameObject gameObject) {
-//        gameObjects.removeValue(gameObject, true);
-//        gameObject.release();
-//    }
-//
-//    public Array<GameObject> getGameObjects() {
-//        return gameObjects;
-//    }
+
+    @Override
+    public CellGrid getGrid() {
+        return cellGrid;
+    }
+
+    @Override
+    public int nextPartId() {
+        return nextPartId++;
+    }
 
     public void update(float delta) {
         if (!paused) {
@@ -116,12 +119,22 @@ public class GameWorld implements EvoTreeWorld, Disposable {
 
             cellGrid.updateSunLight(sunLight);
 
-            for (Seed seed : seeds) {
-                seed.update();
+            Iterator<Seed> seedIterator = seeds.iterator();
+            while (seedIterator.hasNext()) {
+                Seed seed = seedIterator.next();
+                if (seed.update(this)) {
+                    seedIterator.remove();
+                    seed.release();
+                }
             }
 
-            for (Tree tree : trees) {
-                tree.update();
+            Iterator<Tree> treeIterator = trees.iterator();
+            while (treeIterator.hasNext()) {
+                Tree tree = treeIterator.next();
+                if (tree.update(this)) {
+                    treeIterator.remove();
+                    tree.release();
+                }
             }
 
             eventProcessor.process();

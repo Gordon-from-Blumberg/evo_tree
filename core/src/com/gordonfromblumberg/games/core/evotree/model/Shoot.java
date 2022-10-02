@@ -23,11 +23,6 @@ public class Shoot extends Wood {
     }
 
     @Override
-    public int getLightAbsorption() {
-        return 100;
-    }
-
-    @Override
     public void release() {
         pool.free(this);
     }

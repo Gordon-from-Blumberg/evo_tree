@@ -51,5 +51,9 @@ public class RandomUtils {
         public float nextFloat(float from, float to) {
             return from == to ? from : from + ((to - from) * rand.nextFloat());
         }
+
+        public boolean nextBool(float chance) {
+            return rand.nextFloat() < chance;
+        }
     }
 }

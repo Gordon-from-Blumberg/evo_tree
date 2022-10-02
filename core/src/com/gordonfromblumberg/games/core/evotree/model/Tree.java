@@ -3,6 +3,7 @@ package com.gordonfromblumberg.games.core.evotree.model;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.gordonfromblumberg.games.core.common.utils.Poolable;
+import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
 
 public class Tree implements Poolable {
     private static final Pool<Tree> pool = new Pool<Tree>() {
@@ -15,9 +16,12 @@ public class Tree implements Poolable {
     int id;
     int generation;
     int turnsRemain;
-    DNA dna;
+    final DNA dna = new DNA();
     int energy;
-    final Array<TreePart> parts = new Array<>();
+    final Array<Wood> woods = new Array<>();
+    final Array<Shoot> shoots = new Array<>();
+
+    boolean justSprouted;
 
     private Tree() {}
 
@@ -25,8 +29,27 @@ public class Tree implements Poolable {
         return pool.obtain();
     }
 
-    public void update() {
+    /**
+     * Updates state of this tree
+     * @param world Game world
+     * @return true if this tree should be removed from world
+     */
+    public boolean update(EvoTreeWorld world) {
+        --turnsRemain;
+        return false;
+    }
 
+    public void addShoot(Shoot shoot) {
+        shoots.add(shoot);
+        shoot.tree = this;
+    }
+
+    public void addWood(Wood wood) {
+        if (wood instanceof Shoot) {
+            throw new IllegalArgumentException("Shoot should be added as shoot");
+        }
+        woods.add(wood);
+        wood.tree = this;
     }
 
     public void setId(int id) {
@@ -43,12 +66,15 @@ public class Tree implements Poolable {
         id = 0;
         generation = 0;
         turnsRemain = 0;
-        dna.release();
-        dna = null;
+        dna.reset();
         energy = 0;
-        for (TreePart part : parts) {
-            part.release();
+        for (Wood wood : woods) {
+            wood.release();
         }
-        parts.clear();
+        woods.clear();
+        for (Shoot shoot : shoots) {
+            shoot.release();
+        }
+        shoots.clear();
     }
 }

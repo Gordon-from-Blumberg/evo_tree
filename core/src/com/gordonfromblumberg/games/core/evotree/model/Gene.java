@@ -1,29 +1,27 @@
 package com.gordonfromblumberg.games.core.evotree.model;
 
-import com.badlogic.gdx.utils.Pool;
-import com.gordonfromblumberg.games.core.common.utils.Poolable;
+import com.gordonfromblumberg.games.core.common.utils.RandomUtils;
 
-public class Gene implements Poolable {
-    private static final Pool<Gene> pool = new Pool<Gene>() {
-        @Override
-        protected Gene newObject() {
-            return new Gene();
+public class Gene {
+    final static RandomUtils.RandomGen RAND = RandomUtils.randomGen(-15615);
+
+    private final byte[] values = new byte[4];
+
+    Gene() {}
+
+    void setRandom() {
+        for (int i = 0; i < 4; ++i) {
+            values[i] = (byte) RAND.nextInt(0, 32);
         }
-    };
-
-    private Gene() {}
-
-    public static Gene getInstance() {
-        return pool.obtain();
     }
 
-    @Override
-    public void release() {
-        pool.free(this);
+    void set(Gene other) {
+        System.arraycopy(other.values, 0, this.values, 0, 4);
     }
 
-    @Override
-    public void reset() {
-
+    void reset() {
+        for (int i = 0; i < 4; ++i) {
+            values[i] = -1;
+        }
     }
 }

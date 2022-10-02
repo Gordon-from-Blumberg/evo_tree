@@ -1,31 +1,44 @@
 package com.gordonfromblumberg.games.core.evotree.model;
 
-import com.badlogic.gdx.utils.Pool;
-import com.gordonfromblumberg.games.core.common.utils.Poolable;
+import com.gordonfromblumberg.games.core.common.utils.RandomUtils;
 
-public class DNA implements Poolable {
-    private static final Pool<DNA> pool = new Pool<DNA>() {
-        @Override
-        protected DNA newObject() {
-            return new DNA();
+public class DNA {
+    private static final float MUTATION_CHANCE = 0.02f;
+
+    final Gene[] genes = new Gene[16];
+
+    DNA() {
+        for (Gene gene : genes) {
+            gene.setRandom();
         }
-    };
-
-    Gene[] genes;
-
-    private DNA() {}
-
-    public static DNA getInstance() {
-        return pool.obtain();
     }
 
-    @Override
-    public void release() {
-        pool.free(this);
+    private DNA(DNA original) {
+        set(original);
     }
 
-    @Override
+    public DNA copy() {
+        return new DNA(this);
+    }
+
+    public void set(DNA original) {
+        for (int i = 0; i < 16; ++i) {
+            this.genes[i].set(original.genes[i]);
+        }
+    }
+
+    public void mutate() {
+        final RandomUtils.RandomGen rand = Gene.RAND;
+        for (Gene gene : genes) {
+            if (rand.nextBool(MUTATION_CHANCE)) {
+                gene.setRandom();
+            }
+        }
+    }
+
     public void reset() {
-
+        for (Gene gene : genes) {
+            gene.reset();
+        }
     }
 }
