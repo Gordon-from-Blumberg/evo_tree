@@ -13,12 +13,10 @@ public class Cell {
 
     int updateSunLight(int light) {
         TreePart tp = treePart;
-        if (tp == null) {
-            sunLight = light;
-        } else {
+        if (tp != null) {
             light -= tp.getLightAbsorption();
-            sunLight = light;
         }
+        sunLight = light;
         if (sunLight < 0) {
             sunLight = 0;
         }

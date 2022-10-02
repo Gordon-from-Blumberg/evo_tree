@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFontCache;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
@@ -15,21 +14,18 @@ import com.gordonfromblumberg.games.core.common.event.EventHandler;
 import com.gordonfromblumberg.games.core.common.event.EventProcessor;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
 import com.gordonfromblumberg.games.core.common.utils.ClickHandler;
-import com.gordonfromblumberg.games.core.common.model.GameObject;
-import com.gordonfromblumberg.games.core.evotree.model.Cell;
-import com.gordonfromblumberg.games.core.evotree.model.CellGrid;
-import com.gordonfromblumberg.games.core.evotree.model.LightingTest;
-import com.gordonfromblumberg.games.core.evotree.model.TreePart;
+import com.gordonfromblumberg.games.core.evotree.model.*;
+import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
 
-public class GameWorld implements Disposable {
-    private static int nextId = 1;
+public class GameWorld implements EvoTreeWorld, Disposable {
+    private static int nextTreeId = 1;
+    private static int nextPartId = 1;
     private int turn = 0;
 
-    private final Array<GameObject> gameObjects = new Array<>();
+    private final Array<Seed> seeds = new Array<>();
+    private final Array<Tree> trees = new Array<>();
 
     private final EventProcessor eventProcessor = new EventProcessor();
-
-    public Rectangle visibleArea;
 
     int sunLight;
     CellGrid cellGrid;
@@ -38,11 +34,11 @@ public class GameWorld implements Disposable {
     private final Color pauseColor = Color.GRAY;
     final BitmapFontCache pauseText;
 
-    private int maxCount = 0;
+    private int maxSeeds = 0;
+    private int maxTrees = 0;
 
     private float updateDelay = 0.1f;
     private float time = 0;
-    private int score = 0;
 
     final Array<ClickHandler> clickHandlers = new Array<>(1);
 
@@ -52,7 +48,6 @@ public class GameWorld implements Disposable {
 
     public GameWorld(GameWorldParams params) {
         Gdx.app.log("INIT", "GameWorld constructor");
-        visibleArea = new Rectangle();
 
         final AssetManager assets = Main.getInstance().assets();
         pauseText = new BitmapFontCache(assets.get("ui/uiskin.json", Skin.class).getFont("default-font"));
@@ -71,25 +66,42 @@ public class GameWorld implements Disposable {
     public void setSize(int width, int height) {
 //        this.width = width;
 //        this.height = height;
-        visibleArea.setSize(width, height);
     }
 
-    public void addGameObject(GameObject gameObject) {
-        gameObjects.add(gameObject);
-        gameObject.setGameWorld(this);
-        gameObject.setActive(true);
-        gameObject.setId(nextId++);
-        if (gameObjects.size > maxCount) maxCount = gameObjects.size;
+    @Override
+    public void addSeed(Seed seed) {
+        seeds.add(seed);
+        seed.setId(nextPartId++);
+        if (seeds.size > maxSeeds) maxSeeds = seeds.size;
     }
 
-    public void removeGameObject(GameObject gameObject) {
-        gameObjects.removeValue(gameObject, true);
-        gameObject.release();
+    @Override
+    public void removeSeed(Seed seed) {
+        seeds.removeValue(seed, true);
+        seed.release();
     }
 
-    public Array<GameObject> getGameObjects() {
-        return gameObjects;
+    @Override
+    public void addTree(Tree tree) {
+        trees.add(tree);
+        tree.setId(nextTreeId++);
+        if (trees.size > maxTrees) maxTrees = trees.size;
     }
+
+    @Override
+    public void removeTree(Tree tree) {
+        trees.removeValue(tree, true);
+        tree.release();
+    }
+//
+//    public void removeGameObject(GameObject gameObject) {
+//        gameObjects.removeValue(gameObject, true);
+//        gameObject.release();
+//    }
+//
+//    public Array<GameObject> getGameObjects() {
+//        return gameObjects;
+//    }
 
     public void update(float delta) {
         if (!paused) {
@@ -104,15 +116,19 @@ public class GameWorld implements Disposable {
 
             cellGrid.updateSunLight(sunLight);
 
-            for (GameObject gameObject : gameObjects) {
-                gameObject.update(delta);
+            for (Seed seed : seeds) {
+                seed.update();
+            }
+
+            for (Tree tree : trees) {
+                tree.update();
             }
 
             eventProcessor.process();
 
-            if (time > 2) {
-                time = 0;
-                Gdx.app.log("GameWorld", gameObjects.size + " objects in the world of maximum " + maxCount);
+            if (turn % 20 == 0) {
+                Gdx.app.log("GameWorld", seeds.size + " seeds in the world of maximum " + maxSeeds);
+                Gdx.app.log("GameWorld", trees.size + " trees in the world of maximum " + maxTrees);
             }
         }
     }
@@ -179,8 +195,6 @@ public class GameWorld implements Disposable {
 
     @Override
     public void dispose() {
-        for (GameObject gameObject : gameObjects) {
-            gameObject.dispose();
-        }
+
     }
 }

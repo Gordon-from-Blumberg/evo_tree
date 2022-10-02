@@ -15,4 +15,10 @@ public class LightingTest extends TreePart {
     public void setLightAbsorption(int lightAbsorption) {
         this.lightAbsorption = lightAbsorption;
     }
+
+    @Override
+    public void release() {}
+
+    @Override
+    public void reset() {}
 }
