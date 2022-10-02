@@ -30,8 +30,6 @@ public class GameWorldRenderer extends FBORenderer {
 
     private final GameWorld world;
     private final Batch batch;
-    private Viewport viewport;
-    private final Rectangle worldArea = new Rectangle();
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
     private final Matrix3 viewToWorld = new Matrix3();
     private final Matrix3 worldToView = new Matrix3();
@@ -42,16 +40,21 @@ public class GameWorldRenderer extends FBORenderer {
 
     public GameWorldRenderer(GameWorld world, Batch batch, Viewport viewport) {
         super(viewport);
-
+        Gdx.app.log("INIT", "GameWorldRenderer constructor");
         this.batch = batch;
         this.world = world;
     }
 
-    public void initialize(Viewport viewport, float width, float height) {
+    public void initialize() {
+        Gdx.app.log("INIT", "GameWorldRenderer init");
         final AssetManager assets = Main.getInstance().assets();
 
-        this.viewport = viewport;
-        worldArea.setSize(width, height);
+        float worldHeight = world.cellGrid.getHeight() * world.cellGrid.getCellSize();
+        if (worldHeight > viewport.getWorldHeight()) {
+            float ration = viewport.getWorldWidth() / viewport.getWorldHeight();
+            viewport.setWorldSize(ration * worldHeight, worldHeight);
+            viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+        }
 
 //        viewport.getCamera().position.set(l.getWidth() * l.getTileWidth() / 2f, 0, 0);
 //        viewToWorld.set(new float[] {
@@ -109,7 +112,7 @@ public class GameWorldRenderer extends FBORenderer {
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 //        Gdx.gl.glEnable(GL20.GL_BLEND);
-        Gdx.gl20.glLineWidth(0.5f / ((OrthographicCamera) viewport.getCamera()).zoom);
+        Gdx.gl20.glLineWidth(1f / ((OrthographicCamera) viewport.getCamera()).zoom);
         shapeRenderer.setColor(0.3f, 0.3f, 0.3f, 1f);
         for (int i = 0, w = world.cellGrid.getWidth(); i < w; ++i) {
             for (int j = 0, h = world.cellGrid.getHeight(); j < h; ++j) {

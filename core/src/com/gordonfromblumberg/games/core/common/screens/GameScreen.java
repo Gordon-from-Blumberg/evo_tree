@@ -8,10 +8,13 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FillViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.world.GameWorld;
@@ -29,18 +32,18 @@ public class GameScreen extends AbstractScreen {
 
     protected GameScreen(SpriteBatch batch) {
         super(batch);
-
+        Gdx.app.log("INIT", "GameScreen constructor");
         gameWorld = new GameWorld();
     }
 
     @Override
     public void initialize() {
         super.initialize();
-
+        Gdx.app.log("INIT", "GameScreen init");
         final ConfigManager configManager = AbstractFactory.getInstance().configManager();
         gameWorld.initialize();
         worldRenderer = renderer = new GameWorldRenderer(gameWorld, batch, viewport);
-        renderer.initialize(viewport, viewport.getWorldHeight(), viewport.getWorldHeight());
+        renderer.initialize();
 
         final float minZoom = configManager.getFloat("minZoom");
         final float maxZoom = configManager.getFloat("maxZoom");
@@ -89,7 +92,7 @@ public class GameScreen extends AbstractScreen {
 
     void screenToViewport(float x, float y, Vector3 out) {
         viewport.unproject(coords3.set(x, y, 0));
-        viewCoord.setText(coords3.x + ", " + coords3.y);
+//        viewCoord.setText(coords3.x + ", " + coords3.y);
         out.set(coords3);
     }
 
@@ -126,14 +129,25 @@ public class GameScreen extends AbstractScreen {
 
     @Override
     protected void createWorldViewport() {
+        camera = new OrthographicCamera();
+        camera.setToOrtho(false);
+        viewport = new FillViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
+        viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+    }
+
+    @Override
+    protected void createUiRenderer() {
         final ConfigManager configManager = AbstractFactory.getInstance().configManager();
         final float worldWidth = configManager.getFloat("worldWidth");
         final float minRatio = configManager.getFloat("minRatio");
+        final float maxRatio = configManager.getFloat("maxRatio");
+        final float minWorldHeight = worldWidth / maxRatio;
         final float maxWorldHeight = worldWidth / minRatio;
-        camera = new OrthographicCamera();
+        OrthographicCamera camera = new OrthographicCamera();
         camera.setToOrtho(false);
-        viewport = new FillViewport(worldWidth, maxWorldHeight, camera);
-        viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+        Viewport viewport = new ExtendViewport(worldWidth, minWorldHeight, worldWidth, maxWorldHeight, camera);
+        stage = new Stage(viewport, batch);
+        uiRenderer = new GameUIRenderer(viewport, stage, gameWorld, this::screenToViewport);
     }
 
     @Override
@@ -161,6 +175,13 @@ public class GameScreen extends AbstractScreen {
 
         uiRootTable.add(new Label("Camera pos", uiSkin));
         uiRootTable.add(cameraPos);
+        if (AbstractFactory.getInstance().configManager().getBoolean("lightingTest")) {
+            uiRootTable.add().expandX();
+            uiRootTable.add(new Label("Light", uiSkin));
+            Label lightLabel = new Label("", uiSkin);
+            uiRootTable.add(lightLabel).minWidth(100);
+            ((GameUIRenderer) uiRenderer).setLightLabel(lightLabel);
+        }
         uiRootTable.row();
         uiRootTable.add(new Label("Zoom", uiSkin));
         uiRootTable.add(zoom);

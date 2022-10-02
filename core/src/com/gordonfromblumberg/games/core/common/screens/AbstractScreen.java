@@ -25,6 +25,7 @@ public abstract class AbstractScreen implements Screen {
     protected Color color = Color.BLACK;
 
     protected Stage stage;
+    // todo delete viewport from screen
     protected Viewport viewport;
     protected OrthographicCamera camera;
     protected Renderer worldRenderer, uiRenderer;
@@ -115,7 +116,7 @@ public abstract class AbstractScreen implements Screen {
         viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
     }
 
-    private void createUiRenderer() {
+    protected void createUiRenderer() {
         final ConfigManager configManager = AbstractFactory.getInstance().configManager();
         final float worldWidth = configManager.getFloat("worldWidth");
         final float minRatio = configManager.getFloat("minRatio");

@@ -8,15 +8,38 @@ public class CellGrid {
             {-1, 0}
     };
     private enum Direction {
-        up(0),
-        right(1),
-        down(2),
-        left(3);
+        up(0) {
+            @Override
+            Direction opposite() {
+                return down;
+            }
+        },
+        right(1) {
+            @Override
+            Direction opposite() {
+                return left;
+            }
+        },
+        down(2) {
+            @Override
+            Direction opposite() {
+                return up;
+            }
+        },
+        left(3) {
+            @Override
+            Direction opposite() {
+                return right;
+            }
+        };
+
+        static final Direction[] ALL = values();
 
         private final int code;
         Direction(int code) {
             this.code = code;
         }
+        abstract Direction opposite();
     }
 
     int width, height;
@@ -76,16 +99,12 @@ public class CellGrid {
             if (r == w) r = 0;
 
             int treeHeight = treeHeights[l];
-            if (treeHeight - treeHeights[i] > 1) {
-                for (; treeHeight >= 0; --treeHeight) {
-                    calcLight(cells[l][treeHeight], cells[i][treeHeight].sunLight - 2, Direction.left);
-                }
+            for (; treeHeight >= 0; --treeHeight) {
+                calcLight(cells[l][treeHeight], cells[i][treeHeight].sunLight - 2, Direction.left);
             }
             treeHeight = treeHeights[r];
-            if (treeHeight - treeHeights[i] > 1) {
-                for (; treeHeight >= 0; --treeHeight) {
-                    calcLight(cells[r][treeHeight], cells[i][treeHeight].sunLight - 2, Direction.right);
-                }
+            for (; treeHeight >= 0; --treeHeight) {
+                calcLight(cells[r][treeHeight], cells[i][treeHeight].sunLight - 2, Direction.right);
             }
         }
     }
@@ -98,29 +117,13 @@ public class CellGrid {
         int old = cell.getSunLight();
         if (light > old) {
             if (cell.updateSunLight(light) > old) {
-                switch (dir) {
-                    case up:
-                    case down:
-                        Cell next = getCell(cell, dir);
+                for (Direction d : Direction.ALL) {
+                    if (d != dir.opposite()) {
+                        Cell next = getCell(cell, d);
                         if (next != null && !next.underSun) {
-                            calcLight(next, cell.getSunLight() - 2, dir);
+                            calcLight(next, cell.getSunLight() - 2, d);
                         }
-                        break;
-                    case left:
-                    case right:
-                        next = getCell(cell, Direction.up);
-                        if (next != null && !next.underSun) {
-                            calcLight(next, cell.getSunLight() - 2, Direction.up);
-                        }
-                        next = getCell(cell, Direction.down);
-                        if (next != null && !next.underSun) {
-                            calcLight(next, cell.getSunLight() - 2, Direction.down);
-                        }
-                        next = getCell(cell, dir);
-                        if (next != null && !next.underSun) {
-                            calcLight(next, cell.getSunLight() - 2, dir);
-                        }
-                        break;
+                    }
                 }
             }
         }

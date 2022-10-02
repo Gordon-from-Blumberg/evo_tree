@@ -29,6 +29,10 @@ public class Cell {
         return sunLight;
     }
 
+    public boolean isUnderSun() {
+        return underSun;
+    }
+
     public TreePart getTreePart() {
         return treePart;
     }

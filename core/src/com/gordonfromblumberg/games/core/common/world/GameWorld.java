@@ -51,6 +51,7 @@ public class GameWorld implements Disposable {
     }
 
     public GameWorld(GameWorldParams params) {
+        Gdx.app.log("INIT", "GameWorld constructor");
         visibleArea = new Rectangle();
 
         final AssetManager assets = Main.getInstance().assets();
@@ -61,6 +62,7 @@ public class GameWorld implements Disposable {
     }
 
     public void initialize() {
+        Gdx.app.log("INIT", "GameWorld init");
         if (AbstractFactory.getInstance().configManager().getBoolean("lightingTest")) {
             addClickHandler(this::testLighting);
         }
@@ -150,17 +152,21 @@ public class GameWorld implements Disposable {
         if (cell != null) {
             TreePart treePart = cell.getTreePart();
             if (treePart == null) {
-                treePart = new LightingTest(4);
+                treePart = new LightingTest(5);
                 cell.setTreePart(treePart);
             } else {
-                int absorption = treePart.getLightAbsorption() + 4;
-                if (absorption > 20) {
+                int absorption = treePart.getLightAbsorption() + 5;
+                if (absorption > 30) {
                     cell.setTreePart(null);
                 } else {
                     ((LightingTest) treePart).setLightAbsorption(absorption);
                 }
             }
         }
+    }
+
+    public Cell findCell(int x, int y) {
+        return cellGrid.findCell(x, y);
     }
 
     public void registerHandler(String type, EventHandler handler) {
