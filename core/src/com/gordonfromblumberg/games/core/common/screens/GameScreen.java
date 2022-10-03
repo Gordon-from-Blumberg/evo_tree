@@ -175,16 +175,21 @@ public class GameScreen extends AbstractScreen {
 
         uiRootTable.add(new Label("Camera pos", uiSkin));
         uiRootTable.add(cameraPos);
-        if (AbstractFactory.getInstance().configManager().getBoolean("lightingTest")) {
+//        if (AbstractFactory.getInstance().configManager().getBoolean("lightingTest")) {
             uiRootTable.add().expandX();
             uiRootTable.add(new Label("Light", uiSkin));
             Label lightLabel = new Label("", uiSkin);
             uiRootTable.add(lightLabel).minWidth(100);
             ((GameUIRenderer) uiRenderer).setLightLabel(lightLabel);
-        }
+//        }
         uiRootTable.row();
         uiRootTable.add(new Label("Zoom", uiSkin));
         uiRootTable.add(zoom);
+        uiRootTable.add().expandX();
+        uiRootTable.add(new Label("Cell", uiSkin));
+        Label cellLabel = new Label("", uiSkin);
+        uiRootTable.add(cellLabel).minWidth(100);
+        ((GameUIRenderer) uiRenderer).setCellLabel(cellLabel);
         uiRootTable.row();
         uiRootTable.add(new Label("Screen", uiSkin));
         uiRootTable.add(screenCoord);

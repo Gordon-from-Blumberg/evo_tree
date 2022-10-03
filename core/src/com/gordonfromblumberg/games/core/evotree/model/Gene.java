@@ -11,7 +11,7 @@ public class Gene {
 
     void setRandom() {
         for (int i = 0; i < 4; ++i) {
-            values[i] = (byte) RAND.nextInt(0, 32);
+            values[i] = (byte) RAND.nextInt(0, 52);
         }
     }
 

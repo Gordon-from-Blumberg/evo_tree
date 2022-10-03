@@ -10,8 +10,9 @@ public class DNA {
     final Gene[] genes = new Gene[GENES_COUNT];
 
     DNA() {
-        for (Gene gene : genes) {
-            gene.setRandom();
+        for (int i = 0; i < GENES_COUNT; ++i) {
+            genes[i] = new Gene();
+            genes[i].setRandom();
         }
     }
 

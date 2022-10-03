@@ -1,5 +1,6 @@
 package com.gordonfromblumberg.games.core.evotree.model;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.gordonfromblumberg.games.core.common.utils.Poolable;
@@ -24,6 +25,7 @@ public class Tree implements Poolable {
     int energy;
     final Array<Wood> woods = new Array<>();
     final Array<Shoot> shoots = new Array<>();
+    final Array<Shoot> newShoots = new Array<>();
 
     boolean justSprouted;
 
@@ -60,6 +62,7 @@ public class Tree implements Poolable {
         energy -= getSize() * Wood.ENERGY_CONSUMPTION;
 
         if (energy <= 0) {
+            Gdx.app.log("TREE", "Tree #" + id + " has no energy and dies");
             return true;
         }
 
@@ -69,11 +72,15 @@ public class Tree implements Poolable {
             int requiredEnergy = ENERGY_REQUIRED_TO_SPROUT * shoot.canMakeChildrenCount(grid);
             if (requiredEnergy < energy) {
                 energy -= requiredEnergy;
-                shoot.sprout(world);
+                shoot.sprout(world, newShoots);
                 it.remove();
                 shoot.release();
             }
         }
+        for (Shoot newShoot : newShoots) {
+            addShoot(newShoot);
+        }
+        newShoots.clear();
 
         return false;
     }
@@ -92,7 +99,8 @@ public class Tree implements Poolable {
     }
 
     private void produceSeeds(EvoTreeWorld world) {
-        if (energy >= shoots.size) {
+        Gdx.app.log("TREE", "Tree #" + id + " attempts to produce seeds: energy=" + energy + ", shoots=" + shoots.size);
+        if (energy >= shoots.size && shoots.size > 0) {
             int energyPerSeed = (energy / shoots.size) + 1;
             int nextGeneration = generation + 1;
             for (Shoot shoot : shoots) {

@@ -1,5 +1,6 @@
 package com.gordonfromblumberg.games.core.evotree.model;
 
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
 
@@ -19,7 +20,7 @@ public class Shoot extends Wood {
         return pool.obtain();
     }
 
-    void sprout(EvoTreeWorld world) {
+    void sprout(EvoTreeWorld world, Array<Shoot> newShoots) {
         Cell cell = this.cell;
         Wood wood = Wood.getInstance();
         wood.id = world.nextPartId();
@@ -35,7 +36,7 @@ public class Shoot extends Wood {
                     Shoot shoot = getInstance();
                     shoot.id = world.nextPartId();
                     shoot.setCell(neib);
-                    tree.addShoot(shoot);
+                    newShoots.add(shoot);
                     shoot.activeGene = tree.dna.genes[nextActiveGene];
                 }
             }

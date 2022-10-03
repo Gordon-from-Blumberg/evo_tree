@@ -14,6 +14,7 @@ import com.gordonfromblumberg.games.core.common.event.EventHandler;
 import com.gordonfromblumberg.games.core.common.event.EventProcessor;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
 import com.gordonfromblumberg.games.core.common.utils.ClickHandler;
+import com.gordonfromblumberg.games.core.common.utils.RandomUtils;
 import com.gordonfromblumberg.games.core.evotree.model.*;
 import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
 
@@ -39,7 +40,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
     private int maxSeeds = 0;
     private int maxTrees = 0;
 
-    private float updateDelay = 0.1f;
+    private float updateDelay = 0.16f;
     private float time = 0;
 
     final Array<ClickHandler> clickHandlers = new Array<>(1);
@@ -62,6 +63,14 @@ public class GameWorld implements EvoTreeWorld, Disposable {
         Gdx.app.log("INIT", "GameWorld init");
         if (AbstractFactory.getInstance().configManager().getBoolean("lightingTest")) {
             addClickHandler(this::testLighting);
+        }
+
+        for (int i = 12; i < cellGrid.getWidth(); i += 12) {
+            Seed seed = Seed.getInstance();
+            seed.setCell(cellGrid.cells[i][RandomUtils.nextInt(0, cellGrid.getHeight() / 2)]);
+            seed.setGeneration(1);
+            seed.setEnergy(100);
+            addSeed(seed);
         }
     }
 
@@ -117,8 +126,6 @@ public class GameWorld implements EvoTreeWorld, Disposable {
             }
             time = 0;
 
-            cellGrid.updateSunLight(sunLight);
-
             Iterator<Seed> seedIterator = seeds.iterator();
             while (seedIterator.hasNext()) {
                 Seed seed = seedIterator.next();
@@ -136,6 +143,8 @@ public class GameWorld implements EvoTreeWorld, Disposable {
                     tree.release();
                 }
             }
+
+            cellGrid.updateSunLight(sunLight);
 
             eventProcessor.process();
 

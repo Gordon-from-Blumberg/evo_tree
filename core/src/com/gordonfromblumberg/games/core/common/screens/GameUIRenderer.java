@@ -8,9 +8,11 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.gordonfromblumberg.games.core.common.utils.CoordsConverter;
 import com.gordonfromblumberg.games.core.common.world.GameWorld;
 import com.gordonfromblumberg.games.core.evotree.model.Cell;
+import com.gordonfromblumberg.games.core.evotree.model.TreePart;
 
 public class GameUIRenderer extends UIRenderer {
     private Label lightLabel;
+    private Label cellLabel;
     private GameWorld world;
 
     private final Vector3 GAME_VIEW_COORDS = new Vector3();
@@ -27,6 +29,10 @@ public class GameUIRenderer extends UIRenderer {
         this.lightLabel = lightLabel;
     }
 
+    void setCellLabel(Label cellLabel) {
+        this.cellLabel = cellLabel;
+    }
+
     @Override
     public void render(float dt) {
         if (lightLabel != null) {
@@ -34,8 +40,15 @@ public class GameUIRenderer extends UIRenderer {
             Cell cell = world.findCell((int) GAME_VIEW_COORDS.x, (int) GAME_VIEW_COORDS.y);
             if (cell != null) {
                 lightLabel.setText(cell.getSunLight() + (cell.isUnderSun() ? " / 1" : " / 0"));
+                TreePart treePart = cell.getTreePart();
+                if (treePart != null) {
+                    cellLabel.setText(treePart.getClass().getSimpleName() + " #" + treePart.getId());
+                } else {
+                    cellLabel.setText("No tree part");
+                }
             } else {
                 lightLabel.setText("No cell");
+                cellLabel.setText("No tree part");
             }
         }
 

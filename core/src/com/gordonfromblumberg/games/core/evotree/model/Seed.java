@@ -51,7 +51,10 @@ public class Seed extends TreePart {
             return false;
         }
 
-        if (energy > ENERGY_REQUIRED_TO_SPROUT && calcLight(grid) >= LIGHT_REQUIRED_TO_SPROUT) {
+        if (energy > ENERGY_REQUIRED_TO_SPROUT
+                && calcLight(grid) >= LIGHT_REQUIRED_TO_SPROUT
+                && !(grid.getCell(cell, Direction.left).treePart instanceof Wood)
+                && !(grid.getCell(cell, Direction.right).treePart instanceof Wood)) {
             energy -= ENERGY_REQUIRED_TO_SPROUT;
             sprout(world);
             return true;
@@ -62,7 +65,7 @@ public class Seed extends TreePart {
     private void sprout(EvoTreeWorld world) {
         Tree tree = Tree.getInstance();
         tree.generation = this.generation;
-        tree.turnsRemain = Gene.RAND.nextInt(64, 128);
+        tree.turnsRemain = Gene.RAND.nextInt(64, 82);
         tree.dna.set(this.dna);
         tree.energy = this.energy;
         Shoot shoot = Shoot.getInstance();
@@ -72,6 +75,14 @@ public class Seed extends TreePart {
         tree.addShoot(shoot);
         tree.justSprouted = true;
         world.addTree(tree);
+    }
+
+    public void setGeneration(int generation) {
+        this.generation = generation;
+    }
+
+    public void setEnergy(int energy) {
+        this.energy = energy;
     }
 
     @Override
