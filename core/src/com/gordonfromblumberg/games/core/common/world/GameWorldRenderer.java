@@ -13,8 +13,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.gordonfromblumberg.games.core.common.Main;
 import com.gordonfromblumberg.games.core.common.screens.FBORenderer;
-import com.gordonfromblumberg.games.core.evotree.model.Cell;
-import com.gordonfromblumberg.games.core.evotree.model.TreePart;
+import com.gordonfromblumberg.games.core.evotree.model.*;
 
 import java.util.Iterator;
 
@@ -26,6 +25,7 @@ public class GameWorldRenderer extends FBORenderer {
     private static final Color MIN_ABS_COLOR = new Color(0.5f, 1f, 0.7f, 1f);
     private static final Color MAX_ABS_COLOR = new Color(0f, 0.6f, 0.1f, 1f);
     private static final float MAX_ABSORPTION = 20;
+    private static final Color SEED_COLOR = new Color(0.66f, 0.41f, 0.19f, 1f);
     private static final Vector3 tempVec3 = new Vector3();
 
     private final GameWorld world;
@@ -98,12 +98,20 @@ public class GameWorldRenderer extends FBORenderer {
                             nightB + diffB * k,
                             1);
                 } else {
-                    float k = 1 - treePart.getLightAbsorption() / MAX_ABSORPTION;
-                    shapeRenderer.setColor(
-                            absR + daR * k,
-                            absG + daG * k,
-                            absB + daB * k,
-                            1);
+                    if (treePart instanceof Seed) {
+                        shapeRenderer.setColor(SEED_COLOR);
+                    } else if (treePart instanceof Shoot) {
+                        shapeRenderer.setColor(MIN_ABS_COLOR);
+                    } else if (treePart instanceof Wood) {
+                        shapeRenderer.setColor(MAX_ABS_COLOR);
+                    } else {
+                        float k = 1 - treePart.getLightAbsorption() / MAX_ABSORPTION;
+                        shapeRenderer.setColor(
+                                absR + daR * k,
+                                absG + daG * k,
+                                absB + daB * k,
+                                1);
+                    }
                 }
                 shapeRenderer.rect(i * cellSize, j * cellSize, cellSize, cellSize);
             }

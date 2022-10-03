@@ -5,6 +5,8 @@ import com.badlogic.gdx.utils.Pool;
 import com.gordonfromblumberg.games.core.common.utils.Poolable;
 import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
 
+import java.util.Iterator;
+
 public class Tree implements Poolable {
     private static final Pool<Tree> pool = new Pool<Tree>() {
         @Override
@@ -12,6 +14,8 @@ public class Tree implements Poolable {
             return new Tree();
         }
     };
+
+    private static final int ENERGY_REQUIRED_TO_SPROUT = 10;
 
     int id;
     int generation;
@@ -35,7 +39,42 @@ public class Tree implements Poolable {
      * @return true if this tree should be removed from world
      */
     public boolean update(EvoTreeWorld world) {
-        --turnsRemain;
+        if (justSprouted) {
+            justSprouted = false;
+            return false;
+        }
+
+        if (--turnsRemain < 0) {
+            produceSeeds(world);
+            return true;
+        }
+
+        CellGrid grid = world.getGrid();
+        for (Wood wood : woods) {
+            energy += wood.calcLight(grid);
+        }
+        for (Shoot shoot : shoots) {
+            energy += shoot.calcLight(grid);
+        }
+
+        energy -= getSize() * Wood.ENERGY_CONSUMPTION;
+
+        if (energy <= 0) {
+            return true;
+        }
+
+        Iterator<Shoot> it = shoots.iterator();
+        while (it.hasNext()) {
+            Shoot shoot = it.next();
+            int requiredEnergy = ENERGY_REQUIRED_TO_SPROUT * shoot.canMakeChildrenCount(grid);
+            if (requiredEnergy < energy) {
+                energy -= requiredEnergy;
+                shoot.sprout(world);
+                it.remove();
+                shoot.release();
+            }
+        }
+
         return false;
     }
 
@@ -50,6 +89,26 @@ public class Tree implements Poolable {
         }
         woods.add(wood);
         wood.tree = this;
+    }
+
+    private void produceSeeds(EvoTreeWorld world) {
+        if (energy >= shoots.size) {
+            int energyPerSeed = (energy / shoots.size) + 1;
+            int nextGeneration = generation + 1;
+            for (Shoot shoot : shoots) {
+                Seed seed = Seed.getInstance();
+                seed.setCell(shoot.cell);
+                seed.generation = nextGeneration;
+                seed.dna.set(this.dna);
+                seed.dna.mutate();
+                seed.energy = energyPerSeed;
+                world.addSeed(seed);
+            }
+        }
+    }
+
+    public int getSize() {
+        return woods.size + shoots.size;
     }
 
     public void setId(int id) {

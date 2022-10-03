@@ -1,7 +1,6 @@
 package com.gordonfromblumberg.games.core.evotree.model;
 
 import com.badlogic.gdx.utils.Pool;
-import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
 
 public class Wood extends TreePart {
     private static final Pool<Wood> pool = new Pool<Wood>() {
@@ -11,20 +10,16 @@ public class Wood extends TreePart {
         }
     };
 
+    static final int ENERGY_CONSUMPTION = 8;
+
     protected Tree tree;
 
     Wood() {
-        super(8);
+        super(ENERGY_CONSUMPTION);
     }
 
     public static Wood getInstance() {
         return pool.obtain();
-    }
-
-    @Override
-    public boolean update(EvoTreeWorld world) {
-        tree.energy -= energyConsumption;
-        return tree.energy <= 0;
     }
 
     @Override
@@ -39,8 +34,8 @@ public class Wood extends TreePart {
 
     @Override
     public void reset() {
-        id = 0;
-        cell = null;
+        super.reset();
+
         tree = null;
     }
 }

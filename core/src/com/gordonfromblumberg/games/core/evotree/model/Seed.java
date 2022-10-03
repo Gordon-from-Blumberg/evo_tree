@@ -12,6 +12,7 @@ public class Seed extends TreePart {
     };
 
     private static final int LIGHT_REQUIRED_TO_SPROUT = 10;
+    private static final int ENERGY_REQUIRED_TO_SPROUT = 10;
 
     int generation;
     final DNA dna = new DNA();
@@ -50,7 +51,8 @@ public class Seed extends TreePart {
             return false;
         }
 
-        if (calcLight(grid) >= LIGHT_REQUIRED_TO_SPROUT) {
+        if (energy > ENERGY_REQUIRED_TO_SPROUT && calcLight(grid) >= LIGHT_REQUIRED_TO_SPROUT) {
+            energy -= ENERGY_REQUIRED_TO_SPROUT;
             sprout(world);
             return true;
         }
@@ -84,8 +86,8 @@ public class Seed extends TreePart {
 
     @Override
     public void reset() {
-        id = 0;
-        cell = null;
+        super.reset();
+
         generation = 0;
         dna.reset();
         energy = 0;

@@ -19,6 +19,10 @@ public class Gene {
         System.arraycopy(other.values, 0, this.values, 0, 4);
     }
 
+    byte getValue(Direction direction) {
+        return values[direction.getCode()];
+    }
+
     void reset() {
         for (int i = 0; i < 4; ++i) {
             values[i] = -1;

@@ -49,4 +49,15 @@ public abstract class TreePart implements Poolable {
     }
 
     public abstract int getLightAbsorption();
+
+    @Override
+    public void reset() {
+        id = 0;
+        if (cell != null) {
+            if (cell.treePart == this) {
+                cell.treePart = null;
+            }
+            cell = null;
+        }
+    }
 }
