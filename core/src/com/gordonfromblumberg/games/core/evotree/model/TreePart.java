@@ -6,7 +6,6 @@ import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
 public abstract class TreePart implements Poolable {
     protected static final int[] LIGHT_MODS = new int[] {1, 2, 4, 2};
 
-    protected int id;
     protected Cell cell;
     protected int energyConsumption;
 
@@ -23,14 +22,6 @@ public abstract class TreePart implements Poolable {
      */
     public boolean update(EvoTreeWorld world) {
         return false;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public void setCell(Cell cell) {
@@ -56,7 +47,6 @@ public abstract class TreePart implements Poolable {
 
     @Override
     public void reset() {
-        id = 0;
         if (cell != null) {
             if (cell.treePart == this) {
                 cell.treePart = null;

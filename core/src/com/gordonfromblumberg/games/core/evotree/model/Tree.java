@@ -136,12 +136,16 @@ public class Tree implements Poolable {
         }
     }
 
-    public int getSize() {
-        return woods.size + shoots.size;
+    public int getId() {
+        return id;
     }
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getSize() {
+        return woods.size + shoots.size;
     }
 
     public Color getColor() {

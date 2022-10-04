@@ -22,7 +22,7 @@ import java.util.Iterator;
 
 public class GameWorld implements EvoTreeWorld, Disposable {
     private static int nextTreeId = 1;
-    private static int nextPartId = 1;
+    private static int nextSeedId = 1;
     private int turn = 0;
 
     private final Array<Seed> seeds = new Array<>();
@@ -82,7 +82,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
     @Override
     public void addSeed(Seed seed) {
         seeds.add(seed);
-        seed.setId(nextPartId++);
+        seed.setId(nextSeedId++);
         if (seeds.size > maxSeeds) maxSeeds = seeds.size;
     }
 
@@ -108,11 +108,6 @@ public class GameWorld implements EvoTreeWorld, Disposable {
     @Override
     public CellGrid getGrid() {
         return cellGrid;
-    }
-
-    @Override
-    public int nextPartId() {
-        return nextPartId++;
     }
 
     public void update(float delta) {

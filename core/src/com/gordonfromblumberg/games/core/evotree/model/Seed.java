@@ -15,6 +15,7 @@ public class Seed extends TreePart {
     private static final int LIGHT_REQUIRED_TO_SPROUT = 10;
     private static final int ENERGY_REQUIRED_TO_SPROUT = 10;
 
+    int id;
     int generation;
     final DNA dna = new DNA();
     int energy;
@@ -71,13 +72,20 @@ public class Seed extends TreePart {
         tree.init();
         tree.energy = this.energy;
         Shoot shoot = Shoot.getInstance();
-        shoot.id = world.nextPartId();
         shoot.setCell(this.cell);
         shoot.activeGene = tree.dna.genes[0];
         tree.addShoot(shoot);
         tree.justSprouted = true;
         world.addTree(tree);
         Gdx.app.log("TREE", "Tree #" + tree.id + " was sprouted from seed #" + id + " with energy " + tree.energy);
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public void setGeneration(int generation) {
@@ -102,6 +110,7 @@ public class Seed extends TreePart {
     public void reset() {
         super.reset();
 
+        id = 0;
         generation = 0;
         dna.reset();
         energy = 0;

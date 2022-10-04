@@ -12,5 +12,4 @@ public interface EvoTreeWorld {
     void removeTree(Tree tree);
 
     CellGrid getGrid();
-    int nextPartId();
 }

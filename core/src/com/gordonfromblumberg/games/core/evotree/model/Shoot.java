@@ -23,7 +23,6 @@ public class Shoot extends Wood {
     void sprout(EvoTreeWorld world, Array<Shoot> newShoots) {
         Cell cell = this.cell;
         Wood wood = Wood.getInstance();
-        wood.id = world.nextPartId();
         wood.setCell(cell);
         tree.addWood(wood);
 
@@ -34,7 +33,6 @@ public class Shoot extends Wood {
                 Cell neib = grid.getCell(cell, dir);
                 if (neib != null && neib.treePart == null) {
                     Shoot shoot = getInstance();
-                    shoot.id = world.nextPartId();
                     shoot.setCell(neib);
                     newShoots.add(shoot);
                     shoot.activeGene = tree.dna.genes[nextActiveGene];
