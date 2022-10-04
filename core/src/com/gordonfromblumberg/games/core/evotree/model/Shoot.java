@@ -56,6 +56,20 @@ public class Shoot extends Wood {
         return result;
     }
 
+    boolean isBlocked(CellGrid grid) {
+        for (Direction dir : Direction.ALL) {
+            if (activeGene.getValue(dir) < 16) {
+                Cell neib = grid.getCell(cell, dir);
+                if (neib != null
+                        && neib.treePart != null
+                        && !(neib.treePart instanceof Wood && ((Wood) neib.treePart).tree == this.tree)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
     public void release() {
         pool.free(this);

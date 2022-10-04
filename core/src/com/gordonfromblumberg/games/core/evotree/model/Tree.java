@@ -17,6 +17,7 @@ public class Tree implements Poolable {
     };
 
     private static final int ENERGY_REQUIRED_TO_SPROUT = 10;
+    private static final int MAX_ENERGY_PER_SEED = 300;
 
     int id;
     int generation;
@@ -70,7 +71,7 @@ public class Tree implements Poolable {
         while (it.hasNext()) {
             Shoot shoot = it.next();
             int requiredEnergy = ENERGY_REQUIRED_TO_SPROUT * shoot.canMakeChildrenCount(grid);
-            if (requiredEnergy < energy) {
+            if (requiredEnergy < energy && !shoot.isBlocked(grid)) {
                 energy -= requiredEnergy;
                 shoot.sprout(world, newShoots);
                 it.remove();
@@ -102,6 +103,9 @@ public class Tree implements Poolable {
         Gdx.app.log("TREE", "Tree #" + id + " attempts to produce seeds: energy=" + energy + ", shoots=" + shoots.size);
         if (energy >= shoots.size && shoots.size > 0) {
             int energyPerSeed = (energy / shoots.size) + 1;
+            if (energyPerSeed > MAX_ENERGY_PER_SEED) {
+                energyPerSeed = MAX_ENERGY_PER_SEED;
+            }
             int nextGeneration = generation + 1;
             for (Shoot shoot : shoots) {
                 Seed seed = Seed.getInstance();
