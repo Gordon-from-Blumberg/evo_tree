@@ -1,6 +1,7 @@
 package com.gordonfromblumberg.games.core.evotree.model;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.gordonfromblumberg.games.core.common.utils.Poolable;
@@ -18,6 +19,8 @@ public class Tree implements Poolable {
 
     private static final int ENERGY_REQUIRED_TO_SPROUT = 10;
     private static final int MAX_ENERGY_PER_SEED = 300;
+    private static final float MIN_COLOR_VALUE = 0.15f;
+    private static final float MAX_COLOR_VALUE = 0.85f;
 
     int id;
     int generation;
@@ -27,6 +30,7 @@ public class Tree implements Poolable {
     final Array<Wood> woods = new Array<>();
     final Array<Shoot> shoots = new Array<>();
     final Array<Shoot> newShoots = new Array<>();
+    private final Color color = new Color();
 
     boolean justSprouted;
 
@@ -34,6 +38,17 @@ public class Tree implements Poolable {
 
     public static Tree getInstance() {
         return pool.obtain();
+    }
+
+    public void init() {
+        Gene gene = dna.genes[DNA.COLOR];
+        float clrDiff = MAX_COLOR_VALUE - MIN_COLOR_VALUE;
+        color.set(
+                MIN_COLOR_VALUE + clrDiff * (gene.getValue(0) ^ gene.getValue(3)) / Gene.MAX_VALUE,
+                MIN_COLOR_VALUE + clrDiff * (gene.getValue(1) ^ gene.getValue(3)) / Gene.MAX_VALUE,
+                MIN_COLOR_VALUE + clrDiff * (gene.getValue(2) ^ gene.getValue(3)) / Gene.MAX_VALUE,
+                1
+        );
     }
 
     /**
@@ -129,6 +144,10 @@ public class Tree implements Poolable {
         this.id = id;
     }
 
+    public Color getColor() {
+        return color;
+    }
+
     @Override
     public void release() {
         pool.free(this);
@@ -149,5 +168,6 @@ public class Tree implements Poolable {
             shoot.release();
         }
         shoots.clear();
+        color.set(0);
     }
 }

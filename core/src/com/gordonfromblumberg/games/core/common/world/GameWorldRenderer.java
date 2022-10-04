@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix3;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -100,10 +99,10 @@ public class GameWorldRenderer extends FBORenderer {
                 } else {
                     if (treePart instanceof Seed) {
                         shapeRenderer.setColor(SEED_COLOR);
-                    } else if (treePart instanceof Shoot) {
-                        shapeRenderer.setColor(MIN_ABS_COLOR);
                     } else if (treePart instanceof Wood) {
-                        shapeRenderer.setColor(MAX_ABS_COLOR);
+                        Color treeColor = ((Wood) treePart).getTree().getColor();
+                        float k = (treePart instanceof Shoot) ? 1.2f : 1;
+                        shapeRenderer.setColor(k * treeColor.r, k * treeColor.g, k * treeColor.b, 1f);
                     } else {
                         float k = 1 - treePart.getLightAbsorption() / MAX_ABSORPTION;
                         shapeRenderer.setColor(
@@ -121,10 +120,16 @@ public class GameWorldRenderer extends FBORenderer {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 //        Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl20.glLineWidth(1f / ((OrthographicCamera) viewport.getCamera()).zoom);
-        shapeRenderer.setColor(0.3f, 0.3f, 0.3f, 1f);
         for (int i = 0, w = world.cellGrid.getWidth(); i < w; ++i) {
+            Cell[] col = cells[i];
             for (int j = 0, h = world.cellGrid.getHeight(); j < h; ++j) {
-                if (cells[i][j].getTreePart() != null) {
+                TreePart treePart = col[j].getTreePart();
+                if (treePart != null) {
+                    if (treePart instanceof Shoot) {
+                        shapeRenderer.setColor(0.4f, 0.3f, 0f, 1f);
+                    } else {
+                        shapeRenderer.setColor(0.5f, 0.5f, 0.5f, 1f);
+                    }
                     shapeRenderer.rect(i * cellSize + 1, j * cellSize + 1, cellSize - 2, cellSize - 2);
                 }
             }

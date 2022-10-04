@@ -22,6 +22,10 @@ public class Wood extends TreePart {
         return pool.obtain();
     }
 
+    public Tree getTree() {
+        return tree;
+    }
+
     @Override
     public int getLightAbsorption() {
         return 100;

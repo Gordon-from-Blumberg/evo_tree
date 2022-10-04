@@ -68,6 +68,7 @@ public class Seed extends TreePart {
         tree.generation = this.generation;
         tree.turnsRemain = Gene.RAND.nextInt(64, 82);
         tree.dna.set(this.dna);
+        tree.init();
         tree.energy = this.energy;
         Shoot shoot = Shoot.getInstance();
         shoot.id = world.nextPartId();

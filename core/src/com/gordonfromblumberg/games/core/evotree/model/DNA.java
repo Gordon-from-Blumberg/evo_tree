@@ -4,7 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.gordonfromblumberg.games.core.common.utils.RandomUtils;
 
 public class DNA {
-    static final int GENES_COUNT = 16;
+    static final int COLOR = 16;
+    static final int GENES_COUNT = 17;
     private static final float MUTATION_CHANCE = 0.02f;
 
     final Gene[] genes = new Gene[GENES_COUNT];
