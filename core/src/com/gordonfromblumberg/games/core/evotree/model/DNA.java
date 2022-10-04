@@ -27,7 +27,7 @@ public class DNA {
         final RandomUtils.RandomGen rand = Gene.RAND;
         for (Gene gene : genes) {
             if (rand.nextBool(MUTATION_CHANCE)) {
-                gene.setRandom();
+                gene.mutate();
                 Gdx.app.log("DNA", "Gene has mutated");
             }
         }

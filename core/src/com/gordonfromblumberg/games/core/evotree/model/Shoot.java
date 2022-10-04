@@ -58,8 +58,8 @@ public class Shoot extends Wood {
         for (Direction dir : Direction.ALL) {
             if (activeGene.getValue(dir) < 16) {
                 Cell neib = grid.getCell(cell, dir);
-                if (neib != null
-                        && neib.treePart != null
+                if (neib == null && dir == Direction.up
+                        || neib != null && neib.treePart != null
                         && !(neib.treePart instanceof Wood && ((Wood) neib.treePart).tree == this.tree)) {
                     return true;
                 }

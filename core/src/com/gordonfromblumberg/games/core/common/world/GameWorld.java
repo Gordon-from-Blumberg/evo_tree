@@ -40,7 +40,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
     private int maxSeeds = 0;
     private int maxTrees = 0;
 
-    private float updateDelay = 0.12f;
+    private float updateDelay = 0.10f;
     private float time = 0;
 
     final Array<ClickHandler> clickHandlers = new Array<>(1);

@@ -38,7 +38,7 @@ public class Seed extends TreePart {
         CellGrid grid = world.getGrid();
         if (cell.y > 0) {
             Cell next = cell;
-            for (int i = 0; i < 2; ++i) {
+            for (int i = 0; i < 3; ++i) {
                 Cell c = grid.getCell(next, Direction.down);
                 if (c != null && c.treePart == null) {
                     next = c;

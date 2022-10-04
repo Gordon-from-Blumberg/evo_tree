@@ -20,7 +20,7 @@ public class GameWorldRenderer extends FBORenderer {
     private static final Color TEMP_COLOR = new Color();
     private static final Color SKY_COLOR = new Color(0.4f, 0.8f, 1f, 1f);
     private static final Color NIGHT_COLOR = new Color(0f, 0.12f, 0.07f, 1f);
-    private static final float MAX_SUN_LIGHT = 30;
+    private static final float MAX_SUN_LIGHT = 50;
     private static final Color MIN_ABS_COLOR = new Color(0.5f, 1f, 0.7f, 1f);
     private static final Color MAX_ABS_COLOR = new Color(0f, 0.6f, 0.1f, 1f);
     private static final float MAX_ABSORPTION = 20;
