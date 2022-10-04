@@ -1,9 +1,18 @@
 package com.gordonfromblumberg.games.core.evotree.model;
 
+import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
+import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.utils.RandomUtils;
 
 public class Gene {
-    final static RandomUtils.RandomGen RAND = RandomUtils.randomGen(-15615);
+    final static RandomUtils.RandomGen RAND;
+
+    static {
+        ConfigManager configManager = AbstractFactory.getInstance().configManager();
+        RAND = RandomUtils.randomGen(configManager.contains("seed")
+                ? configManager.getLong("seed")
+                : RandomUtils.nextLong());
+    }
 
     private final byte[] values = new byte[4];
 

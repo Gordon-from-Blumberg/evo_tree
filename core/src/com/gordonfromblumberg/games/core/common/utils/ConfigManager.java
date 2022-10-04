@@ -77,6 +77,26 @@ public class ConfigManager {
         return 0f;
     }
 
+    public long getLong(String propertyName) {
+        String property = configProperties.get(propertyName);
+        if (property != null) {
+            try {
+                return Long.parseLong(property);
+            } catch (NumberFormatException e) {
+                throw new RuntimeException(
+                        StringUtils.format("Couldn't parse property # = #", propertyName, property),
+                        e
+                );
+            }
+        }
+        return 0L;
+    }
+
+    public boolean contains(String propertyName) {
+        String property = configProperties.get(propertyName);
+        return property != null && !property.trim().isEmpty();
+    }
+
     protected void loadConfig(String configPath) {
         try (BufferedReader reader = new BufferedReader(Gdx.files.internal(configPath).reader())) {
             String line;

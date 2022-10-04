@@ -40,7 +40,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
     private int maxSeeds = 0;
     private int maxTrees = 0;
 
-    private float updateDelay = 0.16f;
+    private float updateDelay = 0.12f;
     private float time = 0;
 
     final Array<ClickHandler> clickHandlers = new Array<>(1);
@@ -65,7 +65,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
             addClickHandler(this::testLighting);
         }
 
-        for (int i = 12; i < cellGrid.getWidth(); i += 12) {
+        for (int i = 5; i < cellGrid.getWidth(); i += 10) {
             Seed seed = Seed.getInstance();
             seed.setCell(cellGrid.cells[i][RandomUtils.nextInt(0, cellGrid.getHeight() / 2)]);
             seed.setGeneration(1);

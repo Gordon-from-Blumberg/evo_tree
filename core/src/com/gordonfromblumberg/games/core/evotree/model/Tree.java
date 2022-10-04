@@ -115,6 +115,8 @@ public class Tree implements Poolable {
                 seed.dna.mutate();
                 seed.energy = energyPerSeed;
                 world.addSeed(seed);
+                Gdx.app.log("SEED", "Seed #" + seed.id + " was produced by tree #" + id
+                        + " with energy " + energyPerSeed + " of gen " + nextGeneration);
             }
         }
     }

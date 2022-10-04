@@ -25,6 +25,10 @@ public class RandomUtils {
         return from == to ? from : from + ((to - from) * RAND.nextFloat());
     }
 
+    public static long nextLong() {
+        return RAND.nextLong();
+    }
+
     public static boolean nextBool() {
         return RAND.nextFloat() < 0.5f;
     }

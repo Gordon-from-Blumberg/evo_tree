@@ -1,5 +1,6 @@
 package com.gordonfromblumberg.games.core.evotree.model;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Pool;
 import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
 
@@ -19,7 +20,7 @@ public class Seed extends TreePart {
     int energy;
 
     private Seed() {
-        super(5);
+        super(4);
     }
 
     public static Seed getInstance() {
@@ -75,6 +76,7 @@ public class Seed extends TreePart {
         tree.addShoot(shoot);
         tree.justSprouted = true;
         world.addTree(tree);
+        Gdx.app.log("TREE", "Tree #" + tree.id + " was sprouted from seed #" + id + " with energy " + tree.energy);
     }
 
     public void setGeneration(int generation) {
