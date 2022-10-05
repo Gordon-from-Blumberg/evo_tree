@@ -14,6 +14,7 @@ import com.gordonfromblumberg.games.core.common.event.EventHandler;
 import com.gordonfromblumberg.games.core.common.event.EventProcessor;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
 import com.gordonfromblumberg.games.core.common.utils.ClickHandler;
+import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.utils.RandomUtils;
 import com.gordonfromblumberg.games.core.evotree.model.*;
 import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
@@ -61,9 +62,13 @@ public class GameWorld implements EvoTreeWorld, Disposable {
 
     public void initialize() {
         Gdx.app.log("INIT", "GameWorld init");
-        if (AbstractFactory.getInstance().configManager().getBoolean("lightingTest")) {
+        ConfigManager configManager = AbstractFactory.getInstance().configManager();
+        if (configManager.getBoolean("lightingTest")) {
             addClickHandler(this::testLighting);
         }
+
+        if (configManager.contains("world.turnsPerSecond"))
+            updateDelay = 1f / configManager.getInteger("world.turnsPerSecond");
 
         for (int i = 5; i < cellGrid.getWidth(); i += 10) {
             Seed seed = Seed.getInstance();

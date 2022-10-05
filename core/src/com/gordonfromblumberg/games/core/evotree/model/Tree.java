@@ -4,6 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
+import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.utils.Poolable;
 import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
 
@@ -18,9 +20,16 @@ public class Tree implements Poolable {
     };
 
     private static final int ENERGY_REQUIRED_TO_SPROUT = 10;
-    private static final int MAX_ENERGY_PER_SEED = 300;
-    private static final float MIN_COLOR_VALUE = 0.15f;
-    private static final float MAX_COLOR_VALUE = 0.85f;
+    private static final int MAX_ENERGY_PER_SEED;
+    private static final float MIN_COLOR_VALUE;
+    private static final float MAX_COLOR_VALUE;
+
+    static {
+        ConfigManager configManager = AbstractFactory.getInstance().configManager();
+        MAX_ENERGY_PER_SEED = configManager.getInteger("tree.maxEnergyPerSeed");
+        MIN_COLOR_VALUE = configManager.getFloat("tree.minColor");
+        MAX_COLOR_VALUE = configManager.getFloat("tree.maxColor");
+    }
 
     int id;
     int generation;

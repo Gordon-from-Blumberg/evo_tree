@@ -2,6 +2,7 @@ package com.gordonfromblumberg.games.core.common.utils;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.gordonfromblumberg.games.core.common.Main;
 
@@ -90,6 +91,23 @@ public class ConfigManager {
             }
         }
         return 0L;
+    }
+
+    public void getColor(String propertyName, Color out) {
+        String property = configProperties.get(propertyName);
+        if (property != null) {
+            String[] rgba = property.split(",");
+            if (rgba.length >= 3) {
+                out.r = Float.parseFloat(rgba[0].trim());
+                out.g = Float.parseFloat(rgba[1].trim());
+                out.b = Float.parseFloat(rgba[2].trim());
+                if (rgba.length == 4) {
+                    out.a = Float.parseFloat(rgba[3].trim());
+                } else {
+                    out.a = 1f;
+                }
+            }
+        }
     }
 
     public boolean contains(String propertyName) {

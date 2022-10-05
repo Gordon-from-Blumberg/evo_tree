@@ -11,21 +11,40 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.gordonfromblumberg.games.core.common.Main;
+import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
 import com.gordonfromblumberg.games.core.common.screens.FBORenderer;
+import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.evotree.model.*;
 
 import java.util.Iterator;
 
 public class GameWorldRenderer extends FBORenderer {
     private static final Color TEMP_COLOR = new Color();
-    private static final Color SKY_COLOR = new Color(0.4f, 0.8f, 1f, 1f);
-    private static final Color NIGHT_COLOR = new Color(0f, 0.12f, 0.07f, 1f);
-    private static final float MAX_SUN_LIGHT = 50;
+    private static final Color LIGHT_COLOR = new Color(0.4f, 0.8f, 1f, 1f);
+    private static final Color DARK_COLOR = new Color(0f, 0.12f, 0.07f, 1f);
+    private static final Color MID_COLOR = new Color();
+    private static final float MAX_SUN_LIGHT;
+    private static final Color SEED_COLOR = new Color(0.66f, 0.41f, 0.19f, 1f);
+
     private static final Color MIN_ABS_COLOR = new Color(0.5f, 1f, 0.7f, 1f);
     private static final Color MAX_ABS_COLOR = new Color(0f, 0.6f, 0.1f, 1f);
-    private static final float MAX_ABSORPTION = 20;
-    private static final Color SEED_COLOR = new Color(0.66f, 0.41f, 0.19f, 1f);
+    private static final float MAX_ABSORPTION;
+
     private static final Vector3 tempVec3 = new Vector3();
+
+    static {
+        ConfigManager configManager = AbstractFactory.getInstance().configManager();
+        configManager.getColor("world.lightColor", LIGHT_COLOR);
+        configManager.getColor("world.darkColor", DARK_COLOR);
+        MID_COLOR.set(DARK_COLOR).lerp(LIGHT_COLOR, configManager.getFloat("world.midColor"));
+        MAX_SUN_LIGHT = configManager.getInteger("world.sunLight");
+        configManager.getColor("seed.color", SEED_COLOR);
+
+        // lighting test
+        configManager.getColor("world.lightingTest.minAbsColor", MIN_ABS_COLOR);
+        configManager.getColor("world.lightingTest.maxAbsColor", MAX_ABS_COLOR);
+        MAX_ABSORPTION = configManager.getInteger("world.lightingTest.maxAbsorption");
+    }
 
     private final GameWorld world;
     private final Batch batch;
@@ -77,10 +96,10 @@ public class GameWorldRenderer extends FBORenderer {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         int cellSize = world.cellGrid.getCellSize();
         Cell[][] cells = world.cellGrid.cells;
-        final float nightR = NIGHT_COLOR.r, nightG = NIGHT_COLOR.g, nightB = NIGHT_COLOR.b;
-        final float diffR = SKY_COLOR.r - NIGHT_COLOR.r,
-                diffG = SKY_COLOR.g - NIGHT_COLOR.g,
-                diffB = SKY_COLOR.b - NIGHT_COLOR.b;
+        final float nightR = DARK_COLOR.r, nightG = DARK_COLOR.g, nightB = DARK_COLOR.b;
+        final float diffR = LIGHT_COLOR.r - DARK_COLOR.r,
+                diffG = LIGHT_COLOR.g - DARK_COLOR.g,
+                diffB = LIGHT_COLOR.b - DARK_COLOR.b;
         final float absR = MAX_ABS_COLOR.r, absG = MAX_ABS_COLOR.g, absB = MAX_ABS_COLOR.b;
         final float daR = MIN_ABS_COLOR.r - MAX_ABS_COLOR.r,
                 daG = MIN_ABS_COLOR.g - MAX_ABS_COLOR.g,
