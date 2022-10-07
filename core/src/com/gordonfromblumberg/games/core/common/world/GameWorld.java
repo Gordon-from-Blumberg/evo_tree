@@ -115,6 +115,8 @@ public class GameWorld implements EvoTreeWorld, Disposable {
         return cellGrid;
     }
 
+    private int diff = 1;
+
     public void update(float delta) {
         if (!paused) {
             ++turn;
@@ -144,15 +146,37 @@ public class GameWorld implements EvoTreeWorld, Disposable {
                 }
             }
 
+            if (turn % 80 == 0) {
+                sunLight += diff;
+                if (sunLight == 100) diff = -1;
+                if (sunLight == 32) diff = 1;
+            }
+
             cellGrid.updateSunLight(sunLight);
 
             eventProcessor.process();
 
-            if (turn % 20 == 0) {
+            if (turn % 30 == 0) {
                 Gdx.app.log("GameWorld", seeds.size + " seeds in the world of maximum " + maxSeeds);
                 Gdx.app.log("GameWorld", trees.size + " trees in the world of maximum " + maxTrees);
             }
         }
+    }
+
+    public int getTurn() {
+        return turn;
+    }
+
+    public int getSeedCount() {
+        return seeds.size;
+    }
+
+    public int getTreeCount() {
+        return trees.size;
+    }
+
+    public int getSunLight() {
+        return sunLight;
     }
 
     // world coords

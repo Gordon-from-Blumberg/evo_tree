@@ -44,6 +44,7 @@ public abstract class AbstractScreen implements Screen {
     }
 
     protected void initialize() {
+        Gdx.app.log("INIT", "AbstractScreen.initialize for " + getClass().getSimpleName());
         assets = Main.getInstance().assets();
 
         createWorldViewport();
@@ -131,6 +132,7 @@ public abstract class AbstractScreen implements Screen {
     }
 
     protected void createUI() {
+        Gdx.app.log("INIT", "AbstractScreen.createUI for " + getClass().getSimpleName());
         Gdx.input.setInputProcessor(stage);
 
         uiRootTable = new Table();

@@ -11,10 +11,13 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.gordonfromblumberg.games.core.common.Main;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.world.GameWorld;
@@ -40,27 +43,9 @@ public class GameScreen extends AbstractScreen {
     public void initialize() {
         super.initialize();
         Gdx.app.log("INIT", "GameScreen init");
-        final ConfigManager configManager = AbstractFactory.getInstance().configManager();
         gameWorld.initialize();
         worldRenderer = renderer = new GameWorldRenderer(gameWorld, batch, viewport);
         renderer.initialize();
-
-        final float minZoom = configManager.getFloat("minZoom");
-        final float maxZoom = configManager.getFloat("maxZoom");
-        stage.addListener(new InputListener() {
-            @Override
-            public boolean scrolled(InputEvent event, float x, float y, float amountX, float amountY) {
-                if (amountY > 0)
-                    camera.zoom *= 1.25f;
-                else if (amountY < 0)
-                    camera.zoom /= 1.25f;
-                if (camera.zoom < minZoom)
-                    camera.zoom = minZoom;
-                if (camera.zoom > maxZoom)
-                    camera.zoom = maxZoom;
-                return true;
-            }
-        });
 
         stage.addListener(new ClickListener(Input.Buttons.LEFT) {
             @Override
@@ -131,12 +116,14 @@ public class GameScreen extends AbstractScreen {
     protected void createWorldViewport() {
         camera = new OrthographicCamera();
         camera.setToOrtho(false);
+//        viewport = new ExtendViewport();
         viewport = new FillViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
         viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
     }
 
     @Override
     protected void createUiRenderer() {
+        Gdx.app.log("INIT", "GameScreen.createUiRenderer");
         final ConfigManager configManager = AbstractFactory.getInstance().configManager();
         final float worldWidth = configManager.getFloat("worldWidth");
         final float minRatio = configManager.getFloat("minRatio");
@@ -154,6 +141,27 @@ public class GameScreen extends AbstractScreen {
     protected void createUI() {
         super.createUI();
 
+        Gdx.app.log("INIT", "GameScreen.createUI");
+
+        final ConfigManager configManager = AbstractFactory.getInstance().configManager();
+
+        final float minZoom = configManager.getFloat("minZoom");
+        final float maxZoom = configManager.getFloat("maxZoom");
+        stage.addListener(new InputListener() {
+            @Override
+            public boolean scrolled(InputEvent event, float x, float y, float amountX, float amountY) {
+                if (amountY > 0)
+                    camera.zoom *= 1.25f;
+                else if (amountY < 0)
+                    camera.zoom /= 1.25f;
+                if (camera.zoom < minZoom)
+                    camera.zoom = minZoom;
+                if (camera.zoom > maxZoom)
+                    camera.zoom = maxZoom;
+                return true;
+            }
+        });
+
         final Skin uiSkin = assets.get("ui/uiskin.json", Skin.class);
 
         stage.addListener(new InputListener() {
@@ -167,41 +175,63 @@ public class GameScreen extends AbstractScreen {
             }
         });
 
-        cameraPos = new Label("Hello", uiSkin);
-        zoom = new Label("", uiSkin);
-        screenCoord = new Label("", uiSkin);
-        viewCoord = new Label("", uiSkin);
-        worldCoord = new Label("", uiSkin);
+        if (Main.DEBUG) {
+            uiRootTable.add(createCoordsDebugTable(uiSkin)).left();
+        } else {
+            uiRootTable.add();
+        }
 
-        uiRootTable.add(new Label("Camera pos", uiSkin));
-        uiRootTable.add(cameraPos);
 //        if (AbstractFactory.getInstance().configManager().getBoolean("lightingTest")) {
-            uiRootTable.add().expandX();
-            uiRootTable.add(new Label("Light", uiSkin));
-            Label lightLabel = new Label("", uiSkin);
-            uiRootTable.add(lightLabel).minWidth(100);
-            ((GameUIRenderer) uiRenderer).setLightLabel(lightLabel);
-//        }
-        uiRootTable.row();
-        uiRootTable.add(new Label("Zoom", uiSkin));
-        uiRootTable.add(zoom);
-        uiRootTable.add().expandX();
-        uiRootTable.add(new Label("Cell", uiSkin));
-        Label cellLabel = new Label("", uiSkin);
-        uiRootTable.add(cellLabel).minWidth(100);
-        ((GameUIRenderer) uiRenderer).setCellLabel(cellLabel);
-        uiRootTable.row();
-        uiRootTable.add(new Label("Screen", uiSkin));
-        uiRootTable.add(screenCoord);
-        uiRootTable.row();
-        uiRootTable.add(new Label("Viewport", uiSkin));
-        uiRootTable.add(viewCoord);
-        uiRootTable.row();
-        uiRootTable.add(new Label("World", uiSkin));
-        uiRootTable.add(worldCoord);
-        uiRootTable.row();
+        uiRootTable.add(((GameUIRenderer) uiRenderer).createInfoTable(uiSkin)).expandX().top();
+
+//        uiRootTable.add(new Label("Cell", uiSkin));
+//        Label cellLabel = new Label("", uiSkin);
+//        uiRootTable.add(cellLabel).minWidth(100);
+//        ((GameUIRenderer) uiRenderer).setCellLabel(cellLabel);
+////        }
+//
+//        uiRootTable.row();
+//        uiRootTable.add().expandX();
+//        uiRootTable.add(new Label("Light", uiSkin));
+//        Label lightLabel = new Label("", uiSkin);
+//        uiRootTable.add(lightLabel).minWidth(100);
+//        ((GameUIRenderer) uiRenderer).setLightLabel(lightLabel);
+//
+//        uiRootTable.row();
+//        uiRootTable.add();
+//        uiRootTable.add(new Label("Tree", uiSkin));
+//        Label treeLabel = new Label("", uiSkin);
+//        uiRootTable.add(treeLabel).minWidth(100);
+//        ((GameUIRenderer) uiRenderer).setTreeLabel(treeLabel);
+
+        uiRootTable.row().expandY();
         uiRootTable.add();
-        uiRootTable.add();
-        uiRootTable.add().expand();
+    }
+
+    private Table createCoordsDebugTable(Skin uiSkin) {
+        final Table table = new Table();
+        table.add(new Label("Camera pos", uiSkin));
+        table.add(cameraPos = new Label("Hello", uiSkin));
+
+        table.row();
+        table.add(new Label("Zoom", uiSkin));
+        table.add(zoom = new Label("", uiSkin));
+
+        table.row();
+        table.add(new Label("Screen", uiSkin));
+        table.add(screenCoord = new Label("", uiSkin));
+
+        table.row();
+        table.add(new Label("Viewport", uiSkin));
+        table.add(viewCoord = new Label("", uiSkin));
+
+        table.row();
+        table.add(new Label("World", uiSkin));
+        table.add(worldCoord = new Label("", uiSkin));
+
+        if (Main.DEBUG_UI) {
+            table.debugAll();
+        }
+        return table;
     }
 }

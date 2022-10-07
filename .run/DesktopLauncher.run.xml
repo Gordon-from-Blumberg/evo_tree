@@ -2,6 +2,7 @@
   <configuration default="false" name="DesktopLauncher" type="Application" factoryName="Application" nameIsGenerated="true">
     <option name="MAIN_CLASS_NAME" value="com.gordonfromblumberg.games.desktop.common.DesktopLauncher" />
     <module name="evo_tree.desktop.main" />
+    <option name="PROGRAM_PARAMETERS" value="-debug" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="com.gordonfromblumberg.games.desktop.common.*" />

@@ -38,4 +38,12 @@ public class Cell {
     public void setTreePart(TreePart treePart) {
         this.treePart = treePart;
     }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
 }
