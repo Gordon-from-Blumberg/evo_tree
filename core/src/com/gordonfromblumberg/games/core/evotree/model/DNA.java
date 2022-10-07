@@ -1,14 +1,32 @@
 package com.gordonfromblumberg.games.core.evotree.model;
 
 import com.badlogic.gdx.Gdx;
+import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
+import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.utils.RandomUtils;
 
 public class DNA {
-    static final int COLOR = 16;
-    static final int GENES_COUNT = 17;
-    private static final float MUTATION_CHANCE = 0.02f;
+    static final int SPROUT_GENES_COUNT;
+    static final int COLOR;
+    static final int LIFETIME;
+    static final int SEED_SPROUT_LIGHT;
+    static final int GENES_COUNT;
 
-    final Gene[] genes = new Gene[GENES_COUNT];
+    private static final float MUTATION_CHANCE;
+
+    static {
+        ConfigManager configManager = AbstractFactory.getInstance().configManager();
+        SPROUT_GENES_COUNT = configManager.getInteger("dna.sproutGenesCount");
+        int genesCount = SPROUT_GENES_COUNT;
+        COLOR = genesCount++;
+        LIFETIME = genesCount++;
+        SEED_SPROUT_LIGHT = genesCount++;
+        GENES_COUNT = genesCount;
+
+        MUTATION_CHANCE = configManager.getFloat("dna.mutationChance");
+    }
+
+    private final Gene[] genes = new Gene[GENES_COUNT];
 
     DNA() {
         for (int i = 0; i < GENES_COUNT; ++i) {
@@ -31,6 +49,10 @@ public class DNA {
                 Gdx.app.log("DNA", "Gene has mutated");
             }
         }
+    }
+
+    public Gene getGene(int index) {
+        return genes[index];
     }
 
     public void reset() {

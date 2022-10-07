@@ -23,17 +23,21 @@ public class Tree implements Poolable {
     private static final int MAX_ENERGY_PER_SEED;
     private static final float MIN_COLOR_VALUE;
     private static final float MAX_COLOR_VALUE;
+    private static final int MIN_LIFETIME;
+    private static final int MAX_LIFETIME;
 
     static {
         ConfigManager configManager = AbstractFactory.getInstance().configManager();
         MAX_ENERGY_PER_SEED = configManager.getInteger("tree.maxEnergyPerSeed");
         MIN_COLOR_VALUE = configManager.getFloat("tree.minColor");
         MAX_COLOR_VALUE = configManager.getFloat("tree.maxColor");
+        MIN_LIFETIME = configManager.getInteger("tree.minLifetime");
+        MAX_LIFETIME = configManager.getInteger("tree.maxLifetime");
     }
 
     int id;
     int generation;
-    int turnsRemain;
+    int lifetime;
     final DNA dna = new DNA();
     int energy;
     final Array<Wood> woods = new Array<>();
@@ -50,7 +54,7 @@ public class Tree implements Poolable {
     }
 
     public void init() {
-        Gene gene = dna.genes[DNA.COLOR];
+        Gene gene = dna.getGene(DNA.COLOR);
         float clrDiff = MAX_COLOR_VALUE - MIN_COLOR_VALUE;
         color.set(
                 MIN_COLOR_VALUE + clrDiff * (gene.getValue(0) ^ gene.getValue(3)) / Gene.MAX_VALUE,
@@ -58,6 +62,12 @@ public class Tree implements Poolable {
                 MIN_COLOR_VALUE + clrDiff * (gene.getValue(2) ^ gene.getValue(3)) / Gene.MAX_VALUE,
                 1
         );
+        Gene treeLifetime = dna.getGene(DNA.LIFETIME);
+        int lifetime = 0;
+        for (int i = 0; i < 4; ++i) {
+            lifetime += treeLifetime.getValue(i);
+        }
+        this.lifetime = (lifetime - MIN_LIFETIME + 1) % (MAX_LIFETIME - MIN_LIFETIME) + MIN_LIFETIME;
     }
 
     /**
@@ -71,7 +81,7 @@ public class Tree implements Poolable {
             return false;
         }
 
-        if (--turnsRemain < 0) {
+        if (--lifetime < 0) {
             produceSeeds(world);
             return true;
         }
@@ -170,7 +180,7 @@ public class Tree implements Poolable {
     public void reset() {
         id = 0;
         generation = 0;
-        turnsRemain = 0;
+        lifetime = 0;
         dna.reset();
         energy = 0;
         for (Wood wood : woods) {

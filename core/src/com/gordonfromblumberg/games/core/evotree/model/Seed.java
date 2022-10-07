@@ -2,6 +2,8 @@ package com.gordonfromblumberg.games.core.evotree.model;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Pool;
+import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
+import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
 
 public class Seed extends TreePart {
@@ -12,13 +14,22 @@ public class Seed extends TreePart {
         }
     };
 
-    private static final int LIGHT_REQUIRED_TO_SPROUT = 10;
     private static final int ENERGY_REQUIRED_TO_SPROUT = 10;
+
+    private static final int MIN_LIGHT_TO_SPROUT;
+    private static final int MAX_LIGHT_TO_SPROUT;
+
+    static {
+        ConfigManager configManager = AbstractFactory.getInstance().configManager();
+        MIN_LIGHT_TO_SPROUT = configManager.getInteger("seed.minLightToSprout");
+        MAX_LIGHT_TO_SPROUT = configManager.getInteger("seed.maxLightToSprout");
+    }
 
     int id;
     int generation;
     final DNA dna = new DNA();
     int energy;
+    int lightToSprout;
 
     private Seed() {
         super(4);
@@ -26,6 +37,15 @@ public class Seed extends TreePart {
 
     public static Seed getInstance() {
         return pool.obtain();
+    }
+
+    public void init() {
+        Gene lightToSproutGene = dna.getGene(DNA.SEED_SPROUT_LIGHT);
+        int lightToSprout = 0;
+        for (int i = 0; i < 4; ++i) {
+            lightToSprout += lightToSproutGene.getValue(i);
+        }
+        this.lightToSprout = (lightToSprout - MIN_LIGHT_TO_SPROUT + 1) % (MAX_LIGHT_TO_SPROUT - MIN_LIGHT_TO_SPROUT) + MIN_LIGHT_TO_SPROUT;
     }
 
     @Override
@@ -54,7 +74,7 @@ public class Seed extends TreePart {
         }
 
         if (energy > ENERGY_REQUIRED_TO_SPROUT
-                && calcLight(grid) >= LIGHT_REQUIRED_TO_SPROUT
+                && calcLight(grid) >= lightToSprout
                 && !(grid.getCell(cell, Direction.left).treePart instanceof Wood)
                 && !(grid.getCell(cell, Direction.right).treePart instanceof Wood)) {
             energy -= ENERGY_REQUIRED_TO_SPROUT;
@@ -67,13 +87,12 @@ public class Seed extends TreePart {
     private void sprout(EvoTreeWorld world) {
         Tree tree = Tree.getInstance();
         tree.generation = this.generation;
-        tree.turnsRemain = Gene.RAND.nextInt(64, 82);
         tree.dna.set(this.dna);
         tree.init();
         tree.energy = this.energy;
         Shoot shoot = Shoot.getInstance();
         shoot.setCell(this.cell);
-        shoot.activeGene = tree.dna.genes[0];
+        shoot.activeGene = tree.dna.getGene(0);
         tree.addShoot(shoot);
         tree.justSprouted = true;
         world.addTree(tree);
@@ -114,5 +133,6 @@ public class Seed extends TreePart {
         generation = 0;
         dna.reset();
         energy = 0;
+        lightToSprout = -1;
     }
 }

@@ -29,13 +29,13 @@ public class Shoot extends Wood {
         CellGrid grid = world.getGrid();
         for (Direction dir : Direction.ALL) {
             int nextActiveGene = activeGene.getValue(dir);
-            if (nextActiveGene < 16) {
+            if (nextActiveGene < DNA.SPROUT_GENES_COUNT) {
                 Cell neib = grid.getCell(cell, dir);
                 if (neib != null && neib.treePart == null) {
                     Shoot shoot = getInstance();
                     shoot.setCell(neib);
                     newShoots.add(shoot);
-                    shoot.activeGene = tree.dna.genes[nextActiveGene];
+                    shoot.activeGene = tree.dna.getGene(nextActiveGene);
                 }
             }
         }
@@ -44,7 +44,7 @@ public class Shoot extends Wood {
     int canMakeChildrenCount(CellGrid grid) {
         int result = 0;
         for (Direction dir : Direction.ALL) {
-            if (activeGene.getValue(dir) < 16) {
+            if (activeGene.getValue(dir) < DNA.SPROUT_GENES_COUNT) {
                 Cell neib = grid.getCell(cell, dir);
                 if (neib != null && neib.treePart == null) {
                     ++result;
@@ -56,7 +56,7 @@ public class Shoot extends Wood {
 
     boolean isBlocked(CellGrid grid) {
         for (Direction dir : Direction.ALL) {
-            if (activeGene.getValue(dir) < 16) {
+            if (activeGene.getValue(dir) < DNA.SPROUT_GENES_COUNT) {
                 Cell neib = grid.getCell(cell, dir);
                 if (neib == null && dir == Direction.up
                         || neib != null && neib.treePart != null
