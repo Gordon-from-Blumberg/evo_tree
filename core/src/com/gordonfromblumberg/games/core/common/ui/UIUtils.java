@@ -2,8 +2,10 @@ package com.gordonfromblumberg.games.core.common.ui;
 
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.gordonfromblumberg.games.core.common.Main;
 
 public class UIUtils {
     private UIUtils() {}
@@ -57,5 +59,15 @@ public class UIUtils {
         }
 
         return button;
+    }
+
+    public static Table createTable() {
+        Table table = new Table();
+
+        if (Main.DEBUG_UI) {
+            table.debugAll();
+        }
+
+        return table;
     }
 }

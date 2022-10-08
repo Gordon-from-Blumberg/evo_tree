@@ -34,12 +34,14 @@ public class GameWorld implements EvoTreeWorld, Disposable {
     int sunLight;
     CellGrid cellGrid;
 
+    boolean running;
     boolean paused;
     private final Color pauseColor = Color.GRAY;
     final BitmapFontCache pauseText;
 
     private int maxSeeds = 0;
     private int maxTrees = 0;
+    private int maxGeneration = 0;
 
     private float updateDelay = 0.10f;
     private float time = 0;
@@ -77,6 +79,8 @@ public class GameWorld implements EvoTreeWorld, Disposable {
             seed.setEnergy(100);
             addSeed(seed);
         }
+
+        running = true;
     }
 
     public void setSize(int width, int height) {
@@ -89,6 +93,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
         seeds.add(seed);
         seed.setId(nextSeedId++);
         if (seeds.size > maxSeeds) maxSeeds = seeds.size;
+        if (seed.getGeneration() > maxGeneration) maxGeneration = seed.getGeneration();
     }
 
     @Override
@@ -118,7 +123,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
     private int diff = 1;
 
     public void update(float delta) {
-        if (!paused) {
+        if (running && !paused) {
             ++turn;
 
             time += delta;
@@ -149,16 +154,19 @@ public class GameWorld implements EvoTreeWorld, Disposable {
             if (turn % 80 == 0) {
                 sunLight += diff;
                 if (sunLight == 100) diff = -1;
-                if (sunLight == 32) diff = 1;
+                if (sunLight == 32) diff = 2;
             }
 
             cellGrid.updateSunLight(sunLight);
 
             eventProcessor.process();
 
-            if (turn % 30 == 0) {
-                Gdx.app.log("GameWorld", seeds.size + " seeds in the world of maximum " + maxSeeds);
-                Gdx.app.log("GameWorld", trees.size + " trees in the world of maximum " + maxTrees);
+//            if (turn % 30 == 0) {
+//                Gdx.app.log("GameWorld", seeds.size + " seeds in the world of maximum " + maxSeeds);
+//                Gdx.app.log("GameWorld", trees.size + " trees in the world of maximum " + maxTrees);
+//            }
+            if (seeds.isEmpty() && trees.isEmpty()) {
+                running = false;
             }
         }
     }
@@ -171,12 +179,28 @@ public class GameWorld implements EvoTreeWorld, Disposable {
         return seeds.size;
     }
 
+    public int getMaxSeeds() {
+        return maxSeeds;
+    }
+
     public int getTreeCount() {
         return trees.size;
     }
 
+    public int getMaxTrees() {
+        return maxTrees;
+    }
+
+    public int getMaxGeneration() {
+        return maxGeneration;
+    }
+
     public int getSunLight() {
         return sunLight;
+    }
+
+    public void setTurnsPerSecond(int turnsPerSecond) {
+        updateDelay = 1f / turnsPerSecond;
     }
 
     // world coords

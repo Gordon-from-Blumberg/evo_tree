@@ -107,6 +107,10 @@ public class Seed extends TreePart {
         this.id = id;
     }
 
+    public int getGeneration() {
+        return generation;
+    }
+
     public void setGeneration(int generation) {
         this.generation = generation;
     }

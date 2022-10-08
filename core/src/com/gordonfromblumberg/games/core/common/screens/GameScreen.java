@@ -19,6 +19,8 @@ import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.gordonfromblumberg.games.core.common.Main;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
+import com.gordonfromblumberg.games.core.common.ui.IntChangeableLabel;
+import com.gordonfromblumberg.games.core.common.ui.UIUtils;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.world.GameWorld;
 import com.gordonfromblumberg.games.core.common.world.GameWorldRenderer;
@@ -144,6 +146,7 @@ public class GameScreen extends AbstractScreen {
         Gdx.app.log("INIT", "GameScreen.createUI");
 
         final ConfigManager configManager = AbstractFactory.getInstance().configManager();
+        final GameUIRenderer renderer = (GameUIRenderer) uiRenderer;
 
         final float minZoom = configManager.getFloat("minZoom");
         final float maxZoom = configManager.getFloat("maxZoom");
@@ -176,40 +179,29 @@ public class GameScreen extends AbstractScreen {
         });
 
         if (Main.DEBUG) {
-            uiRootTable.add(createCoordsDebugTable(uiSkin)).left().top();
+            uiRootTable.add(createCoordsDebugTable(uiSkin))
+                    .left().top();
         } else {
             uiRootTable.add();
         }
 
-//        if (AbstractFactory.getInstance().configManager().getBoolean("lightingTest")) {
-        uiRootTable.add(((GameUIRenderer) uiRenderer).createInfoTable(uiSkin)).expandX().top();
+        uiRootTable.add(renderer.createInfoTable(uiSkin))
+                .expandX().top();
 
-//        uiRootTable.add(new Label("Cell", uiSkin));
-//        Label cellLabel = new Label("", uiSkin);
-//        uiRootTable.add(cellLabel).minWidth(100);
-//        ((GameUIRenderer) uiRenderer).setCellLabel(cellLabel);
-////        }
-//
-//        uiRootTable.row();
-//        uiRootTable.add().expandX();
-//        uiRootTable.add(new Label("Light", uiSkin));
-//        Label lightLabel = new Label("", uiSkin);
-//        uiRootTable.add(lightLabel).minWidth(100);
-//        ((GameUIRenderer) uiRenderer).setLightLabel(lightLabel);
-//
-//        uiRootTable.row();
-//        uiRootTable.add();
-//        uiRootTable.add(new Label("Tree", uiSkin));
-//        Label treeLabel = new Label("", uiSkin);
-//        uiRootTable.add(treeLabel).minWidth(100);
-//        ((GameUIRenderer) uiRenderer).setTreeLabel(treeLabel);
+        if (Main.DEBUG) {
+            uiRootTable.add(renderer.createCellDebugTable(uiSkin))
+                    .top();
+        } else {
+            uiRootTable.add();
+        }
 
         uiRootTable.row().expandY();
-        uiRootTable.add();
+        uiRootTable.add(renderer.createControlTable(uiSkin, configManager.getInteger("world.turnsPerSecond")))
+                .left().bottom().pad(10f);
     }
 
     private Table createCoordsDebugTable(Skin uiSkin) {
-        final Table table = new Table();
+        final Table table = UIUtils.createTable();
         table.add(new Label("Camera pos", uiSkin));
         table.add(cameraPos = new Label("Hello", uiSkin));
 
@@ -228,10 +220,6 @@ public class GameScreen extends AbstractScreen {
         table.row();
         table.add(new Label("World", uiSkin));
         table.add(worldCoord = new Label("", uiSkin));
-
-        if (Main.DEBUG_UI) {
-            table.debugAll();
-        }
         return table;
     }
 }

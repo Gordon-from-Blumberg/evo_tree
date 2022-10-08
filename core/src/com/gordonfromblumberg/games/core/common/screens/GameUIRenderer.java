@@ -1,19 +1,15 @@
 package com.gordonfromblumberg.games.core.common.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.gordonfromblumberg.games.core.common.Main;
-import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
+import com.gordonfromblumberg.games.core.common.ui.IntChangeableLabel;
+import com.gordonfromblumberg.games.core.common.ui.UIUtils;
 import com.gordonfromblumberg.games.core.common.ui.UpdatableLabel;
-import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.utils.CoordsConverter;
 import com.gordonfromblumberg.games.core.common.world.GameWorld;
 import com.gordonfromblumberg.games.core.evotree.model.Cell;
@@ -22,17 +18,11 @@ import com.gordonfromblumberg.games.core.evotree.model.TreePart;
 import com.gordonfromblumberg.games.core.evotree.model.Wood;
 
 public class GameUIRenderer extends UIRenderer {
-    private Label worldLightLabel;
-    private Label seedsLabel;
-    private Label treesLabel;
-
-    private Label lightLabel;
-    private Label cellLabel;
-    private Label treeLabel;
     private GameWorld world;
 
     private final Vector3 GAME_VIEW_COORDS = new Vector3();
     private CoordsConverter toGameViewConverter;
+    private Cell cell;
 
     public GameUIRenderer(Viewport viewport, Stage stage, GameWorld world, CoordsConverter toGameViewConverter) {
         super(viewport, stage);
@@ -43,69 +33,92 @@ public class GameUIRenderer extends UIRenderer {
         this.toGameViewConverter = toGameViewConverter;
     }
 
-    public Table createInfoTable(Skin uiSkin) {
+    Table createInfoTable(Skin uiSkin) {
         float pad = 10f;
-        Table table = new Table();
-        table.add(new Label("Turn", uiSkin)).padRight(pad);
-        table.add(new UpdatableLabel(uiSkin, () -> world.getTurn())).minWidth(80);
+        Table table = UIUtils.createTable();
+        table.add(new Label("Turn", uiSkin))
+                .padRight(pad).right();
+        table.add(new UpdatableLabel(uiSkin, () -> world.getTurn()))
+                .minWidth(80);
 
         table.row();
-        table.add(new Label("Light", uiSkin)).padRight(pad);
-        table.add(new UpdatableLabel(uiSkin, () -> world.getSunLight())).left();
+        table.add(new Label("Light", uiSkin))
+                .padRight(pad).right();
+        table.add(new UpdatableLabel(uiSkin, () -> world.getSunLight()))
+                .left();
 
         table.row();
-        table.add(new Label("Seeds", uiSkin)).padRight(pad);
-        table.add(new UpdatableLabel(uiSkin, () -> world.getSeedCount())).left();
+        table.add(new Label("Seeds", uiSkin))
+                .padRight(pad).right();
+        table.add(new UpdatableLabel(uiSkin, () -> world.getSeedCount() + " of " + world.getMaxSeeds()))
+                .left();
 
         table.row();
-        table.add(new Label("Trees", uiSkin)).padRight(pad);
-        table.add(new UpdatableLabel(uiSkin, () -> world.getTreeCount())).left();
+        table.add(new Label("Trees", uiSkin))
+                .padRight(pad).right();
+        table.add(new UpdatableLabel(uiSkin, () -> world.getTreeCount() + " of " + world.getMaxTrees()))
+                .left();
 
-        if (Main.DEBUG_UI) {
-            table.debugAll();
-        }
+        table.row();
+        table.add(new Label("Generation", uiSkin))
+                .padRight(pad).right();
+        table.add(new UpdatableLabel(uiSkin, () -> world.getMaxGeneration()))
+                .left();
 
         return table;
     }
 
-    void setLightLabel(Label lightLabel) {
-        this.lightLabel = lightLabel;
+    Table createCellDebugTable(Skin uiSkin) {
+        float pad = 10f;
+        Table table = UIUtils.createTable();
+        table.add(new Label("Cell", uiSkin))
+                .padRight(pad).right();
+        table.add(new UpdatableLabel(uiSkin, () -> cell != null ? cell.getX() + ", " + cell.getY() : "No cell"))
+                .left();
+
+        table.row();
+        table.add(new Label("Light", uiSkin))
+                .padRight(pad).right();
+        table.add(new UpdatableLabel(uiSkin, () -> cell != null ? cell.getSunLight() + " / " + cell.isUnderSun() : "No cell"))
+                .left();
+
+        table.row();
+        table.add(new Label("Tree", uiSkin))
+                .padRight(pad).right();
+        table.add(new UpdatableLabel(uiSkin, () -> {
+            TreePart treePart = cell != null ? cell.getTreePart() : null;
+            if (treePart instanceof Seed) {
+                return "Seed #" + ((Seed) treePart).getId();
+            }
+            if (treePart instanceof Wood) {
+                return treePart.getClass().getSimpleName() + " of tree #" + ((Wood) treePart).getTree().getId();
+            }
+            return treePart != null ? treePart.getClass().getSimpleName() : "No tree";
+        }))
+                .minWidth(160);
+        return table;
     }
 
-    void setCellLabel(Label cellLabel) {
-        this.cellLabel = cellLabel;
-    }
+    Table createControlTable(Skin uiSkin, int initialValue) {
+        float pad = 10f;
+        Table table = UIUtils.createTable();
+        table.add(new Label("Turns per sec", uiSkin))
+                .padRight(pad).right();
 
-    void setTreeLabel(Label treeLabel) {
-        this.treeLabel = treeLabel;
+        IntChangeableLabel speedControl = new IntChangeableLabel(uiSkin, world::setTurnsPerSecond);
+        speedControl.setMinValue(5);
+        speedControl.setMaxValue(30);
+        speedControl.setStep(5);
+        speedControl.setValue(initialValue);
+        table.add(speedControl)
+                .left();
+        return table;
     }
 
     @Override
     public void render(float dt) {
-        if (lightLabel != null) {
-            toGameViewConverter.convert(Gdx.input.getX(), Gdx.input.getY(), GAME_VIEW_COORDS);
-            Cell cell = world.findCell((int) GAME_VIEW_COORDS.x, (int) GAME_VIEW_COORDS.y);
-            if (cell != null) {
-                cellLabel.setText(cell.getX() + ", " + cell.getY());
-                lightLabel.setText(cell.getSunLight() + (cell.isUnderSun() ? " / 1" : " / 0"));
-                TreePart treePart = cell.getTreePart();
-                if (treePart != null) {
-                    if (treePart instanceof Seed) {
-                        treeLabel.setText(treePart.getClass().getSimpleName() + " #" + ((Seed) treePart).getId());
-                    } else if (treePart instanceof Wood) {
-                        treeLabel.setText(treePart.getClass().getSimpleName() + " of tree #" + ((Wood) treePart).getTree().getId());
-                    } else {
-                        treeLabel.setText(treePart.getClass().getSimpleName());
-                    }
-                } else {
-                    treeLabel.setText("No tree");
-                }
-            } else {
-                cellLabel.setText("No cell");
-                lightLabel.setText("No cell");
-                treeLabel.setText("No tree");
-            }
-        }
+        toGameViewConverter.convert(Gdx.input.getX(), Gdx.input.getY(), GAME_VIEW_COORDS);
+        cell = world.findCell((int) GAME_VIEW_COORDS.x, (int) GAME_VIEW_COORDS.y);
 
         super.render(dt);
     }
