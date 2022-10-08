@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.gordonfromblumberg.games.core.common.Main;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
+import com.gordonfromblumberg.games.core.common.ui.UpdatableLabel;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.utils.CoordsConverter;
 import com.gordonfromblumberg.games.core.common.world.GameWorld;
@@ -21,7 +22,6 @@ import com.gordonfromblumberg.games.core.evotree.model.TreePart;
 import com.gordonfromblumberg.games.core.evotree.model.Wood;
 
 public class GameUIRenderer extends UIRenderer {
-    private Label turnsLabel;
     private Label worldLightLabel;
     private Label seedsLabel;
     private Label treesLabel;
@@ -44,17 +44,22 @@ public class GameUIRenderer extends UIRenderer {
     }
 
     public Table createInfoTable(Skin uiSkin) {
+        float pad = 10f;
         Table table = new Table();
-        table.add(turnsLabel = new Label("Turn 1", uiSkin));
+        table.add(new Label("Turn", uiSkin)).padRight(pad);
+        table.add(new UpdatableLabel(uiSkin, () -> world.getTurn())).minWidth(80);
 
         table.row();
-        table.add(worldLightLabel = new Label("Light " + world.getSunLight(), uiSkin));
+        table.add(new Label("Light", uiSkin)).padRight(pad);
+        table.add(new UpdatableLabel(uiSkin, () -> world.getSunLight())).left();
 
         table.row();
-        table.add(seedsLabel = new Label("Seeds " + world.getSeedCount(), uiSkin));
+        table.add(new Label("Seeds", uiSkin)).padRight(pad);
+        table.add(new UpdatableLabel(uiSkin, () -> world.getSeedCount())).left();
 
         table.row();
-        table.add(treesLabel = new Label("Trees " + world.getTreeCount(), uiSkin));
+        table.add(new Label("Trees", uiSkin)).padRight(pad);
+        table.add(new UpdatableLabel(uiSkin, () -> world.getTreeCount())).left();
 
         if (Main.DEBUG_UI) {
             table.debugAll();
@@ -77,7 +82,6 @@ public class GameUIRenderer extends UIRenderer {
 
     @Override
     public void render(float dt) {
-        turnsLabel.setText("Turn " + world.getTurn());
         if (lightLabel != null) {
             toGameViewConverter.convert(Gdx.input.getX(), Gdx.input.getY(), GAME_VIEW_COORDS);
             Cell cell = world.findCell((int) GAME_VIEW_COORDS.x, (int) GAME_VIEW_COORDS.y);

@@ -176,7 +176,7 @@ public class GameScreen extends AbstractScreen {
         });
 
         if (Main.DEBUG) {
-            uiRootTable.add(createCoordsDebugTable(uiSkin)).left();
+            uiRootTable.add(createCoordsDebugTable(uiSkin)).left().top();
         } else {
             uiRootTable.add();
         }
