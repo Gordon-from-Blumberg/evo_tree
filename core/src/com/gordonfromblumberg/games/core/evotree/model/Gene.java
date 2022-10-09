@@ -7,6 +7,8 @@ import com.gordonfromblumberg.games.core.common.utils.RandomUtils;
 public class Gene {
     static final RandomUtils.RandomGen RAND;
     static final int MAX_VALUE = 42;
+    static final int LIGHT_ABSORPTION = 4;
+    static final int VALUE_COUNT = 5;
 
     static {
         ConfigManager configManager = AbstractFactory.getInstance().configManager();
@@ -15,12 +17,12 @@ public class Gene {
                 : RandomUtils.nextLong());
     }
 
-    private final byte[] values = new byte[4];
+    private final byte[] values = new byte[VALUE_COUNT];
 
     Gene() {}
 
     void setRandom() {
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < VALUE_COUNT; ++i) {
             values[i] = (byte) RAND.nextInt(0, MAX_VALUE);
         }
     }

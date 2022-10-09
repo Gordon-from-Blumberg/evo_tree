@@ -24,6 +24,7 @@ public class Shoot extends Wood {
         Cell cell = this.cell;
         Wood wood = Wood.getInstance();
         wood.setCell(cell);
+        wood.lightAbsorption = this.lightAbsorption;
         tree.addWood(wood);
 
         CellGrid grid = world.getGrid();
@@ -36,18 +37,20 @@ public class Shoot extends Wood {
                     shoot.setCell(neib);
                     newShoots.add(shoot);
                     shoot.activeGene = tree.dna.getGene(nextActiveGene);
+                    shoot.lightAbsorption = calcLightAbsorption(shoot.activeGene.getValue(Gene.LIGHT_ABSORPTION));
                 }
             }
         }
     }
 
-    int canMakeChildrenCount(CellGrid grid) {
+    int calcSproutCost(CellGrid grid) {
         int result = 0;
         for (Direction dir : Direction.ALL) {
-            if (activeGene.getValue(dir) < DNA.SPROUT_GENES_COUNT) {
+            int nextGene = activeGene.getValue(dir);
+            if (nextGene < DNA.SPROUT_GENES_COUNT) {
                 Cell neib = grid.getCell(cell, dir);
                 if (neib != null && neib.treePart == null) {
-                    ++result;
+                    result += 2 * calcLightAbsorption(tree.dna.getGene(nextGene).getValue(Gene.LIGHT_ABSORPTION));
                 }
             }
         }

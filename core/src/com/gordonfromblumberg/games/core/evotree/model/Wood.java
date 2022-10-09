@@ -10,9 +10,12 @@ public class Wood extends TreePart {
         }
     };
 
+    private static final int MIN_ABSORPTION = 4;
+    private static final int MAX_ABSORPTION = 50;
     static final int ENERGY_CONSUMPTION = 8;
 
     protected Tree tree;
+    protected int lightAbsorption;
 
     Wood() {
         super(ENERGY_CONSUMPTION);
@@ -28,7 +31,12 @@ public class Wood extends TreePart {
 
     @Override
     public int getLightAbsorption() {
-        return 100;
+        return lightAbsorption;
+    }
+
+    protected static int calcLightAbsorption(int geneValue) {
+        int absorption = MIN_ABSORPTION + geneValue;
+        return absorption > MAX_ABSORPTION ? MAX_ABSORPTION : absorption;
     }
 
     @Override
@@ -41,5 +49,6 @@ public class Wood extends TreePart {
         super.reset();
 
         tree = null;
+        lightAbsorption = 0;
     }
 }

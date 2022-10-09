@@ -93,6 +93,7 @@ public class Seed extends TreePart {
         Shoot shoot = Shoot.getInstance();
         shoot.setCell(this.cell);
         shoot.activeGene = tree.dna.getGene(0);
+        shoot.lightAbsorption = Wood.calcLightAbsorption(shoot.activeGene.getValue(Gene.LIGHT_ABSORPTION));
         tree.addShoot(shoot);
         tree.justSprouted = true;
         world.addTree(tree);
@@ -121,7 +122,7 @@ public class Seed extends TreePart {
 
     @Override
     public int getLightAbsorption() {
-        return 100;
+        return 1000;
     }
 
     @Override

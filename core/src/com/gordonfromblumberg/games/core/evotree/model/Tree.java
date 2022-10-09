@@ -19,7 +19,6 @@ public class Tree implements Poolable {
         }
     };
 
-    private static final int ENERGY_REQUIRED_TO_SPROUT = 10;
     private static final int MAX_ENERGY_PER_SEED;
     private static final float MIN_COLOR_VALUE;
     private static final float MAX_COLOR_VALUE;
@@ -88,10 +87,10 @@ public class Tree implements Poolable {
 
         CellGrid grid = world.getGrid();
         for (Wood wood : woods) {
-            energy += wood.calcLight(grid);
+            energy += 2 * wood.calcLight(grid);
         }
         for (Shoot shoot : shoots) {
-            energy += shoot.calcLight(grid);
+            energy += 2 * shoot.calcLight(grid);
         }
 
         energy -= getSize() * Wood.ENERGY_CONSUMPTION;
@@ -104,7 +103,7 @@ public class Tree implements Poolable {
         Iterator<Shoot> it = shoots.iterator();
         while (it.hasNext()) {
             Shoot shoot = it.next();
-            int requiredEnergy = ENERGY_REQUIRED_TO_SPROUT * shoot.canMakeChildrenCount(grid);
+            int requiredEnergy = shoot.calcSproutCost(grid);
             if (requiredEnergy < energy && !shoot.isBlocked(grid)) {
                 energy -= requiredEnergy;
                 shoot.sprout(world, newShoots);

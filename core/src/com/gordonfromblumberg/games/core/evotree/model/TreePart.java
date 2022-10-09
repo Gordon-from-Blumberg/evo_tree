@@ -40,7 +40,7 @@ public abstract class TreePart implements Poolable {
                 }
             }
         }
-        return max;
+        return Math.min(max, getLightAbsorption());
     }
 
     public abstract int getLightAbsorption();

@@ -120,11 +120,17 @@ public class GameWorld implements EvoTreeWorld, Disposable {
         return cellGrid;
     }
 
-    private int diff = 1;
+    private int diff = -1;
 
     public void update(float delta) {
         if (running && !paused) {
             ++turn;
+
+            if (turn % 500 == 0) {
+                sunLight += diff;
+                if (sunLight == 80) diff = -1;
+//                if (sunLight == 35) diff = 1;
+            }
 
             time += delta;
 
@@ -149,12 +155,6 @@ public class GameWorld implements EvoTreeWorld, Disposable {
                     treeIterator.remove();
                     tree.release();
                 }
-            }
-
-            if (turn % 80 == 0) {
-                sunLight += diff;
-                if (sunLight == 100) diff = -1;
-                if (sunLight == 32) diff = 2;
             }
 
             cellGrid.updateSunLight(sunLight);
