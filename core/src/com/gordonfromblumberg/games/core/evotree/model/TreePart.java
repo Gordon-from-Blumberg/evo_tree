@@ -43,6 +43,10 @@ public abstract class TreePart implements Poolable {
         return Math.min(max, getLightAbsorption());
     }
 
+    public int calcEnergy(CellGrid grid) {
+        return 2 * calcLight(grid);
+    }
+
     public abstract int getLightAbsorption();
 
     @Override

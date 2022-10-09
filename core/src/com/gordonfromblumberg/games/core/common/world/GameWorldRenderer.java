@@ -120,8 +120,14 @@ public class GameWorldRenderer extends FBORenderer {
                         shapeRenderer.setColor(SEED_COLOR);
                     } else if (treePart instanceof Wood) {
                         Color treeColor = ((Wood) treePart).getTree().getColor();
-                        float k = (treePart instanceof Shoot) ? 1.2f : 1;
-                        shapeRenderer.setColor(k * treeColor.r, k * treeColor.g, k * treeColor.b, 1f);
+                        float k = (treePart instanceof Shoot) ? 1.25f : 1;
+                        float o = treePart.getLightAbsorption() / 44f * (1f - 0.2f) + 0.2f;
+                        if (o > 1f) o = 1f;
+                        shapeRenderer.setColor(
+                                (k * treeColor.r - MID_COLOR.r) * o + MID_COLOR.r,
+                                (k * treeColor.g - MID_COLOR.g) * o + MID_COLOR.g,
+                                (k * treeColor.b - MID_COLOR.b) * o + MID_COLOR.b,
+                                1f);
                     } else {
                         float k = 1 - treePart.getLightAbsorption() / MAX_ABSORPTION;
                         shapeRenderer.setColor(

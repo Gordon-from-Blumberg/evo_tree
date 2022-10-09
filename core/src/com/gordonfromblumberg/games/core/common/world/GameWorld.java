@@ -120,7 +120,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
         return cellGrid;
     }
 
-    private int diff = -1;
+    private int diff = 1;
 
     public void update(float delta) {
         if (running && !paused) {
@@ -128,8 +128,8 @@ public class GameWorld implements EvoTreeWorld, Disposable {
 
             if (turn % 500 == 0) {
                 sunLight += diff;
-                if (sunLight == 80) diff = -1;
-//                if (sunLight == 35) diff = 1;
+                if (sunLight == 60) diff = -1;
+                if (sunLight == 25) diff = 1;
             }
 
             time += delta;

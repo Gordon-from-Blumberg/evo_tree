@@ -87,10 +87,10 @@ public class Tree implements Poolable {
 
         CellGrid grid = world.getGrid();
         for (Wood wood : woods) {
-            energy += 2 * wood.calcLight(grid);
+            energy += wood.calcEnergy(grid);
         }
         for (Shoot shoot : shoots) {
-            energy += 2 * shoot.calcLight(grid);
+            energy += shoot.calcEnergy(grid);
         }
 
         energy -= getSize() * Wood.ENERGY_CONSUMPTION;

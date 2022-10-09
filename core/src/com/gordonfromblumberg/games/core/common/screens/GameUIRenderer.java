@@ -96,6 +96,23 @@ public class GameUIRenderer extends UIRenderer {
             return treePart != null ? treePart.getClass().getSimpleName() : "No tree";
         }))
                 .minWidth(160);
+
+        table.row();
+        table.add(new Label("Absorption", uiSkin))
+                .padRight(pad).right();
+        table.add(new UpdatableLabel(uiSkin, () -> cell != null && cell.getTreePart() != null
+                ? cell.getTreePart().getLightAbsorption() : "No tree part")
+        )
+                .left();
+
+        table.row();
+        table.add(new Label("Energy", uiSkin))
+                .padRight(pad).right();
+        table.add(new UpdatableLabel(uiSkin, () -> cell != null && cell.getTreePart() != null
+                ? cell.getTreePart().calcEnergy(world.getGrid()) : "No tree part")
+        )
+                .left();
+
         return table;
     }
 
