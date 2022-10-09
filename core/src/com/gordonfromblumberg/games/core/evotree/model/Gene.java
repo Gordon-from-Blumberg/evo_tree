@@ -1,5 +1,6 @@
 package com.gordonfromblumberg.games.core.evotree.model;
 
+import com.badlogic.gdx.Gdx;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.utils.RandomUtils;
@@ -7,14 +8,29 @@ import com.gordonfromblumberg.games.core.common.utils.RandomUtils;
 public class Gene {
     static final RandomUtils.RandomGen RAND;
     static final int MAX_VALUE = 42;
-    static final int LIGHT_ABSORPTION = 4;
-    static final int VALUE_COUNT = 5;
+    static final int LIGHT_ABSORPTION;
+    static final int CONDITION1;
+    static final int PARAMETER1;
+    static final int CONDITION2;
+    static final int PARAMETER2;
+    static final int MOVE_TO;
+    static final int VALUE_COUNT;
 
     static {
         ConfigManager configManager = AbstractFactory.getInstance().configManager();
-        RAND = RandomUtils.randomGen(configManager.contains("seed")
+        long seed = configManager.contains("seed")
                 ? configManager.getLong("seed")
-                : RandomUtils.nextLong());
+                : RandomUtils.nextLong();
+        Gdx.app.log("RANDOM", "Seed = " + seed);
+        RAND = RandomUtils.randomGen(seed);
+        int valueCount = Direction.ALL.length;
+        LIGHT_ABSORPTION = valueCount++;
+        CONDITION1 = valueCount++;
+        PARAMETER1 = valueCount++;
+        CONDITION2 = valueCount++;
+        PARAMETER2 = valueCount++;
+        MOVE_TO = valueCount++;
+        VALUE_COUNT = valueCount;
     }
 
     private final byte[] values = new byte[VALUE_COUNT];
@@ -32,7 +48,7 @@ public class Gene {
     }
 
     void set(Gene other) {
-        System.arraycopy(other.values, 0, this.values, 0, 4);
+        System.arraycopy(other.values, 0, this.values, 0, VALUE_COUNT);
     }
 
     byte getValue(Direction direction) {

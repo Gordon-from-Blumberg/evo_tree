@@ -17,11 +17,11 @@ public class DNA {
     static {
         ConfigManager configManager = AbstractFactory.getInstance().configManager();
         SPROUT_GENES_COUNT = configManager.getInteger("dna.sproutGenesCount");
-        int genesCount = SPROUT_GENES_COUNT;
-        COLOR = genesCount++;
-        LIFETIME = genesCount++;
-        SEED_SPROUT_LIGHT = genesCount++;
-        GENES_COUNT = genesCount;
+        int geneCount = SPROUT_GENES_COUNT;
+        COLOR = geneCount++;
+        LIFETIME = geneCount++;
+        SEED_SPROUT_LIGHT = geneCount++;
+        GENES_COUNT = geneCount;
 
         MUTATION_CHANCE = configManager.getFloat("dna.mutationChance");
     }

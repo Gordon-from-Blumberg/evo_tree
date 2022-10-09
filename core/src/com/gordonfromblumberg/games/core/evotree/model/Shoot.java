@@ -1,8 +1,9 @@
 package com.gordonfromblumberg.games.core.evotree.model;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.utils.Pool;
-import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
 
 public class Shoot extends Wood {
     private static final Pool<Shoot> pool = new Pool<Shoot>() {
@@ -11,6 +12,15 @@ public class Shoot extends Wood {
             return new Shoot();
         }
     };
+    private static final ObjectSet<Gene> PROCESSED_GENES = new ObjectSet<>(DNA.SPROUT_GENES_COUNT);
+
+    private static final byte SHOOT_HEIGHT_LESS = 17;
+    private static final byte SHOOT_HEIGHT_EQUALS = 18;
+    private static final byte SHOOT_HEIGHT_MORE = 19;
+    private static final byte LIGHT_LESS = 20;
+    private static final byte LIGHT_MORE = 21;
+
+    private static final byte FALSE_CONDITION = Gene.MAX_VALUE - 2;
 
     Gene activeGene;
 
@@ -20,14 +30,45 @@ public class Shoot extends Wood {
         return pool.obtain();
     }
 
-    void sprout(EvoTreeWorld world, Array<Shoot> newShoots) {
-        Cell cell = this.cell;
-        Wood wood = Wood.getInstance();
-        wood.setCell(cell);
-        wood.lightAbsorption = this.lightAbsorption;
-        tree.addWood(wood);
+    boolean update(CellGrid grid, Array<Shoot> newShoots) {
+        Gene gene = activeGene;
+        PROCESSED_GENES.add(gene);
+        while (checkCondition(gene.getValue(Gene.CONDITION1), gene.getValue(Gene.PARAMETER1), grid)
+                && checkCondition(gene.getValue(Gene.CONDITION2), gene.getValue(Gene.PARAMETER2), grid)) {
+            if (gene.getValue(Gene.MOVE_TO) < DNA.SPROUT_GENES_COUNT) {
+                Gene next = tree.dna.getGene(gene.getValue(Gene.MOVE_TO));
+                if (!PROCESSED_GENES.contains(next)) {
+                    gene = next;
+                    PROCESSED_GENES.add(next);
+//                    Gdx.app.log("SHOOT", "Gene was moved by conditions!");
+                } else {
+                    activeGene = gene;
+                    PROCESSED_GENES.clear();
+                    return false;
+                }
+            } else {
+                PROCESSED_GENES.clear();
+                return false;
+            }
+        }
+        PROCESSED_GENES.clear();
 
-        CellGrid grid = world.getGrid();
+        activeGene = gene;
+
+        int requiredEnergy = calcSproutCost(grid);
+        if (requiredEnergy < tree.energy && !isBlocked(grid)) {
+            tree.energy -= requiredEnergy;
+            sprout(grid, newShoots);
+            return true;
+        }
+
+        return false;
+    }
+
+    void sprout(CellGrid grid, Array<Shoot> newShoots) {
+        Cell cell = this.cell;
+        becomeWood();
+
         for (Direction dir : Direction.ALL) {
             int nextActiveGene = activeGene.getValue(dir);
             if (nextActiveGene < DNA.SPROUT_GENES_COUNT) {
@@ -43,6 +84,13 @@ public class Shoot extends Wood {
         }
     }
 
+    private void becomeWood() {
+        Wood wood = Wood.getInstance();
+        wood.setCell(cell);
+        wood.lightAbsorption = this.lightAbsorption;
+        tree.addWood(wood);
+    }
+
     int calcSproutCost(CellGrid grid) {
         int result = 0;
         for (Direction dir : Direction.ALL) {
@@ -50,7 +98,7 @@ public class Shoot extends Wood {
             if (nextGene < DNA.SPROUT_GENES_COUNT) {
                 Cell neib = grid.getCell(cell, dir);
                 if (neib != null && neib.treePart == null) {
-                    result += 2 * calcLightAbsorption(tree.dna.getGene(nextGene).getValue(Gene.LIGHT_ABSORPTION));
+                    result += 3 * calcLightAbsorption(tree.dna.getGene(nextGene).getValue(Gene.LIGHT_ABSORPTION));
                 }
             }
         }
@@ -69,6 +117,22 @@ public class Shoot extends Wood {
             }
         }
         return false;
+    }
+
+    private boolean checkCondition(byte condition, byte parameter, CellGrid grid) {
+        switch (condition) {
+            case SHOOT_HEIGHT_LESS:
+                return cell.y < parameter;
+            case SHOOT_HEIGHT_EQUALS:
+                return cell.y == parameter;
+            case SHOOT_HEIGHT_MORE:
+                return cell.y > parameter;
+            case LIGHT_LESS:
+                return calcLight(grid) <= parameter;
+            case LIGHT_MORE:
+                return calcLight(grid) > parameter;
+        }
+        return condition < FALSE_CONDITION;
     }
 
     @Override

@@ -103,10 +103,7 @@ public class Tree implements Poolable {
         Iterator<Shoot> it = shoots.iterator();
         while (it.hasNext()) {
             Shoot shoot = it.next();
-            int requiredEnergy = shoot.calcSproutCost(grid);
-            if (requiredEnergy < energy && !shoot.isBlocked(grid)) {
-                energy -= requiredEnergy;
-                shoot.sprout(world, newShoots);
+            if (shoot.update(grid, newShoots)) {
                 it.remove();
                 shoot.release();
             }
@@ -168,6 +165,10 @@ public class Tree implements Poolable {
 
     public Color getColor() {
         return color;
+    }
+
+    public int getEnergy() {
+        return energy;
     }
 
     @Override

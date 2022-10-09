@@ -12,10 +12,7 @@ import com.gordonfromblumberg.games.core.common.ui.UIUtils;
 import com.gordonfromblumberg.games.core.common.ui.UpdatableLabel;
 import com.gordonfromblumberg.games.core.common.utils.CoordsConverter;
 import com.gordonfromblumberg.games.core.common.world.GameWorld;
-import com.gordonfromblumberg.games.core.evotree.model.Cell;
-import com.gordonfromblumberg.games.core.evotree.model.Seed;
-import com.gordonfromblumberg.games.core.evotree.model.TreePart;
-import com.gordonfromblumberg.games.core.evotree.model.Wood;
+import com.gordonfromblumberg.games.core.evotree.model.*;
 
 public class GameUIRenderer extends UIRenderer {
     private GameWorld world;
@@ -83,21 +80,6 @@ public class GameUIRenderer extends UIRenderer {
                 .left();
 
         table.row();
-        table.add(new Label("Tree", uiSkin))
-                .padRight(pad).right();
-        table.add(new UpdatableLabel(uiSkin, () -> {
-            TreePart treePart = cell != null ? cell.getTreePart() : null;
-            if (treePart instanceof Seed) {
-                return "Seed #" + ((Seed) treePart).getId();
-            }
-            if (treePart instanceof Wood) {
-                return treePart.getClass().getSimpleName() + " of tree #" + ((Wood) treePart).getTree().getId();
-            }
-            return treePart != null ? treePart.getClass().getSimpleName() : "No tree";
-        }))
-                .minWidth(160);
-
-        table.row();
         table.add(new Label("Absorption", uiSkin))
                 .padRight(pad).right();
         table.add(new UpdatableLabel(uiSkin, () -> cell != null && cell.getTreePart() != null
@@ -113,6 +95,45 @@ public class GameUIRenderer extends UIRenderer {
         )
                 .left();
 
+        table.row();
+        table.add(new Label("Tree", uiSkin))
+                .padRight(pad).right();
+        table.add(new UpdatableLabel(uiSkin, () -> {
+                    TreePart treePart = cell != null ? cell.getTreePart() : null;
+                    if (treePart instanceof Seed) {
+                        return "Seed #" + ((Seed) treePart).getId();
+                    }
+                    if (treePart instanceof Wood) {
+                        return "#" + ((Wood) treePart).getTree().getId() + ", " + treePart.getClass().getSimpleName();
+                    }
+                    return treePart != null ? treePart.getClass().getSimpleName() : "No tree";
+                }))
+                .minWidth(160);
+
+        table.row();
+        table.add(new Label("Tree energy", uiSkin))
+                .padRight(pad).right();
+        table.add(new UpdatableLabel(uiSkin, () -> {
+            TreePart treePart = cell != null ? cell.getTreePart() : null;
+            if (treePart instanceof Wood) {
+                return  ((Wood) treePart).getTree().getEnergy();
+            }
+            return "No tree";
+        }))
+                .left();
+
+        table.row();
+        table.add(new Label("Tree size", uiSkin))
+                .padRight(pad).right();
+        table.add(new UpdatableLabel(uiSkin, () -> {
+                    TreePart treePart = cell != null ? cell.getTreePart() : null;
+                    if (treePart instanceof Wood) {
+                        return  ((Wood) treePart).getTree().getSize();
+                    }
+                    return "No tree";
+                }))
+                .left();
+
         return table;
     }
 
@@ -124,7 +145,7 @@ public class GameUIRenderer extends UIRenderer {
 
         IntChangeableLabel speedControl = new IntChangeableLabel(uiSkin, world::setTurnsPerSecond);
         speedControl.setMinValue(5);
-        speedControl.setMaxValue(30);
+        speedControl.setMaxValue(50);
         speedControl.setStep(5);
         speedControl.setValue(initialValue);
         table.add(speedControl)
