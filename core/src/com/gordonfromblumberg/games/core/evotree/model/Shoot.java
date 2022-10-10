@@ -14,13 +14,17 @@ public class Shoot extends Wood {
     };
     private static final ObjectSet<Gene> PROCESSED_GENES = new ObjectSet<>(DNA.SPROUT_GENES_COUNT);
 
-    private static final byte SHOOT_HEIGHT_LESS = 17;
-    private static final byte SHOOT_HEIGHT_EQUALS = 18;
-    private static final byte SHOOT_HEIGHT_MORE = 19;
-    private static final byte LIGHT_LESS = 20;
-    private static final byte LIGHT_MORE = 21;
+    private static final byte FALSE_CONDITION = 32;
+    private static final byte TRUE_CONDITION = 33;
 
-    private static final byte FALSE_CONDITION = Gene.MAX_VALUE - 2;
+    private static final byte SHOOT_HEIGHT_LESS = 34;
+    private static final byte SHOOT_HEIGHT_EQUALS = 35;
+    private static final byte SHOOT_HEIGHT_MORE = 36;
+    private static final byte LIGHT_LESS = 37;
+    private static final byte LIGHT_MORE = 38;
+
+    private static final byte MIN_CONDITION = FALSE_CONDITION;
+    private static final byte MAX_CONDITION = LIGHT_MORE;
 
     Gene activeGene;
 
@@ -33,7 +37,8 @@ public class Shoot extends Wood {
     boolean update(CellGrid grid, Array<Shoot> newShoots) {
         Gene gene = activeGene;
         PROCESSED_GENES.add(gene);
-        while (checkCondition(gene.getValue(Gene.CONDITION1), gene.getValue(Gene.PARAMETER1), grid)
+        while (shouldCheckCondition(gene)
+                && checkCondition(gene.getValue(Gene.CONDITION1), gene.getValue(Gene.PARAMETER1), grid)
                 && checkCondition(gene.getValue(Gene.CONDITION2), gene.getValue(Gene.PARAMETER2), grid)) {
             if (gene.getValue(Gene.MOVE_TO) < DNA.SPROUT_GENES_COUNT) {
                 Gene next = tree.dna.getGene(gene.getValue(Gene.MOVE_TO));
@@ -119,8 +124,19 @@ public class Shoot extends Wood {
         return false;
     }
 
+    private boolean shouldCheckCondition(Gene gene) {
+        byte condition1 = gene.getValue(Gene.CONDITION1);
+        byte condition2 = gene.getValue(Gene.CONDITION2);
+        return condition1 >= MIN_CONDITION && condition1 <= MAX_CONDITION
+                || condition2 >= MIN_CONDITION && condition2 <= MAX_CONDITION;
+    }
+
     private boolean checkCondition(byte condition, byte parameter, CellGrid grid) {
         switch (condition) {
+            case FALSE_CONDITION:
+                return false;
+            case TRUE_CONDITION:
+                return true;
             case SHOOT_HEIGHT_LESS:
                 return cell.y < parameter;
             case SHOOT_HEIGHT_EQUALS:
@@ -132,7 +148,7 @@ public class Shoot extends Wood {
             case LIGHT_MORE:
                 return calcLight(grid) > parameter;
         }
-        return condition < FALSE_CONDITION;
+        return true;
     }
 
     @Override
