@@ -33,8 +33,8 @@ public class GameWorld implements EvoTreeWorld, Disposable {
 
     private final EventProcessor eventProcessor = new EventProcessor();
 
-    int sunLight;
     CellGrid cellGrid;
+    LightDistribution lightDistribution;
 
     boolean running;
     boolean paused;
@@ -61,7 +61,9 @@ public class GameWorld implements EvoTreeWorld, Disposable {
         pauseText = new BitmapFontCache(assets.get("ui/uiskin.json", Skin.class).getFont("default-font"));
 
         cellGrid = new CellGrid(params.width, params.height, params.cellSize);
-        sunLight = params.sunLight;
+        LightDistribution original = new SimpleLightDistribution(params.width, params.height, params.sunLight, 3);
+//        lightDistribution = new ChangeLightByTime(original,10, -35, 750, -1);
+        lightDistribution = new ChangeLightByX(original,15);
     }
 
     public void initialize() {
@@ -130,11 +132,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
         if (running && !paused) {
             ++turn;
 
-            if (turn % 500 == 0) {
-                sunLight += diff;
-                if (sunLight == 60) diff = -1;
-                if (sunLight == 25) diff = 1;
-            }
+            lightDistribution.nextTurn();
 
             time += delta;
 
@@ -164,7 +162,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
                 }
             }
 
-            cellGrid.updateSunLight(sunLight);
+            cellGrid.updateSunLight(lightDistribution);
 
             eventProcessor.process();
 
@@ -203,7 +201,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
     }
 
     public int getSunLight() {
-        return sunLight;
+        return lightDistribution.getLight(0, cellGrid.getHeight() - 1);
     }
 
     public void setTurnsPerSecond(int turnsPerSecond) {

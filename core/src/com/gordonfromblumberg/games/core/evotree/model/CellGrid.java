@@ -27,7 +27,7 @@ public class CellGrid {
         }
     }
 
-    public void updateSunLight(int sunLight) {
+    public void updateSunLight(LightDistribution lightDistribution) {
         final Cell[][] cells = this.cells;
         final int[] treeHeights = this.treeHeights;
         // go from top to bottom and calculate sunlight for each cell
@@ -37,7 +37,7 @@ public class CellGrid {
             boolean treeHeightUpdated = false;
             for (int h = height, j = h - 1; j >= 0; --j) {
                 Cell cell = col[j];
-                int light = getSunLightLevel(sunLight, j);
+                int light = lightDistribution.getLight(i, j);
 
                 if (j == h - 1) {
                     cell.underSun = true;
@@ -73,10 +73,6 @@ public class CellGrid {
                 calcLight(cells[r][treeHeight], cells[i][treeHeight].sunLight - 2, Direction.right);
             }
         }
-    }
-
-    int getSunLightLevel(int sunLight, int y) {
-        return sunLight - (height - y - 1) / 3;
     }
 
     private void calcLight(Cell cell, int light, Direction dir) {
