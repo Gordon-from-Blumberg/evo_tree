@@ -13,13 +13,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.gordonfromblumberg.games.core.common.Main;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
-import com.gordonfromblumberg.games.core.common.ui.IntChangeableLabel;
 import com.gordonfromblumberg.games.core.common.ui.UIUtils;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.world.GameWorld;
@@ -186,18 +184,21 @@ public class GameScreen extends AbstractScreen {
         }
 
         uiRootTable.add(renderer.createInfoTable(uiSkin))
-                .expandX().top();
+                .top().padLeft(10f);
 
         if (Main.DEBUG) {
             uiRootTable.add(renderer.createCellDebugTable(uiSkin))
-                    .top();
+                    .top().padLeft(10f);
         } else {
             uiRootTable.add();
         }
 
-        uiRootTable.row().expandY();
+        uiRootTable.add(renderer.createDnaDesc(uiSkin))
+                .expandX().top().right().padLeft(10f);
+
+        uiRootTable.row();
         uiRootTable.add(renderer.createControlTable(uiSkin, configManager.getInteger("world.turnsPerSecond")))
-                .left().bottom().pad(10f);
+                .expandY().left().bottom().pad(0f, 10f, 10f, 0f);
     }
 
     private Table createCoordsDebugTable(Skin uiSkin) {

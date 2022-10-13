@@ -10,7 +10,7 @@ public class DNA {
     static final int COLOR;
     static final int LIFETIME;
     static final int SEED_SPROUT_LIGHT;
-    static final int GENES_COUNT;
+    public static final int GENES_COUNT;
 
     private static final float MUTATION_CHANCE;
 

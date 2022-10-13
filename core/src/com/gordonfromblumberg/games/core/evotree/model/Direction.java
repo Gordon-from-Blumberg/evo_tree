@@ -1,6 +1,6 @@
 package com.gordonfromblumberg.games.core.evotree.model;
 
-enum Direction {
+public enum Direction {
     up(0) {
         @Override
         Direction opposite() {

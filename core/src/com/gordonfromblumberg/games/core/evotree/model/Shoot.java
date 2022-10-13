@@ -45,7 +45,6 @@ public class Shoot extends Wood {
                 if (!PROCESSED_GENES.contains(next)) {
                     gene = next;
                     PROCESSED_GENES.add(next);
-//                    Gdx.app.log("SHOOT", "Gene was moved by conditions!");
                 } else {
                     activeGene = gene;
                     PROCESSED_GENES.clear();
@@ -61,10 +60,15 @@ public class Shoot extends Wood {
         activeGene = gene;
 
         int requiredEnergy = calcSproutCost(grid);
-        if (requiredEnergy < tree.energy && !isBlocked(grid)) {
+        if (requiredEnergy < tree.energy) {
             tree.energy -= requiredEnergy;
             sprout(grid, newShoots);
-            return true;
+            if (!isBlocked(grid)) {
+                becomeWood();
+                return true;
+            } else {
+                return false;
+            }
         }
 
         return false;
@@ -72,7 +76,6 @@ public class Shoot extends Wood {
 
     void sprout(CellGrid grid, Array<Shoot> newShoots) {
         Cell cell = this.cell;
-        becomeWood();
 
         for (Direction dir : Direction.ALL) {
             int nextActiveGene = activeGene.getValue(dir);

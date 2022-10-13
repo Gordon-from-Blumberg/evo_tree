@@ -16,6 +16,7 @@ import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
 import com.gordonfromblumberg.games.core.common.utils.ClickHandler;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.utils.RandomUtils;
+import com.gordonfromblumberg.games.core.evotree.event.SelectTreeEvent;
 import com.gordonfromblumberg.games.core.evotree.model.*;
 import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
 
@@ -28,6 +29,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
 
     private final Array<Seed> seeds = new Array<>();
     private final Array<Tree> trees = new Array<>();
+    private Tree selectedTree;
 
     private final EventProcessor eventProcessor = new EventProcessor();
 
@@ -67,6 +69,8 @@ public class GameWorld implements EvoTreeWorld, Disposable {
         ConfigManager configManager = AbstractFactory.getInstance().configManager();
         if (configManager.getBoolean("lightingTest")) {
             addClickHandler(this::testLighting);
+        } else {
+            addClickHandler(this::selectTree);
         }
 
         if (configManager.contains("world.turnsPerSecond"))
@@ -120,7 +124,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
         return cellGrid;
     }
 
-    private int diff = 0;
+    private int diff = 1;
 
     public void update(float delta) {
         if (running && !paused) {
@@ -154,6 +158,9 @@ public class GameWorld implements EvoTreeWorld, Disposable {
                 if (tree.update(this)) {
                     treeIterator.remove();
                     tree.release();
+                    if (tree == selectedTree) {
+                        selectTree(null);
+                    }
                 }
             }
 
@@ -231,6 +238,25 @@ public class GameWorld implements EvoTreeWorld, Disposable {
 
     public void pause() {
         this.paused = !this.paused;
+    }
+
+    private void selectTree(int b, float x, float y) {
+        Cell cell = cellGrid.findCell((int) x, (int) y);
+        if (cell != null) {
+            TreePart treePart = cell.getTreePart();
+            if (treePart instanceof Wood) {
+                selectTree(((Wood) treePart).getTree());
+                return;
+            }
+        }
+        selectTree(null);
+    }
+
+    private void selectTree(Tree tree) {
+        if (selectedTree != tree) {
+            selectedTree = tree;
+//            eventProcessor.push(SelectTreeEvent.getInstance().setTree(tree));
+        }
     }
 
     private void testLighting(int b, float x, float y) {

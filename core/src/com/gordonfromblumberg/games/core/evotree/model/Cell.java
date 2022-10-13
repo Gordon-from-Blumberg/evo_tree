@@ -20,7 +20,7 @@ public class Cell {
         if (sunLight < 0) {
             sunLight = 0;
         }
-        if (y < 10) sunLight >>= 1;
+//        if (y < 10) sunLight >>= 1;
         return sunLight;
     }
 

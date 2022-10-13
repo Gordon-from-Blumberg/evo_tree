@@ -171,6 +171,10 @@ public class Tree implements Poolable {
         return energy;
     }
 
+    public DNA getDna() {
+        return dna;
+    }
+
     @Override
     public void release() {
         pool.free(this);

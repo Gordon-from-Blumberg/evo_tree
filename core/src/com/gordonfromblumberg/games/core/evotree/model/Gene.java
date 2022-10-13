@@ -8,12 +8,12 @@ import com.gordonfromblumberg.games.core.common.utils.RandomUtils;
 public class Gene {
     static final RandomUtils.RandomGen RAND;
     static final int MAX_VALUE = 42;
-    static final int LIGHT_ABSORPTION;
-    static final int CONDITION1;
-    static final int PARAMETER1;
-    static final int CONDITION2;
-    static final int PARAMETER2;
-    static final int MOVE_TO;
+    public static final int LIGHT_ABSORPTION;
+    public static final int CONDITION1;
+    public static final int PARAMETER1;
+    public static final int CONDITION2;
+    public static final int PARAMETER2;
+    public static final int MOVE_TO;
     static final int VALUE_COUNT;
 
     static {
@@ -51,11 +51,11 @@ public class Gene {
         System.arraycopy(other.values, 0, this.values, 0, VALUE_COUNT);
     }
 
-    byte getValue(Direction direction) {
+    public byte getValue(Direction direction) {
         return values[direction.getCode()];
     }
 
-    byte getValue(int index) {
+    public byte getValue(int index) {
         return values[index];
     }
 

@@ -2,17 +2,24 @@ package com.gordonfromblumberg.games.core.common.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.utils.SnapshotArray;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.gordonfromblumberg.games.core.common.event.Event;
+import com.gordonfromblumberg.games.core.common.event.EventHandler;
 import com.gordonfromblumberg.games.core.common.ui.IntChangeableLabel;
 import com.gordonfromblumberg.games.core.common.ui.UIUtils;
 import com.gordonfromblumberg.games.core.common.ui.UpdatableLabel;
 import com.gordonfromblumberg.games.core.common.utils.CoordsConverter;
 import com.gordonfromblumberg.games.core.common.world.GameWorld;
+import com.gordonfromblumberg.games.core.evotree.event.SelectTreeEvent;
 import com.gordonfromblumberg.games.core.evotree.model.*;
+import com.gordonfromblumberg.games.core.evotree.model.Cell;
+import com.gordonfromblumberg.games.core.evotree.model.Tree;
+
+import static com.gordonfromblumberg.games.core.common.utils.StringUtils.padLeft;
 
 public class GameUIRenderer extends UIRenderer {
     private GameWorld world;
@@ -151,6 +158,57 @@ public class GameUIRenderer extends UIRenderer {
         table.add(speedControl)
                 .left();
         return table;
+    }
+
+    WidgetGroup createDnaDesc(Skin uiSkin) {
+        VerticalGroup group = new VerticalGroup();
+        for (int i = 0, n = DNA.GENES_COUNT; i < n; ++i) {
+            group.addActor(new Label("", uiSkin));
+        }
+
+        world.registerHandler("selectTree", new EventHandler() {
+            private final StringBuilder sb = new StringBuilder();
+
+            @Override
+            public boolean handle(Event event) {
+                Tree tree = ((SelectTreeEvent) event).getTree();
+                if (tree == null) {
+                    group.setVisible(false);
+                } else {
+                    DNA dna = tree.getDna();
+                    SnapshotArray<Actor> labels = group.getChildren();
+                    Actor[] labelArr = labels.begin();
+                    for (int i = 0, n = DNA.GENES_COUNT; i < n; ++i) {
+                        Gene gene = dna.getGene(i);
+                        sb.delete(0, sb.length());
+                        sb.append("     ").append(padLeft(gene.getValue(Direction.up), 2))
+                                .append("    ")
+                                .append(padLeft(gene.getValue(Gene.LIGHT_ABSORPTION), 2))
+                                .append('\n')
+
+                                .append(padLeft(i, 2)).append(" ")
+                                .append(padLeft(gene.getValue(Direction.left), 2)).append("  ")
+                                .append(padLeft(gene.getValue(Direction.right), 2))
+                                .append("  ")
+                                .append(padLeft(gene.getValue(Gene.CONDITION1), 2)).append(" ")
+                                .append(padLeft(gene.getValue(Gene.PARAMETER1), 2)).append(" ")
+                                .append(padLeft(gene.getValue(Gene.MOVE_TO), 2))
+                                .append('\n')
+
+                                .append("     ").append(padLeft(gene.getValue(Direction.down), 2))
+                                .append("    ")
+                                .append(padLeft(gene.getValue(Gene.CONDITION2), 2)).append(" ")
+                                .append(padLeft(gene.getValue(Gene.PARAMETER2), 2));
+
+                        ((Label) labelArr[i]).setText(sb.toString());
+                    }
+                    group.setVisible(true);
+                }
+                return true;
+            }
+        });
+
+        return group;
     }
 
     @Override
