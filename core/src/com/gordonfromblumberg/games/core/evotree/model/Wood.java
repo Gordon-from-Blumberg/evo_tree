@@ -12,7 +12,7 @@ public class Wood extends TreePart {
 
     private static final int MIN_ABSORPTION = 4;
     private static final int MAX_ABSORPTION = 50;
-    static final int ENERGY_CONSUMPTION = 8;
+    static final int ENERGY_CONSUMPTION = 10;
 
     protected Tree tree;
     protected int lightAbsorption;

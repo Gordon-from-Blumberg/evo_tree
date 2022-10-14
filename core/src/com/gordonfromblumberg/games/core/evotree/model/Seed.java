@@ -90,6 +90,7 @@ public class Seed extends TreePart {
         tree.dna.set(this.dna);
         tree.init();
         tree.energy = this.energy;
+        tree.root = this.cell;
         Shoot shoot = Shoot.getInstance();
         shoot.setCell(this.cell);
         shoot.activeGene = tree.dna.getGene(0);

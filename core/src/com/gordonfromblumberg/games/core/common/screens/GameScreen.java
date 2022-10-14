@@ -193,7 +193,8 @@ public class GameScreen extends AbstractScreen {
             uiRootTable.add();
         }
 
-        uiRootTable.add(renderer.createDnaDesc(uiSkin))
+        uiRootTable.add(new Label("", uiSkin))
+//        uiRootTable.add(renderer.createDnaDesc(uiSkin))
                 .expandX().top().right().padLeft(10f);
 
         uiRootTable.row();

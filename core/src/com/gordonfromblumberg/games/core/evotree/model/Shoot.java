@@ -1,6 +1,5 @@
 package com.gordonfromblumberg.games.core.evotree.model;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.utils.Pool;
@@ -14,17 +13,26 @@ public class Shoot extends Wood {
     };
     private static final ObjectSet<Gene> PROCESSED_GENES = new ObjectSet<>(DNA.SPROUT_GENES_COUNT);
 
-    private static final byte FALSE_CONDITION = 32;
-    private static final byte TRUE_CONDITION = 33;
+    private static final byte FALSE_CONDITION = 0;
+    private static final byte TRUE_CONDITION = 1;
 
-    private static final byte SHOOT_HEIGHT_LESS = 34;
-    private static final byte SHOOT_HEIGHT_EQUALS = 35;
-    private static final byte SHOOT_HEIGHT_MORE = 36;
-    private static final byte LIGHT_LESS = 37;
-    private static final byte LIGHT_MORE = 38;
+    private static final byte SHOOT_HEIGHT_LESS = 2;
+    private static final byte SHOOT_HEIGHT_EQUALS = 3;
+    private static final byte SHOOT_HEIGHT_MORE = 4;
+    private static final byte LIGHT_LESS = 5;
+    private static final byte LIGHT_MORE = 6;
+    private static final byte TREE_HEIGHT_LESS = 7;
+    private static final byte TREE_HEIGHT_MORE = 8;
+    private static final byte TREE_SIZE_LESS = 9;
+    private static final byte TREE_SIZE_MORE = 10;
+    private static final byte TREE_ENERGY_LESS = 11;
+    private static final byte TREE_ENERGY_MORE = 12;
+    private static final byte BRANCH_LENGTH_LESS = 13;
+    private static final byte BRANCH_LENGTH_EQUALS = 14;
+    private static final byte BRANCH_LENGTH_MORE = 15;
 
     private static final byte MIN_CONDITION = FALSE_CONDITION;
-    private static final byte MAX_CONDITION = LIGHT_MORE;
+    private static final byte MAX_CONDITION = BRANCH_LENGTH_MORE;
 
     Gene activeGene;
 
@@ -150,6 +158,24 @@ public class Shoot extends Wood {
                 return calcLight(grid) <= parameter;
             case LIGHT_MORE:
                 return calcLight(grid) > parameter;
+            case TREE_HEIGHT_LESS:
+                return tree.getHeight() < parameter;
+            case TREE_HEIGHT_MORE:
+                return tree.getHeight() > parameter;
+            case TREE_SIZE_LESS:
+                return tree.getSize() < parameter * 2;
+            case TREE_SIZE_MORE:
+                return tree.getSize() > parameter * 2;
+            case TREE_ENERGY_LESS:
+                return tree.energy < parameter * 300;
+            case TREE_ENERGY_MORE:
+                return tree.energy > parameter * 300;
+            case BRANCH_LENGTH_LESS:
+                return Math.abs(cell.x - tree.root.x) < parameter / 2;
+            case BRANCH_LENGTH_EQUALS:
+                return Math.abs(cell.x - tree.root.x) == parameter / 2;
+            case BRANCH_LENGTH_MORE:
+                return Math.abs(cell.x - tree.root.x) > parameter / 2;
         }
         return true;
     }

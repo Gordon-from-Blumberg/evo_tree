@@ -151,9 +151,10 @@ public class GameUIRenderer extends UIRenderer {
                 .padRight(pad).right();
 
         IntChangeableLabel speedControl = new IntChangeableLabel(uiSkin, world::setTurnsPerSecond);
-        speedControl.setMinValue(5);
-        speedControl.setMaxValue(50);
-        speedControl.setStep(5);
+        speedControl.setMinValue(4);
+        speedControl.setMaxValue(64);
+        speedControl.geometric();
+        speedControl.setStep(2);
         speedControl.setValue(initialValue);
         table.add(speedControl)
                 .left();

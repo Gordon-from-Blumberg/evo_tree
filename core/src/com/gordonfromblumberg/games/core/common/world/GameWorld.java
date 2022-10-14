@@ -62,8 +62,9 @@ public class GameWorld implements EvoTreeWorld, Disposable {
 
         cellGrid = new CellGrid(params.width, params.height, params.cellSize);
         LightDistribution original = new SimpleLightDistribution(params.width, params.height, params.sunLight, 3);
-//        lightDistribution = new ChangeLightByTime(original,10, -35, 750, -1);
+//        lightDistribution = new ChangeLightByTime(original,15, -15, 750, 1);
         lightDistribution = new ChangeLightByX(original,15);
+//        lightDistribution = original;
     }
 
     public void initialize() {

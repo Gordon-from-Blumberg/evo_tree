@@ -39,6 +39,8 @@ public class Tree implements Poolable {
     int lifetime;
     final DNA dna = new DNA();
     int energy;
+    Cell root;
+    int maxHeight;
     final Array<Wood> woods = new Array<>();
     final Array<Shoot> shoots = new Array<>();
     final Array<Shoot> newShoots = new Array<>();
@@ -119,6 +121,9 @@ public class Tree implements Poolable {
     public void addShoot(Shoot shoot) {
         shoots.add(shoot);
         shoot.tree = this;
+        if (shoot.cell.y > maxHeight) {
+            maxHeight = shoot.cell.y;
+        }
     }
 
     public void addWood(Wood wood) {
@@ -171,6 +176,10 @@ public class Tree implements Poolable {
         return energy;
     }
 
+    public int getHeight() {
+        return maxHeight - root.y + 1;
+    }
+
     public DNA getDna() {
         return dna;
     }
@@ -187,6 +196,8 @@ public class Tree implements Poolable {
         lifetime = 0;
         dna.reset();
         energy = 0;
+        root = null;
+        maxHeight = 0;
         for (Wood wood : woods) {
             wood.release();
         }
