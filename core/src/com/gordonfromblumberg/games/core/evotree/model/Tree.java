@@ -53,7 +53,7 @@ public class Tree implements Poolable {
     }
 
     public void init() {
-        Gene gene = dna.getGene(DNA.COLOR);
+        Gene gene = dna.getSpecialGene(DNA.COLOR);
         float clrDiff = MAX_COLOR_VALUE - MIN_COLOR_VALUE;
         color.set(
                 MIN_COLOR_VALUE + clrDiff * (gene.getValue(0) ^ gene.getValue(3)) / Gene.MAX_VALUE,
@@ -61,9 +61,9 @@ public class Tree implements Poolable {
                 MIN_COLOR_VALUE + clrDiff * (gene.getValue(2) ^ gene.getValue(3)) / Gene.MAX_VALUE,
                 1
         );
-        Gene treeLifetime = dna.getGene(DNA.LIFETIME);
+        Gene treeLifetime = dna.getSpecialGene(DNA.LIFETIME);
         int lifetime = 0;
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < Gene.VALUE_COUNT; ++i) {
             lifetime += treeLifetime.getValue(i);
         }
         this.lifetime = (lifetime - MIN_LIFETIME + 1) % (MAX_LIFETIME - MIN_LIFETIME) + MIN_LIFETIME;

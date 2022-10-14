@@ -6,10 +6,12 @@ import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.utils.RandomUtils;
 
 public class DNA {
+    static final int SEED_SPROUT_LIGHT = 0;
+    static final int COLOR = 1;
+    static final int LIFETIME = 2;
+
     static final int SPROUT_GENES_COUNT;
-    static final int COLOR;
-    static final int LIFETIME;
-    static final int SEED_SPROUT_LIGHT;
+    static final int SPECIAL;
     public static final int GENES_COUNT;
 
     private static final float MUTATION_CHANCE;
@@ -18,9 +20,7 @@ public class DNA {
         ConfigManager configManager = AbstractFactory.getInstance().configManager();
         SPROUT_GENES_COUNT = configManager.getInteger("dna.sproutGenesCount");
         int geneCount = SPROUT_GENES_COUNT;
-        COLOR = geneCount++;
-        LIFETIME = geneCount++;
-        SEED_SPROUT_LIGHT = geneCount++;
+        SPECIAL = geneCount++;
         GENES_COUNT = geneCount;
 
         MUTATION_CHANCE = configManager.getFloat("dna.mutationChance");
@@ -53,6 +53,10 @@ public class DNA {
 
     public Gene getGene(int index) {
         return genes[index];
+    }
+
+    Gene getSpecialGene(int valueIndex) {
+        return genes[genes[SPECIAL].getValue(valueIndex) % SPROUT_GENES_COUNT];
     }
 
     public void reset() {

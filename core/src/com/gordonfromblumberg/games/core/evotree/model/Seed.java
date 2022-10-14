@@ -40,9 +40,9 @@ public class Seed extends TreePart {
     }
 
     public void init() {
-        Gene lightToSproutGene = dna.getGene(DNA.SEED_SPROUT_LIGHT);
+        Gene lightToSproutGene = dna.getSpecialGene(DNA.SEED_SPROUT_LIGHT);
         int lightToSprout = 0;
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < Gene.VALUE_COUNT; ++i) {
             lightToSprout += lightToSproutGene.getValue(i);
         }
         this.lightToSprout = (lightToSprout - MIN_LIGHT_TO_SPROUT + 1) % (MAX_LIGHT_TO_SPROUT - MIN_LIGHT_TO_SPROUT) + MIN_LIGHT_TO_SPROUT;
