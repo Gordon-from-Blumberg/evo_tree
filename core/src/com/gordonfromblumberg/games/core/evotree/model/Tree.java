@@ -34,6 +34,8 @@ public class Tree implements Poolable {
         MAX_LIFETIME = configManager.getInteger("tree.maxLifetime");
     }
 
+    static final Array<Shoot> newShoots = new Array<>();
+
     int id;
     int generation;
     int lifetime;
@@ -43,7 +45,6 @@ public class Tree implements Poolable {
     int maxHeight;
     final Array<Wood> woods = new Array<>();
     final Array<Shoot> shoots = new Array<>();
-    final Array<Shoot> newShoots = new Array<>();
     private final Color color = new Color();
 
     boolean justSprouted;
