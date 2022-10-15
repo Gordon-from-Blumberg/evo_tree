@@ -61,9 +61,9 @@ public class GameWorld implements EvoTreeWorld, Disposable {
         pauseText = new BitmapFontCache(assets.get("ui/uiskin.json", Skin.class).getFont("default-font"));
 
         cellGrid = new CellGrid(params.width, params.height, params.cellSize);
-        LightDistribution original = new SimpleLightDistribution(params.width, params.height, params.sunLight, 3);
-//        lightDistribution = new ChangeLightByTime(original,15, -15, 750, 1);
-        lightDistribution = new ChangeLightByX(original,15);
+        LightDistribution original = new SimpleLightDistribution(params.width, params.height, params.sunLight, 2);
+        lightDistribution = new ChangeLightByTime(original,15, -15, 1000, 1);
+//        lightDistribution = new ChangeLightByX(original,15);
 //        lightDistribution = original;
     }
 

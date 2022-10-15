@@ -30,9 +30,11 @@ public class Shoot extends Wood {
     private static final byte BRANCH_LENGTH_LESS = 13;
     private static final byte BRANCH_LENGTH_EQUALS = 14;
     private static final byte BRANCH_LENGTH_MORE = 15;
+    private static final byte TREE_LIFETIME_LESS = 16;
+    private static final byte TREE_LIFETIME_MORE = 17;
 
     private static final byte MIN_CONDITION = FALSE_CONDITION;
-    private static final byte MAX_CONDITION = BRANCH_LENGTH_MORE;
+    private static final byte MAX_CONDITION = TREE_LIFETIME_MORE;
 
     Gene activeGene;
 
@@ -176,6 +178,10 @@ public class Shoot extends Wood {
                 return Math.abs(cell.x - tree.root.x) == parameter / 2;
             case BRANCH_LENGTH_MORE:
                 return Math.abs(cell.x - tree.root.x) > parameter / 2;
+            case TREE_LIFETIME_LESS:
+                return tree.lifetime < parameter;
+            case TREE_LIFETIME_MORE:
+                return tree.lifetime > parameter;
         }
         return true;
     }
