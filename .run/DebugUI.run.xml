@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="DebugUI" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.gordonfromblumberg.games.desktop.common.DesktopLauncher" />
+    <module name="evo_tree.desktop.main" />
+    <option name="PROGRAM_PARAMETERS" value="-debugui -debug" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="com.gordonfromblumberg.games.desktop.common.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
