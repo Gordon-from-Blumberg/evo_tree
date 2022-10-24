@@ -1,6 +1,7 @@
 package com.gordonfromblumberg.games.core.common.world;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -9,7 +10,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.gordonfromblumberg.games.core.common.Main;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
 import com.gordonfromblumberg.games.core.common.screens.FBORenderer;
@@ -19,7 +19,6 @@ import com.gordonfromblumberg.games.core.evotree.model.*;
 import java.util.Iterator;
 
 public class GameWorldRenderer extends FBORenderer {
-    private static final Color TEMP_COLOR = new Color();
     private static final Color LIGHT_COLOR = new Color(0.4f, 0.8f, 1f, 1f);
     private static final Color DARK_COLOR = new Color(0f, 0.12f, 0.07f, 1f);
     private static final Color MID_COLOR = new Color();
@@ -56,8 +55,8 @@ public class GameWorldRenderer extends FBORenderer {
 
     private final Color pauseColor = Color.GRAY;
 
-    public GameWorldRenderer(GameWorld world, Batch batch, Viewport viewport) {
-        super(viewport);
+    public GameWorldRenderer(GameWorld world, Batch batch) {
+        super();
         Gdx.app.log("INIT", "GameWorldRenderer constructor");
         this.batch = batch;
         this.world = world;
@@ -73,20 +72,12 @@ public class GameWorldRenderer extends FBORenderer {
             viewport.setWorldSize(ration * worldHeight, worldHeight);
             viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
         }
-
-//        viewport.getCamera().position.set(l.getWidth() * l.getTileWidth() / 2f, 0, 0);
-//        viewToWorld.set(new float[] {
-//                 1.0f / l.getTileWidth(),  1.0f / l.getTileWidth(),  0.0f,
-//                -1.0f / l.getTileHeight(), 1.0f / l.getTileHeight(), 0.0f,
-//                 0.5f,                    -0.5f,                     1.0f
-//        });
-//        worldToView.set(viewToWorld).inv();
     }
 
     @Override
     public void render(float dt) {
-//        batch.begin();
-        final Color origColor = TEMP_COLOR.set(batch.getColor());
+        updateCamera();
+
         if (world.paused) {
             batch.setColor(pauseColor);
         }
@@ -163,7 +154,7 @@ public class GameWorldRenderer extends FBORenderer {
         final Iterator<ClickPoint> it = clickPoints.iterator();
         while (it.hasNext()) {
             ClickPoint cp = it.next();
-            worldToScreen(tempVec3.set(cp.x, cp.y, 1));
+            worldToView(tempVec3.set(cp.x, cp.y, 1));
             cp.animation.update(dt);
             final float circleMul = cp.getCircle();
             Gdx.app.log("RENDER", "render click at " + cp.x + ", " + cp.y + ", mul = " + circleMul);
@@ -189,24 +180,29 @@ public class GameWorldRenderer extends FBORenderer {
     }
 
     /**
-     * Transforms viewport coordinates to isometric world
+     * Transforms viewport coordinates to logical world
      */
-    public void screenToWorld(Vector3 coords) {
-        coords.z = 1.0f;
-        coords.mul(viewToWorld);
+    public void viewToWorld(float x, float y, Vector3 out) {
+        out.set(x, y, 1f).mul(viewToWorld);
     }
 
     /**
-     * Transforms isometric world to viewport coordinates
+     * Transforms logical world to viewport coordinates
      */
-    public void worldToScreen(Vector3 coords) {
+    public void worldToView(Vector3 coords) {
         coords.z = 1.0f;
         coords.mul(worldToView);
     }
 
-    public void click(int button, float x, float y) {
-//        worldToScreen(tempVec3.set(x, y, 1));
-//        ClickPoint cp = ClickPoint.getInstance();
-//        clickPoints.add(cp.init(tempVec3.x, tempVec3.y));
+    private void updateCamera() {
+        float cameraSpeed = 8 * camera.zoom;
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
+            camera.translate(-cameraSpeed, 0);
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
+            camera.translate(cameraSpeed, 0);
+//        if (Gdx.input.isKeyPressed(Input.Keys.UP))
+//            camera.translate(0, cameraSpeed);
+//        if (Gdx.input.isKeyPressed(Input.Keys.DOWN))
+//            camera.translate(0, -cameraSpeed);
     }
 }

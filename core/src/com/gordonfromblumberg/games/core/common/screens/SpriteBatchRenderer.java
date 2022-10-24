@@ -1,13 +1,15 @@
 package com.gordonfromblumberg.games.core.common.screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class SpriteBatchRenderer extends AbstractRenderer {
-    private SpriteBatch batch;
+    protected SpriteBatch batch;
 
-    public SpriteBatchRenderer(SpriteBatch batch, Viewport viewport) {
-        super(viewport);
+    public SpriteBatchRenderer(SpriteBatch batch) {
+        super();
+
+        Gdx.app.log("INIT", "SpriteBatchRenderer constructor for class " + getClass().getSimpleName());
 
         this.batch = batch;
     }

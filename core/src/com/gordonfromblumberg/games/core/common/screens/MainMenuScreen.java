@@ -2,8 +2,6 @@ package com.gordonfromblumberg.games.core.common.screens;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -25,8 +23,8 @@ public class MainMenuScreen extends AbstractScreen {
     }
 
     @Override
-    protected void createUI() {
-        super.createUI();
+    protected void createUiRenderer() {
+        super.createUiRenderer();
 
         final Skin uiSkin = assets.get("ui/uiskin.json", Skin.class);
 
@@ -37,6 +35,6 @@ public class MainMenuScreen extends AbstractScreen {
                 Main.getInstance().setScreen(new GameScreen(batch));
             }
         });
-        uiRootTable.add(textButton);
+        uiRenderer.rootTable.add(textButton);
     }
 }

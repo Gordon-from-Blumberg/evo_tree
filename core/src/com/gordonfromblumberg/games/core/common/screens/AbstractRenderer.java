@@ -1,16 +1,25 @@
 package com.gordonfromblumberg.games.core.common.screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
+import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 
 public abstract class AbstractRenderer implements Renderer {
-    protected Camera camera;
+    protected OrthographicCamera camera;
     protected Viewport viewport;
     protected boolean centerCamera;
 
-    protected AbstractRenderer(Viewport viewport) {
-        this.camera = viewport.getCamera();
-        this.viewport = viewport;
+    private final Vector3 temp = new Vector3();
+
+    protected AbstractRenderer() {
+        Gdx.app.log("INIT", "AbstractRenderer constructor for class " + getClass().getSimpleName());
+        this.camera = createCamera();
+        this.viewport = createViewport(camera);
     }
 
     @Override
@@ -19,12 +28,44 @@ public abstract class AbstractRenderer implements Renderer {
     }
 
     @Override
-    public Camera getCamera() {
+    public OrthographicCamera getCamera() {
         return camera;
     }
 
     @Override
     public Viewport getViewport() {
         return viewport;
+    }
+
+    @Override
+    public void screenToViewport(float x, float y, Vector3 out) {
+        viewport.unproject(temp.set(x, y, 0));
+        out.set(temp);
+    }
+
+    @Override
+    public void viewportToScreen(float x, float y, Vector3 out) {
+        viewport.project(temp.set(x, y, 0));
+        out.set(temp);
+    }
+
+    protected OrthographicCamera createCamera() {
+        OrthographicCamera camera = new OrthographicCamera();
+        camera.setToOrtho(false);
+        return camera;
+    }
+
+    protected Viewport createViewport(Camera camera) {
+        final ConfigManager configManager = AbstractFactory.getInstance().configManager();
+        final float worldWidth = configManager.getFloat("worldWidth");
+        final float minRatio = configManager.getFloat("minRatio");
+        final float maxRatio = configManager.getFloat("maxRatio");
+        final float minWorldHeight = worldWidth / maxRatio;
+        final float maxWorldHeight = worldWidth / minRatio;
+        return new ExtendViewport(worldWidth, minWorldHeight, worldWidth, maxWorldHeight, camera);
+    }
+
+    @Override
+    public void dispose() {
     }
 }

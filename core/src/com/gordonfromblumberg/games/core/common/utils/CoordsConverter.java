@@ -4,5 +4,5 @@ import com.badlogic.gdx.math.Vector3;
 
 @FunctionalInterface
 public interface CoordsConverter {
-    void convert(int x, int y, Vector3 out);
+    void convert(float x, float y, Vector3 out);
 }

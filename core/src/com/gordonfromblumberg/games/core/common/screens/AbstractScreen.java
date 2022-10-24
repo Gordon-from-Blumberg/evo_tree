@@ -5,15 +5,8 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.gordonfromblumberg.games.core.common.Main;
-import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
-import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 
 public abstract class AbstractScreen implements Screen {
 
@@ -24,13 +17,8 @@ public abstract class AbstractScreen implements Screen {
     protected SpriteBatch batch;
     protected Color color = Color.BLACK;
 
-    protected Stage stage;
-    // todo delete viewport from screen
-    protected Viewport viewport;
-    protected OrthographicCamera camera;
-    protected Renderer worldRenderer, uiRenderer;
-
-    protected Table uiRootTable;
+    protected Renderer worldRenderer;
+    protected UIRenderer uiRenderer;
 
     protected boolean initialized;
 
@@ -38,19 +26,12 @@ public abstract class AbstractScreen implements Screen {
         this.batch = batch;
     }
 
-    protected AbstractScreen(Renderer worldRenderer, Renderer uiRenderer) {
-        this.worldRenderer = worldRenderer;
-        this.uiRenderer = uiRenderer;
-    }
-
     protected void initialize() {
         Gdx.app.log("INIT", "AbstractScreen.initialize for " + getClass().getSimpleName());
         assets = Main.getInstance().assets();
 
-        createWorldViewport();
+        createWorldRenderer();
         createUiRenderer();
-
-        createUI();
     }
 
     @Override
@@ -70,13 +51,9 @@ public abstract class AbstractScreen implements Screen {
 
         update(delta);
 
-//        batch.begin();
         if (worldRenderer != null)
             worldRenderer.render(delta);
-//        renderWorld(delta);
-//        batch.end();
 
-//        renderUi();
         uiRenderer.render(delta);
     }
 
@@ -100,51 +77,26 @@ public abstract class AbstractScreen implements Screen {
     }
 
     protected void update(float delta) {
-        camera.update();
-        batch.setProjectionMatrix(camera.combined);
     }
 
-    protected void createWorldViewport() {
-        final ConfigManager configManager = AbstractFactory.getInstance().configManager();
-        final float worldWidth = configManager.getFloat("worldWidth");
-        final float minRatio = configManager.getFloat("minRatio");
-        final float maxRatio = configManager.getFloat("maxRatio");
-        final float minWorldHeight = worldWidth / maxRatio;
-        final float maxWorldHeight = worldWidth / minRatio;
-        camera = new OrthographicCamera();
-        camera.setToOrtho(false);
-        viewport = new ExtendViewport(worldWidth, minWorldHeight, worldWidth, maxWorldHeight, camera);
-        viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+    /**
+     * Implementation of AbstractScreen does not create world renderer.
+     * This method should be overridden.
+     */
+    protected void createWorldRenderer() {
+        Gdx.app.log("INIT", "AbstractScreen.createWorldRenderer for " + getClass().getSimpleName());
     }
 
     protected void createUiRenderer() {
-        final ConfigManager configManager = AbstractFactory.getInstance().configManager();
-        final float worldWidth = configManager.getFloat("worldWidth");
-        final float minRatio = configManager.getFloat("minRatio");
-        final float maxRatio = configManager.getFloat("maxRatio");
-        final float minWorldHeight = worldWidth / maxRatio;
-        final float maxWorldHeight = worldWidth / minRatio;
-        OrthographicCamera camera = new OrthographicCamera();
-        camera.setToOrtho(false);
-        Viewport viewport = new ExtendViewport(worldWidth, minWorldHeight, worldWidth, maxWorldHeight, camera);
-        stage = new Stage(viewport, batch);
-        uiRenderer = new UIRenderer(viewport, stage);
-    }
+        Gdx.app.log("INIT", "AbstractScreen.createUiRenderer for " + getClass().getSimpleName());
 
-    protected void createUI() {
-        Gdx.app.log("INIT", "AbstractScreen.createUI for " + getClass().getSimpleName());
-        Gdx.input.setInputProcessor(stage);
-
-        uiRootTable = new Table();
-        uiRootTable.setFillParent(true);
-        stage.addActor(uiRootTable);
-
-        if (Main.DEBUG_UI)
-            uiRootTable.debugAll();
+        uiRenderer = new UIRenderer(batch);
     }
 
     @Override
     public void dispose() {
-        stage.dispose();
+        if (worldRenderer != null)
+            worldRenderer.dispose();
+        uiRenderer.dispose();
     }
 }

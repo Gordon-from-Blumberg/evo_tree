@@ -1,17 +1,20 @@
 package com.gordonfromblumberg.games.core.common.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.SnapshotArray;
-import com.badlogic.gdx.utils.viewport.Viewport;
+import com.gordonfromblumberg.games.core.common.Main;
 import com.gordonfromblumberg.games.core.common.event.Event;
 import com.gordonfromblumberg.games.core.common.event.EventHandler;
+import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
 import com.gordonfromblumberg.games.core.common.ui.IntChangeableLabel;
 import com.gordonfromblumberg.games.core.common.ui.UIUtils;
 import com.gordonfromblumberg.games.core.common.ui.UpdatableLabel;
+import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.utils.CoordsConverter;
 import com.gordonfromblumberg.games.core.common.world.GameWorld;
 import com.gordonfromblumberg.games.core.evotree.event.SelectTreeEvent;
@@ -19,22 +22,96 @@ import com.gordonfromblumberg.games.core.evotree.model.*;
 import com.gordonfromblumberg.games.core.evotree.model.Cell;
 import com.gordonfromblumberg.games.core.evotree.model.Tree;
 
+import java.util.function.Consumer;
+
 import static com.gordonfromblumberg.games.core.common.utils.StringUtils.padLeft;
 
 public class GameUIRenderer extends UIRenderer {
     private GameWorld world;
 
     private final Vector3 GAME_VIEW_COORDS = new Vector3();
-    private CoordsConverter toGameViewConverter;
+    private final Vector3 CLICK_COORDS = new Vector3();
+    private final WorldCameraParams WORLD_CAMERA_PARAMS = new WorldCameraParams();
+    private final CoordsConverter toGameView;
+    private final CoordsConverter toGameWorld;
+    private Label screenCoord, viewCoord, worldCoord;
+    private final Consumer<WorldCameraParams> worldCameraParamsGetter;
     private Cell cell;
 
-    public GameUIRenderer(Viewport viewport, Stage stage, GameWorld world, CoordsConverter toGameViewConverter) {
-        super(viewport, stage);
+    public GameUIRenderer(SpriteBatch batch, GameWorld world,
+                          CoordsConverter toGameView, CoordsConverter toGameWorld,
+                          Consumer<WorldCameraParams> worldCameraParamsGetter) {
+        super(batch);
 
         Gdx.app.log("INIT", "GameUIRenderer constructor");
 
         this.world = world;
-        this.toGameViewConverter = toGameViewConverter;
+        this.toGameView = toGameView;
+        this.toGameWorld = toGameWorld;
+        this.worldCameraParamsGetter = worldCameraParamsGetter;
+
+        init();
+    }
+
+    void click(int button, float screenX, float screenY) {
+        screenCoord.setText(screenX + ", " + screenY);
+        toGameView.convert(screenX, screenY, CLICK_COORDS);
+        toGameWorld.convert(CLICK_COORDS.x, CLICK_COORDS.y, CLICK_COORDS);
+        worldCoord.setText(CLICK_COORDS.x + ", " + CLICK_COORDS.y);
+    }
+
+    private void init() {
+        final ConfigManager configManager = AbstractFactory.getInstance().configManager();
+        final AssetManager assets = Main.getInstance().assets();
+        final Skin uiSkin = assets.get("ui/uiskin.json", Skin.class);
+
+        if (Main.DEBUG) {
+            rootTable.add(createCoordsDebugTable(uiSkin))
+                    .left().top();
+        } else {
+            rootTable.add();
+        }
+
+        rootTable.add(createInfoTable(uiSkin))
+                .top().padLeft(10f);
+
+        if (Main.DEBUG) {
+            rootTable.add(createCellDebugTable(uiSkin))
+                    .top().padLeft(10f);
+        } else {
+            rootTable.add();
+        }
+
+        rootTable.add(new Label("", uiSkin))
+//        rootTable.add(createDnaDesc(uiSkin))
+                .expandX().top().right().padLeft(10f);
+
+        rootTable.row();
+        rootTable.add(createControlTable(uiSkin, configManager.getInteger("world.turnsPerSecond")))
+                .expandY().left().bottom().pad(0f, 10f, 10f, 0f);
+    }
+
+    private Table createCoordsDebugTable(Skin uiSkin) {
+        final Table table = UIUtils.createTable();
+        table.add(new Label("Camera pos", uiSkin));
+        table.add(new UpdatableLabel(uiSkin, () -> WORLD_CAMERA_PARAMS.position.x + ", " + WORLD_CAMERA_PARAMS.position.y));
+
+        table.row();
+        table.add(new Label("Zoom", uiSkin));
+        table.add(new UpdatableLabel(uiSkin, () -> WORLD_CAMERA_PARAMS.zoom));
+
+        table.row();
+        table.add(new Label("Screen", uiSkin));
+        table.add(screenCoord = new Label("", uiSkin));
+
+        table.row();
+        table.add(new Label("Viewport", uiSkin));
+        table.add(viewCoord = new Label("", uiSkin));
+
+        table.row();
+        table.add(new Label("World", uiSkin));
+        table.add(worldCoord = new Label("", uiSkin));
+        return table;
     }
 
     Table createInfoTable(Skin uiSkin) {
@@ -214,9 +291,15 @@ public class GameUIRenderer extends UIRenderer {
 
     @Override
     public void render(float dt) {
-        toGameViewConverter.convert(Gdx.input.getX(), Gdx.input.getY(), GAME_VIEW_COORDS);
+        toGameView.convert(Gdx.input.getX(), Gdx.input.getY(), GAME_VIEW_COORDS);
         cell = world.findCell((int) GAME_VIEW_COORDS.x, (int) GAME_VIEW_COORDS.y);
+        worldCameraParamsGetter.accept(WORLD_CAMERA_PARAMS);
 
         super.render(dt);
+    }
+
+    static class WorldCameraParams {
+        final Vector3 position = new Vector3();
+        float zoom;
     }
 }
