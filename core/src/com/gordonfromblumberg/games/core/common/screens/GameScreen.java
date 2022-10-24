@@ -77,9 +77,9 @@ public class GameScreen extends AbstractScreen {
     @Override
     protected void createUiRenderer() {
         Gdx.app.log("INIT", "GameScreen.createUiRenderer");
-        final GameUIRenderer renderer = new GameUIRenderer(batch, gameWorld,
+        final GameUIRenderer uiRenderer = new GameUIRenderer(batch, gameWorld,
                 this.renderer::screenToViewport, this.renderer::viewToWorld, this::getWorldCameraParams);
-        uiRenderer = renderer;
+        this.uiRenderer = uiRenderer;
 
         final ConfigManager configManager = AbstractFactory.getInstance().configManager();
 
