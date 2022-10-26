@@ -32,9 +32,13 @@ public class Shoot extends Wood {
     private static final byte BRANCH_LENGTH_MORE = 15;
     private static final byte TREE_LIFETIME_LESS = 16;
     private static final byte TREE_LIFETIME_MORE = 17;
+    private static final byte IS_BLOCKED_TO_SPROUT = 18;
+    private static final byte IS_NOT_BLOCKED_TO_SPROUT = 19;
+    private static final byte IS_BLOCKED = 20;
+    private static final byte IS_NOT_BLOCKED = 21;
 
     private static final byte MIN_CONDITION = FALSE_CONDITION;
-    private static final byte MAX_CONDITION = TREE_LIFETIME_MORE;
+    private static final byte MAX_CONDITION = IS_NOT_BLOCKED;
 
     Gene activeGene;
 
@@ -137,6 +141,20 @@ public class Shoot extends Wood {
         return false;
     }
 
+    boolean isBlocked(CellGrid grid, byte dirs, boolean toSprout) {
+        byte dirFlag = 1;
+        for (Direction dir : Direction.ALL) {
+            if ((dirs & dirFlag) == dirFlag && (!toSprout || activeGene.getValue(dir) < DNA.SPROUT_GENES_COUNT)) {
+                Cell neib = grid.getCell(cell, dir);
+                if (neib == null || neib.getTreePart() != null) {
+                    return true;
+                }
+            }
+            dirFlag <<= 1;
+        }
+        return false;
+    }
+
     private boolean shouldCheckCondition(Gene gene) {
         byte condition1 = gene.getValue(Gene.CONDITION1);
         byte condition2 = gene.getValue(Gene.CONDITION2);
@@ -145,6 +163,7 @@ public class Shoot extends Wood {
     }
 
     private boolean checkCondition(byte condition, byte parameter, CellGrid grid) {
+        final byte DIRS_MOD = (byte) (1 << Direction.ALL.length);
         switch (condition) {
             case FALSE_CONDITION:
                 return false;
@@ -182,6 +201,14 @@ public class Shoot extends Wood {
                 return tree.lifetime < parameter;
             case TREE_LIFETIME_MORE:
                 return tree.lifetime > parameter;
+            case IS_BLOCKED_TO_SPROUT:
+                return isBlocked(grid, (byte) (parameter % DIRS_MOD), true);
+            case IS_NOT_BLOCKED_TO_SPROUT:
+                return !isBlocked(grid, (byte) (parameter % DIRS_MOD), true);
+            case IS_BLOCKED:
+                return isBlocked(grid, (byte) (parameter % DIRS_MOD), false);
+            case IS_NOT_BLOCKED:
+                return !isBlocked(grid, (byte) (parameter % DIRS_MOD), false);
         }
         return true;
     }
