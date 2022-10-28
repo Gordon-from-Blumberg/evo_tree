@@ -1,5 +1,6 @@
 package com.gordonfromblumberg.games.core.common.screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -16,6 +17,9 @@ public class MainMenuScreen extends AbstractScreen {
         super(batch);
 
         color = Color.FOREST;
+
+        Gdx.app.log("FILE", "local = " + Gdx.files.getLocalStoragePath());
+        Gdx.app.log("FILE", "external = " + Gdx.files.getExternalStoragePath());
     }
 
     @Override
