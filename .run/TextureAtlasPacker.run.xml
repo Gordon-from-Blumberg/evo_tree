@@ -5,7 +5,7 @@
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/android/assets" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="com.gordonfromblumberg.games.core.common.utils.*" />
+        <option name="PATTERN" value="com.gordonfromblumberg.games.desktop.common.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>

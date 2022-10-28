@@ -1,11 +1,23 @@
 apply plugin: "java"
 
 sourceCompatibility = 1.8
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
 sourceSets.main.java.srcDirs = [ "src/" ]
 sourceSets.main.resources.srcDirs = ["../android/assets", "assets"]
+sourceSets.test.java.srcDirs = [ "test/" ]
 
 project.ext.mainClassName = "com.gordonfromblumberg.games.desktop.common.DesktopLauncher"
 project.ext.assetsDir = new File("../android/assets")
+
+test {
+    useJUnitPlatform()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+}
 
 task run(dependsOn: classes, type: JavaExec) {
     main = project.mainClassName
