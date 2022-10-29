@@ -1,16 +1,22 @@
 package com.gordonfromblumberg.games.core.common.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.gordonfromblumberg.games.core.common.Main;
 
 public abstract class AbstractScreen implements Screen {
 
     private static final float MAX_DELTA = 1.0f / 30;
+
+    protected static int screenWidth;
+    protected static int screenHeight;
 
     protected AssetManager assets;
 
@@ -32,6 +38,27 @@ public abstract class AbstractScreen implements Screen {
 
         createWorldRenderer();
         createUiRenderer();
+
+        screenWidth = Gdx.graphics.getWidth();
+        screenHeight = Gdx.graphics.getHeight();
+
+        uiRenderer.addListener(new InputListener() {
+            @Override
+            public boolean keyUp(InputEvent event, int keycode) {
+                if (keycode == Input.Keys.F11) {
+                    if (Gdx.graphics.isFullscreen()) {
+                        Gdx.graphics.setWindowedMode(screenWidth, screenHeight);
+                    } else {
+                        screenWidth = Gdx.graphics.getWidth();
+                        screenHeight = Gdx.graphics.getHeight();
+                        Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+                    }
+
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     @Override

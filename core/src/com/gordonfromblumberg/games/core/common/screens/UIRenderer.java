@@ -1,16 +1,24 @@
 package com.gordonfromblumberg.games.core.common.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.gordonfromblumberg.games.core.common.Main;
+import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
 import com.gordonfromblumberg.games.core.common.ui.UIUtils;
+import com.gordonfromblumberg.games.core.common.ui.UIViewport;
+import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 
 public class UIRenderer extends SpriteBatchRenderer {
     protected Stage stage;
     protected Table rootTable;
+
+    protected float minWidth;
+    protected float minHeight;
 
     public UIRenderer(SpriteBatch batch) {
         super(batch);
@@ -35,6 +43,14 @@ public class UIRenderer extends SpriteBatchRenderer {
     public void render(float dt) {
         stage.act();
         stage.draw();
+    }
+
+    @Override
+    protected Viewport createViewport(Camera camera) {
+        final ConfigManager configManager = AbstractFactory.getInstance().configManager();
+        minWidth = configManager.getFloat("minUiWidth");
+        minHeight = configManager.getFloat("minUiHeight");
+        return new UIViewport(minWidth, minHeight, camera);
     }
 
     protected Stage createStage() {
