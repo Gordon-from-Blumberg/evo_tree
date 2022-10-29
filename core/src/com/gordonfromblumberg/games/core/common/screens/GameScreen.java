@@ -37,25 +37,29 @@ public class GameScreen extends AbstractScreen {
         uiRenderer.addListener(new ClickListener(Input.Buttons.LEFT) {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                x = Gdx.input.getX();
-                y = Gdx.input.getY();
-                ((GameUIRenderer) uiRenderer).click(Input.Buttons.LEFT, x, y);
-                renderer.screenToViewport(x, y, viewCoords3);
-                renderer.viewToWorld(viewCoords3.x, viewCoords3.y, worldCoords3);
-                gameWorld.click(Input.Buttons.LEFT, worldCoords3.x, worldCoords3.y);
+                if (!event.isHandled()) {
+                    x = Gdx.input.getX();
+                    y = Gdx.input.getY();
+                    ((GameUIRenderer) uiRenderer).click(Input.Buttons.LEFT, x, y);
+                    renderer.screenToViewport(x, y, viewCoords3);
+                    renderer.viewToWorld(viewCoords3.x, viewCoords3.y, worldCoords3);
+                    gameWorld.click(Input.Buttons.LEFT, worldCoords3.x, worldCoords3.y);
+                }
             }
         });
 
         uiRenderer.addListener(new ClickListener(Input.Buttons.RIGHT) {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                x = Gdx.input.getX();
-                y = Gdx.input.getY();
+                if (!event.isHandled()) {
+                    x = Gdx.input.getX();
+                    y = Gdx.input.getY();
 //                screenToViewport(x, y, viewCoords3);
 //                renderer.screenToWorld(worldCoords3.set(viewCoords3));
 //                renderer.click(Input.Buttons.LEFT, viewCoords3.x, viewCoords3.y);
 //                screenToWorld(x, y, worldCoords3);
 //                gameWorld.click(Input.Buttons.RIGHT, worldCoords3.x, worldCoords3.y);
+                }
             }
         });
     }
