@@ -120,7 +120,9 @@ public class Shoot extends Wood {
             if (nextGene < DNA.SPROUT_GENES_COUNT) {
                 Cell neib = grid.getCell(cell, dir);
                 if (neib != null && neib.treePart == null) {
-                    result += 3 * calcLightAbsorption(tree.dna.getGene(nextGene).getValue(Gene.LIGHT_ABSORPTION));
+                    int x = calcLightAbsorption(tree.dna.getGene(nextGene).getValue(Gene.LIGHT_ABSORPTION)) - 4;
+                    result += x * x / 2 + 4;
+//                    result += 3 * calcLightAbsorption(tree.dna.getGene(nextGene).getValue(Gene.LIGHT_ABSORPTION));
                 }
             }
         }
