@@ -13,6 +13,8 @@ import com.gordonfromblumberg.games.core.common.event.Event;
 import com.gordonfromblumberg.games.core.common.event.EventHandler;
 import com.gordonfromblumberg.games.core.common.event.EventProcessor;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
+import com.gordonfromblumberg.games.core.common.log.LogManager;
+import com.gordonfromblumberg.games.core.common.log.Logger;
 import com.gordonfromblumberg.games.core.common.utils.ClickHandler;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.utils.RandomUtils;
@@ -23,6 +25,7 @@ import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
 import java.util.Iterator;
 
 public class GameWorld implements EvoTreeWorld, Disposable {
+    private static final Logger log = LogManager.create(GameWorld.class);
     private static int nextTreeId = 1;
     private static int nextSeedId = 1;
     private int turn = 0;
@@ -88,6 +91,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
         }
 
         running = true;
+        log.debug("Game world initialized");
     }
 
     public void setSize(int width, int height) {

@@ -9,8 +9,6 @@ public abstract class TreePart implements Poolable {
     protected Cell cell;
     protected int energyConsumption;
 
-    public TreePart() {}
-
     protected TreePart(int energyConsumption) {
         this.energyConsumption = energyConsumption;
     }

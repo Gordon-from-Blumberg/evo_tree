@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
+import com.gordonfromblumberg.games.core.common.log.LogManager;
+import com.gordonfromblumberg.games.core.common.log.Logger;
 import com.gordonfromblumberg.games.core.common.screens.AbstractScreen;
 import com.gordonfromblumberg.games.core.common.screens.MainMenuScreen;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
@@ -24,6 +26,7 @@ public class Main extends Game {
 	public static String WORK_DIR;
 
 	private static Main instance;
+	private static final Logger log = LogManager.create(Main.class);
 
 	private final AssetManager assetManager;
 	private ConfigManager configManager;
@@ -68,7 +71,9 @@ public class Main extends Game {
 		if (!workDirFile.exists()) {
 			workDirFile.mkdirs();
 		}
-		Gdx.app.log("INIT", "Work dir = " + WORK_DIR);
+		LogManager.init();
+		log.info("INIT: Work dir = " + WORK_DIR);
+		log.info("Main created");
 	}
 
 	public AbstractScreen getCurrentScreen() {

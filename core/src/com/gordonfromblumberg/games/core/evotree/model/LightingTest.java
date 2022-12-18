@@ -4,6 +4,7 @@ public class LightingTest extends TreePart {
     private int lightAbsorption;
 
     public LightingTest(int lightAbsorption) {
+        super(0);
         this.lightAbsorption = lightAbsorption;
     }
 

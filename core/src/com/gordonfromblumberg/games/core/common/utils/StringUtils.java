@@ -2,6 +2,7 @@ package com.gordonfromblumberg.games.core.common.utils;
 
 public class StringUtils {
     static final String PLACE_HOLDER = "#";
+    private static final StringBuilder sb = new StringBuilder();
 
     private StringUtils() {}
 
@@ -28,11 +29,20 @@ public class StringUtils {
         return result.toString();
     }
 
-    public static String padLeft(int number, int pad) {
-        StringBuilder result = new StringBuilder(String.valueOf(number));
-        while (result.length() < pad)
-            result.insert(0, "0");
-
-        return result.toString();
+    public static String padLeft(long number, int pad) {
+        try {
+            String numberStr = String.valueOf(number);
+            int length = Math.max(numberStr.length(), pad);
+            sb.ensureCapacity(length);
+            if (pad > numberStr.length()) {
+                int zeros = pad - numberStr.length();
+                while (zeros-- > 0)
+                    sb.append('0');
+            }
+            sb.append(numberStr);
+            return sb.toString();
+        } finally {
+            sb.delete(0, sb.length());
+        }
     }
 }
