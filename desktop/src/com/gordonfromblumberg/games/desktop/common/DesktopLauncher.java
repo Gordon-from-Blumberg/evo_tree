@@ -7,6 +7,8 @@ import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.desktop.common.factory.DesktopFactory;
 
+import java.io.File;
+
 public class DesktopLauncher {
 	public static void main (String[] args) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
@@ -28,6 +30,19 @@ public class DesktopLauncher {
 			}
 			if ("-lightingTest".equals(arg)) {
 				cfgMgr.setBoolean("lightingTest", true);
+				continue;
+			}
+			String workDirPrefix = "-workDir=";
+			if (arg.startsWith(workDirPrefix)) {
+				String workDir = arg.substring(workDirPrefix.length());
+				File workDirFile = new File(workDir);
+				if (!workDirFile.exists()) {
+					if (!workDirFile.mkdirs()) {
+						System.err.println("Incorrect work dir " + workDir);
+						continue;
+					}
+				}
+				Main.WORK_DIR = workDir;
 				continue;
 			}
 		}

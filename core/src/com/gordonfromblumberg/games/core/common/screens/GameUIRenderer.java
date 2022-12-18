@@ -1,10 +1,13 @@
 package com.gordonfromblumberg.games.core.common.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.SnapshotArray;
 import com.gordonfromblumberg.games.core.common.Main;
@@ -12,6 +15,7 @@ import com.gordonfromblumberg.games.core.common.event.Event;
 import com.gordonfromblumberg.games.core.common.event.EventHandler;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
 import com.gordonfromblumberg.games.core.common.ui.IntChangeableLabel;
+import com.gordonfromblumberg.games.core.common.ui.SaveLoadWindow;
 import com.gordonfromblumberg.games.core.common.ui.UIUtils;
 import com.gordonfromblumberg.games.core.common.ui.UpdatableLabel;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
@@ -37,6 +41,7 @@ public class GameUIRenderer extends UIRenderer {
     private Label screenCoord, viewCoord, worldCoord;
     private final Consumer<WorldCameraParams> worldCameraParamsGetter;
     private Cell cell;
+    private SaveLoadWindow saveLoadWindow;
 
     public GameUIRenderer(SpriteBatch batch, GameWorld world,
                           CoordsConverter toGameView, CoordsConverter toGameWorld,
@@ -89,6 +94,23 @@ public class GameUIRenderer extends UIRenderer {
         rootTable.row();
         rootTable.add(createControlTable(uiSkin, configManager.getInteger("world.turnsPerSecond")))
                 .expandY().left().bottom().pad(0f, 10f, 10f, 0f);
+
+        stage.addListener(new InputListener() {
+            @Override
+            public boolean keyDown(InputEvent event, int keycode) {
+                if (keycode == Input.Keys.F5) {
+                    if (saveLoadWindow == null) {
+                        saveLoadWindow = new SaveLoadWindow("Save / load", uiSkin);
+                        stage.addActor(saveLoadWindow);
+                        saveLoadWindow.setVisible(true);
+                    } else {
+                        saveLoadWindow.setVisible(!saveLoadWindow.isVisible());
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     private Table createCoordsDebugTable(Skin uiSkin) {

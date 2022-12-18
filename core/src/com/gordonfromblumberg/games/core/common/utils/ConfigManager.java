@@ -28,6 +28,10 @@ public class ConfigManager {
         return configProperties.get(property);
     }
 
+    public void setString(String propertyName, String value) {
+        configProperties.put(propertyName, value);
+    }
+
     public boolean getBoolean(String propertyName) {
         String property = configProperties.get(propertyName);
         return Boolean.parseBoolean(property);

@@ -3,6 +3,7 @@ package com.gordonfromblumberg.games.core.common;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -12,6 +13,7 @@ import com.gordonfromblumberg.games.core.common.screens.MainMenuScreen;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.utils.JsonConfigLoader;
 
+import java.io.File;
 import java.util.function.Consumer;
 
 public class Main extends Game {
@@ -19,6 +21,7 @@ public class Main extends Game {
 	public static boolean DEBUG_UI;
 
 	public static final String NAME = "evo_tree";
+	public static String WORK_DIR;
 
 	private static Main instance;
 
@@ -57,6 +60,15 @@ public class Main extends Game {
 		int width = configManager.getInteger("screenWidth");
 		int height = configManager.getInteger("screenHeight");
 		Gdx.graphics.setWindowedMode(width, height);
+
+		if (WORK_DIR == null) {
+			WORK_DIR = Gdx.files.getExternalStoragePath() + NAME;
+		}
+		FileHandle workDirFile = Gdx.files.absolute(WORK_DIR);
+		if (!workDirFile.exists()) {
+			workDirFile.mkdirs();
+		}
+		Gdx.app.log("INIT", "Work dir = " + WORK_DIR);
 	}
 
 	public AbstractScreen getCurrentScreen() {
