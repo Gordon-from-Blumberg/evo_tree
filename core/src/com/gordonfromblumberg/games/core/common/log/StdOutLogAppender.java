@@ -10,4 +10,7 @@ public class StdOutLogAppender extends LogAppender {
             System.out.println(message);
         }
     }
+
+    @Override
+    public void close() { }
 }

@@ -45,4 +45,16 @@ public class StringUtils {
             sb.delete(0, sb.length());
         }
     }
+
+    public static boolean isBlank(String str) {
+        if (str == null || str.isEmpty()) {
+            return true;
+        }
+        for (int i = 0, len = str.length(); i < len; ++i) {
+            if (!Character.isWhitespace(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

@@ -8,12 +8,14 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
+import com.gordonfromblumberg.games.core.common.log.FileLogAppender;
 import com.gordonfromblumberg.games.core.common.log.LogManager;
 import com.gordonfromblumberg.games.core.common.log.Logger;
 import com.gordonfromblumberg.games.core.common.screens.AbstractScreen;
 import com.gordonfromblumberg.games.core.common.screens.MainMenuScreen;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.utils.JsonConfigLoader;
+import com.gordonfromblumberg.games.core.common.utils.StringUtils;
 
 import java.io.File;
 import java.util.function.Consumer;
@@ -53,6 +55,24 @@ public class Main extends Game {
 		configManager = AbstractFactory.getInstance().configManager();
 		configManager.init();
 
+		if (WORK_DIR == null) {
+			String workDir = configManager.getString("workDir");
+			if (StringUtils.isBlank(workDir)) {
+				workDir = Gdx.files.getExternalStoragePath() + NAME;
+			}
+			WORK_DIR = workDir;
+		}
+		FileHandle workDirFile = Gdx.files.absolute(WORK_DIR);
+		if (!workDirFile.exists()) {
+			workDirFile.mkdirs();
+		}
+
+		FileHandle logFile = workDirFile.child(configManager.getString("log.dir") + File.separator
+				+ configManager.getString("log.file"));
+		LogManager.addAppender(new FileLogAppender(logFile));
+		LogManager.init();
+		log.info("INIT: Work dir = " + WORK_DIR);
+
 	    assetManager.load("image/texture_pack.atlas", TextureAtlas.class);
 		loadUiAssets();
 
@@ -63,16 +83,6 @@ public class Main extends Game {
 		int width = configManager.getInteger("screenWidth");
 		int height = configManager.getInteger("screenHeight");
 		Gdx.graphics.setWindowedMode(width, height);
-
-		if (WORK_DIR == null) {
-			WORK_DIR = Gdx.files.getExternalStoragePath() + NAME;
-		}
-		FileHandle workDirFile = Gdx.files.absolute(WORK_DIR);
-		if (!workDirFile.exists()) {
-			workDirFile.mkdirs();
-		}
-		LogManager.init();
-		log.info("INIT: Work dir = " + WORK_DIR);
 		log.info("Main created");
 	}
 
@@ -105,6 +115,7 @@ public class Main extends Game {
 
 	@Override
 	public void dispose() {
+		LogManager.close();
 		super.dispose();
 	}
 }

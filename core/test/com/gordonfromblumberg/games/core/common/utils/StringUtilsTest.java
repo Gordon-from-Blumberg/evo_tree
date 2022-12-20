@@ -35,4 +35,16 @@ public class StringUtilsTest {
         Assertions.assertEquals("001", padLeft(1, 3));
         Assertions.assertEquals("123", padLeft(123, 2));
     }
+
+    @Test
+    void isBlankTest() {
+        Assertions.assertTrue(isBlank(null));
+        Assertions.assertTrue(isBlank(""));
+        Assertions.assertTrue(isBlank(" "));
+        Assertions.assertTrue(isBlank("\n"));
+        Assertions.assertFalse(isBlank("foo"));
+        Assertions.assertFalse(isBlank("  foo"));
+        Assertions.assertFalse(isBlank("\nfoo"));
+        Assertions.assertFalse(isBlank("null"));
+    }
 }
