@@ -2,13 +2,14 @@ package com.gordonfromblumberg.games.core.common.log;
 
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.AtomicQueue;
+import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
 
 import java.io.IOException;
 
 import static com.gordonfromblumberg.games.core.common.utils.StringUtils.padLeft;
 
 public class LogManager {
-    static final AtomicQueue<LogEntry> queue = new AtomicQueue<>(16);
+    static AtomicQueue<LogEntry> queue;
     static final Array<LogAppender> appenders = new Array<>(false, 4);
     static Thread logThread;
 
@@ -17,6 +18,9 @@ public class LogManager {
     private static final StringBuilder stringBuilder = new StringBuilder();
 
     public static void init() {
+        queue = new AtomicQueue<>(AbstractFactory.getInstance()
+                .configManager().getInteger("log.capacity"));
+
         Thread thread = new Thread("Logger") {
             @Override
             public void run() {
@@ -71,9 +75,6 @@ public class LogManager {
     private static String composeMessage(LogEntry entry) {
         StringBuilder sb = stringBuilder;
         try {
-            sb.append('[').append(entry.level.name()).append(']');
-            sb.append('\t');
-
             sb.append(padLeft(entry.frameId, 6));
             sb.append('\t');
 
@@ -83,9 +84,12 @@ public class LogManager {
             sb.append(padLeft(time / 1_000, 3)).append('_');
             time %= 1_000;
             sb.append(padLeft(time, 3));
+            sb.append('\t');
+
+            sb.append('[').append(entry.level.name()).append(']');
             sb.append(' ');
 
-            sb.append(entry.clazz.getSimpleName());
+            sb.append('{').append(entry.clazz.getSimpleName()).append('}');
             sb.append(' ');
 
             sb.append(entry.message);

@@ -40,6 +40,9 @@ public class Logger {
         logEntry.frameId = Gdx.graphics.getFrameId();
         logEntry.clazz = this.clazz;
         logEntry.message = message;
-        LogManager.queue.put(logEntry);
+        if (!LogManager.queue.put(logEntry)) {
+            System.err.println("Log queue is full");
+            logEntry.release();
+        }
     }
 }

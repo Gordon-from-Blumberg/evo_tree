@@ -1,8 +1,9 @@
 package com.gordonfromblumberg.games.core.evotree.model;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Pool;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
+import com.gordonfromblumberg.games.core.common.log.LogManager;
+import com.gordonfromblumberg.games.core.common.log.Logger;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
 
@@ -13,6 +14,7 @@ public class Seed extends TreePart {
             return new Seed();
         }
     };
+    private static final Logger log = LogManager.create(Seed.class);
 
     private static final int ENERGY_REQUIRED_TO_SPROUT = 10;
 
@@ -98,7 +100,7 @@ public class Seed extends TreePart {
         tree.addShoot(shoot);
         tree.justSprouted = true;
         world.addTree(tree);
-        Gdx.app.log("TREE", "Tree #" + tree.id + " was sprouted from seed #" + id + " with energy " + tree.energy);
+        log.info("Tree #" + tree.id + " was sprouted from seed #" + id + " with energy " + tree.energy);
     }
 
     public int getId() {

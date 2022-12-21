@@ -1,15 +1,18 @@
 package com.gordonfromblumberg.games.core.common.screens;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
+import com.gordonfromblumberg.games.core.common.log.LogManager;
+import com.gordonfromblumberg.games.core.common.log.Logger;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 
 public abstract class AbstractRenderer implements Renderer {
+    private static final Logger log = LogManager.create(AbstractRenderer.class);
+
     protected OrthographicCamera camera;
     protected Viewport viewport;
     protected boolean centerCamera;
@@ -17,7 +20,7 @@ public abstract class AbstractRenderer implements Renderer {
     private final Vector3 temp = new Vector3();
 
     protected AbstractRenderer() {
-        Gdx.app.log("INIT", "AbstractRenderer constructor for class " + getClass().getSimpleName());
+        log.info("AbstractRenderer constructor for class " + getClass().getSimpleName());
         this.camera = createCamera();
         this.viewport = createViewport(camera);
     }

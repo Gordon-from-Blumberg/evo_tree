@@ -1,11 +1,13 @@
 package com.gordonfromblumberg.games.core.evotree.model;
 
-import com.badlogic.gdx.Gdx;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
+import com.gordonfromblumberg.games.core.common.log.LogManager;
+import com.gordonfromblumberg.games.core.common.log.Logger;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.utils.RandomUtils;
 
 public class DNA {
+    private static final Logger log = LogManager.create(DNA.class);
     static final int SEED_SPROUT_LIGHT = 0;
     static final int COLOR = 1;
     static final int LIFETIME = 2;
@@ -46,7 +48,7 @@ public class DNA {
         for (Gene gene : genes) {
             if (rand.nextBool(MUTATION_CHANCE)) {
                 gene.mutate();
-                Gdx.app.log("DNA", "Gene has mutated");
+                log.trace("Gene has mutated");
             }
         }
     }

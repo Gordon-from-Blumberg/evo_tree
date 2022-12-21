@@ -1,11 +1,13 @@
 package com.gordonfromblumberg.games.core.common.screens;
 
-import com.badlogic.gdx.Gdx;
+import com.gordonfromblumberg.games.core.common.log.LogManager;
+import com.gordonfromblumberg.games.core.common.log.Logger;
 
 public class FBORenderer extends AbstractRenderer {
+    private static final Logger log = LogManager.create(FBORenderer.class);
 
     public FBORenderer() {
-        Gdx.app.log("INIT", "FBORenderer constructor for class " + getClass().getSimpleName());
+        log.info("FBORenderer constructor for class " + getClass().getSimpleName());
     }
 
     @Override

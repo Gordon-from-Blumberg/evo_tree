@@ -13,8 +13,12 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.*;
+import com.gordonfromblumberg.games.core.common.log.LogManager;
+import com.gordonfromblumberg.games.core.common.log.Logger;
 
 public class ViewportTest implements ApplicationListener {
+    private static final Logger log = LogManager.create(ViewportTest.class);
+
     private static final int WIDTH = 800;
     private static final int HEIGHT = 600;
     private static Skin SKIN;
@@ -62,7 +66,7 @@ public class ViewportTest implements ApplicationListener {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 TextButton button = event.getTarget().firstAscendant(TextButton.class);
-                Gdx.app.log("CLICK", "target = " + button);
+                log.debug("target = " + button);
                 if (button == null)
                     return;
 

@@ -9,11 +9,15 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
+import com.gordonfromblumberg.games.core.common.log.LogManager;
+import com.gordonfromblumberg.games.core.common.log.Logger;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.world.GameWorld;
 import com.gordonfromblumberg.games.core.common.world.GameWorldRenderer;
 
 public class GameScreen extends AbstractScreen {
+    private static final Logger log = LogManager.create(GameScreen.class);
+
     private GameWorld gameWorld;
     private GameWorldRenderer renderer;
 
@@ -22,7 +26,7 @@ public class GameScreen extends AbstractScreen {
 
     protected GameScreen(SpriteBatch batch) {
         super(batch);
-        Gdx.app.log("INIT", "GameScreen constructor");
+        log.info("GameScreen constructor");
         gameWorld = new GameWorld();
     }
 
@@ -30,7 +34,7 @@ public class GameScreen extends AbstractScreen {
     public void initialize() {
         super.initialize();
 
-        Gdx.app.log("INIT", "GameScreen init");
+        log.info("GameScreen init");
         gameWorld.initialize();
         renderer.initialize();
 
@@ -73,14 +77,14 @@ public class GameScreen extends AbstractScreen {
     @Override
     protected void createWorldRenderer() {
         super.createWorldRenderer();
-        Gdx.app.log("INIT", "GameScreen.createWorldRenderer");
+        log.info("GameScreen.createWorldRenderer");
 
         worldRenderer = renderer = new GameWorldRenderer(gameWorld, batch);
     }
 
     @Override
     protected void createUiRenderer() {
-        Gdx.app.log("INIT", "GameScreen.createUiRenderer");
+        log.info("GameScreen.createUiRenderer");
         final GameUIRenderer uiRenderer = new GameUIRenderer(batch, gameWorld,
                 this.renderer::screenToViewport, this.renderer::viewToWorld, this::getWorldCameraParams);
         this.uiRenderer = uiRenderer;

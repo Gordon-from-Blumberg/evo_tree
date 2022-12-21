@@ -1,10 +1,11 @@
 package com.gordonfromblumberg.games.core.evotree.model;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
+import com.gordonfromblumberg.games.core.common.log.LogManager;
+import com.gordonfromblumberg.games.core.common.log.Logger;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.utils.Poolable;
 import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
@@ -18,6 +19,7 @@ public class Tree implements Poolable {
             return new Tree();
         }
     };
+    private static final Logger log = LogManager.create(Tree.class);
 
     private static final int MAX_ENERGY_PER_SEED;
     private static final float MIN_COLOR_VALUE;
@@ -99,7 +101,8 @@ public class Tree implements Poolable {
         energy -= getSize() * Wood.ENERGY_CONSUMPTION;
 
         if (energy <= 0) {
-            Gdx.app.log("TREE", "Tree #" + id + " has no energy and dies");
+            log.debug("Tree #" + id + " has no energy and dies");
+//            Gdx.app.log("TREE", );
             return true;
         }
 
@@ -136,7 +139,8 @@ public class Tree implements Poolable {
     }
 
     private void produceSeeds(EvoTreeWorld world) {
-        Gdx.app.log("TREE", "Tree #" + id + " attempts to produce seeds: energy=" + energy + ", shoots=" + shoots.size);
+        log.info("Tree #" + id + " attempts to produce seeds: energy=" + energy + ", shoots=" + shoots.size);
+//        Gdx.app.log("TREE", "Tree #" + id + " attempts to produce seeds: energy=" + energy + ", shoots=" + shoots.size);
         if (energy >= shoots.size && shoots.size > 0) {
             int energyPerSeed = (energy / shoots.size) + 1;
             if (energyPerSeed > MAX_ENERGY_PER_SEED) {
@@ -151,8 +155,10 @@ public class Tree implements Poolable {
                 seed.dna.mutate();
                 seed.energy = energyPerSeed;
                 world.addSeed(seed);
-                Gdx.app.log("SEED", "Seed #" + seed.id + " was produced by tree #" + id
+                log.info("Seed #" + seed.id + " was produced by tree #" + id
                         + " with energy " + energyPerSeed + " of gen " + nextGeneration);
+//                Gdx.app.log("SEED", "Seed #" + seed.id + " was produced by tree #" + id
+//                        + " with energy " + energyPerSeed + " of gen " + nextGeneration);
             }
         }
     }

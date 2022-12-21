@@ -9,11 +9,15 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.gordonfromblumberg.games.core.common.Main;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
+import com.gordonfromblumberg.games.core.common.log.LogManager;
+import com.gordonfromblumberg.games.core.common.log.Logger;
 import com.gordonfromblumberg.games.core.common.ui.UIUtils;
 import com.gordonfromblumberg.games.core.common.ui.UIViewport;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 
 public class UIRenderer extends SpriteBatchRenderer {
+    private static final Logger log = LogManager.create(UIRenderer.class);
+
     protected Stage stage;
     protected Table rootTable;
 
@@ -23,7 +27,7 @@ public class UIRenderer extends SpriteBatchRenderer {
     public UIRenderer(SpriteBatch batch) {
         super(batch);
 
-        Gdx.app.log("INIT", "UIRenderer constructor for class " + getClass().getSimpleName());
+        log.info("UIRenderer constructor for class " + getClass().getSimpleName());
 
         this.centerCamera = true;
         this.stage = createStage();

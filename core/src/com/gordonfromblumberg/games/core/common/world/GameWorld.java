@@ -1,6 +1,5 @@
 package com.gordonfromblumberg.games.core.common.world;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFontCache;
@@ -58,7 +57,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
     }
 
     public GameWorld(GameWorldParams params) {
-        Gdx.app.log("INIT", "GameWorld constructor");
+        log.info("GameWorld constructor");
 
         final AssetManager assets = Main.getInstance().assets();
         pauseText = new BitmapFontCache(assets.get("ui/uiskin.json", Skin.class).getFont("default-font"));
@@ -71,7 +70,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
     }
 
     public void initialize() {
-        Gdx.app.log("INIT", "GameWorld init");
+        log.info("GameWorld init");
         ConfigManager configManager = AbstractFactory.getInstance().configManager();
         if (configManager.getBoolean("lightingTest")) {
             addClickHandler(this::testLighting);

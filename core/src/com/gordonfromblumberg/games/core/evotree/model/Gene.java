@@ -1,11 +1,14 @@
 package com.gordonfromblumberg.games.core.evotree.model;
 
-import com.badlogic.gdx.Gdx;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
+import com.gordonfromblumberg.games.core.common.log.LogManager;
+import com.gordonfromblumberg.games.core.common.log.Logger;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.utils.RandomUtils;
 
 public class Gene {
+    private static final Logger log = LogManager.create(Gene.class);
+
     static final RandomUtils.RandomGen RAND;
     static final int MAX_VALUE = 42;
     public static final int LIGHT_ABSORPTION;
@@ -21,7 +24,7 @@ public class Gene {
         long seed = configManager.contains("seed")
                 ? configManager.getLong("seed")
                 : RandomUtils.nextLong();
-        Gdx.app.log("RANDOM", "Seed = " + seed);
+        log.info("Seed = " + seed);
         RAND = RandomUtils.randomGen(seed);
         int valueCount = Direction.ALL.length;
         LIGHT_ABSORPTION = valueCount++;

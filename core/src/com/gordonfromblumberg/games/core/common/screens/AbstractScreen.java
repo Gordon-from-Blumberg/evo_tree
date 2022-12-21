@@ -10,9 +10,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.gordonfromblumberg.games.core.common.Main;
+import com.gordonfromblumberg.games.core.common.log.LogManager;
+import com.gordonfromblumberg.games.core.common.log.Logger;
 
 public abstract class AbstractScreen implements Screen {
-
+    private static final Logger log = LogManager.create(AbstractScreen.class);
     private static final float MAX_DELTA = 1.0f / 30;
 
     protected static int screenWidth;
@@ -33,7 +35,7 @@ public abstract class AbstractScreen implements Screen {
     }
 
     protected void initialize() {
-        Gdx.app.log("INIT", "AbstractScreen.initialize for " + getClass().getSimpleName());
+        log.info("AbstractScreen.initialize for " + getClass().getSimpleName());
         assets = Main.getInstance().assets();
 
         createWorldRenderer();
@@ -111,11 +113,11 @@ public abstract class AbstractScreen implements Screen {
      * This method should be overridden.
      */
     protected void createWorldRenderer() {
-        Gdx.app.log("INIT", "AbstractScreen.createWorldRenderer for " + getClass().getSimpleName());
+        log.info("AbstractScreen.createWorldRenderer for " + getClass().getSimpleName());
     }
 
     protected void createUiRenderer() {
-        Gdx.app.log("INIT", "AbstractScreen.createUiRenderer for " + getClass().getSimpleName());
+        log.info("AbstractScreen.createUiRenderer for " + getClass().getSimpleName());
 
         uiRenderer = new UIRenderer(batch);
     }
