@@ -25,7 +25,8 @@ public class Main extends Game {
 	public static boolean DEBUG_UI;
 
 	public static final String NAME = "evo_tree";
-	public static String WORK_DIR;
+	public static String WORK_DIR_PATH;
+	public static FileHandle WORK_DIR;
 
 	private static Main instance;
 	private static final Logger log = LogManager.create(Main.class);
@@ -55,23 +56,23 @@ public class Main extends Game {
 		configManager = AbstractFactory.getInstance().configManager();
 		configManager.init();
 
-		if (WORK_DIR == null) {
+		if (WORK_DIR_PATH == null) {
 			String workDir = configManager.getString("workDir");
 			if (StringUtils.isBlank(workDir)) {
 				workDir = Gdx.files.getExternalStoragePath() + NAME;
 			}
-			WORK_DIR = workDir;
+			WORK_DIR_PATH = workDir;
 		}
-		FileHandle workDirFile = Gdx.files.absolute(WORK_DIR);
-		if (!workDirFile.exists()) {
-			workDirFile.mkdirs();
+		WORK_DIR = Gdx.files.absolute(WORK_DIR_PATH);
+		if (!WORK_DIR.exists()) {
+			WORK_DIR.mkdirs();
 		}
 
-		FileHandle logFile = workDirFile.child(configManager.getString("log.dir") + File.separator
+		FileHandle logFile = WORK_DIR.child(configManager.getString("log.dir") + File.separator
 				+ configManager.getString("log.file"));
 		LogManager.addAppender(new FileLogAppender(logFile));
 		LogManager.init();
-		log.info("INIT: Work dir = " + WORK_DIR);
+		log.info("INIT: Work dir = " + WORK_DIR_PATH);
 
 	    assetManager.load("image/texture_pack.atlas", TextureAtlas.class);
 		loadUiAssets();

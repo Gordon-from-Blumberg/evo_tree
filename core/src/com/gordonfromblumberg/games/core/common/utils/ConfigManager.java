@@ -28,6 +28,11 @@ public class ConfigManager {
         return configProperties.get(property);
     }
 
+    public String getString(String property, String defaultValue) {
+        String propertyValue = configProperties.get(property);
+        return StringUtils.isBlank(propertyValue) ? defaultValue : propertyValue;
+    }
+
     public void setString(String propertyName, String value) {
         configProperties.put(propertyName, value);
     }
