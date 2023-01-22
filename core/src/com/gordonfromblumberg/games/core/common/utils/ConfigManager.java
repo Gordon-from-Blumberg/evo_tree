@@ -11,6 +11,7 @@ import java.io.IOException;
 
 public class ConfigManager {
     private static final String DEFAULT_CONFIG_FILE = "config/default-config.properties";
+    private static final String DEFAULT_UI_CONFIG_FILE = "config/default-ui-config.properties";
     private static final String CONFIG_FILE = "config/config.properties";
     private static final String CONFIG_PREFERENCE = Main.NAME + ".config";
 
@@ -21,6 +22,7 @@ public class ConfigManager {
 
     public void init() {
         loadConfig(DEFAULT_CONFIG_FILE);
+        loadConfig(DEFAULT_UI_CONFIG_FILE);
         loadConfig(CONFIG_FILE);
     }
 
@@ -125,6 +127,7 @@ public class ConfigManager {
     }
 
     protected void loadConfig(String configPath) {
+        System.out.println("Load config " + configPath);
         try (BufferedReader reader = new BufferedReader(Gdx.files.internal(configPath).reader())) {
             String line;
             while ((line = reader.readLine()) != null) {
