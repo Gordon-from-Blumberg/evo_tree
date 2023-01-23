@@ -3,6 +3,7 @@ package com.gordonfromblumberg.games.core.common.log;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.AtomicQueue;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
+import com.gordonfromblumberg.games.core.common.utils.DateTimeFormatter;
 
 import java.io.IOException;
 
@@ -13,9 +14,9 @@ public class LogManager {
     static final Array<LogAppender> appenders = new Array<>(false, 4);
     static Thread logThread;
 
-    private static final long MILLIS_MOD = 100_000_000;
     private static final Logger log = create(LogManager.class);
     private static final StringBuilder stringBuilder = new StringBuilder();
+    private static final DateTimeFormatter dateTimeFormatter = new DateTimeFormatter(true);
 
     public static void init() {
         queue = new AtomicQueue<>(AbstractFactory.getInstance()
@@ -78,12 +79,7 @@ public class LogManager {
             sb.append(padLeft(entry.frameId, 6));
             sb.append('\t');
 
-            long time = entry.timestamp % MILLIS_MOD;
-            sb.append(padLeft(time / 1_000_000, 2)).append('_');
-            time %= 1_000_000;
-            sb.append(padLeft(time / 1_000, 3)).append('_');
-            time %= 1_000;
-            sb.append(padLeft(time, 3));
+            sb.append(dateTimeFormatter.format(entry.timestamp));
             sb.append('\t');
 
             sb.append('[').append(entry.level.name()).append(']');

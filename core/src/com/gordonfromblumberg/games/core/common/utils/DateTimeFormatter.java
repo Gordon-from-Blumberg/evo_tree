@@ -22,14 +22,24 @@ public class DateTimeFormatter {
     private static final int MINUTE_SECOND_DEL = 16;
     private static final int SECOND_0 = 17;
     private static final int SECOND_1 = 18;
+    private static final int SECOND_MILLIS_DEL = 19;
+    private static final int MILLIS_0 = 20;
+    private static final int MILLIS_1 = 21;
+    private static final int MILLIS_2 = 22;
 
     private final Calendar calendar = Calendar.getInstance();
-    private final char[] charBuffer = new char[19];
+    private final boolean withMillis;
+    private final char[] charBuffer;
 
-    public DateTimeFormatter() {
+    public DateTimeFormatter(boolean withMillis) {
+        this.withMillis = withMillis;
+        charBuffer = new char[withMillis ? 23 : 19];
         charBuffer[YEAR_MONTH_DEL] = charBuffer[MONTH_DAY_DEL] = '/';
         charBuffer[DATE_TIME_DEL] = ' ';
         charBuffer[HOUR_MINUTE_DEL] = charBuffer[MINUTE_SECOND_DEL] = ':';
+        if (withMillis) {
+            charBuffer[SECOND_MILLIS_DEL] = '.';
+        }
     }
 
     public String format(long timestamp) {
@@ -68,6 +78,15 @@ public class DateTimeFormatter {
         charBuffer[SECOND_1] = Character.forDigit(second % 10, 10);
         second /= 10;
         charBuffer[SECOND_0] = Character.forDigit(second % 10, 10);
+
+        if (withMillis) {
+            int millis = calendar.get(Calendar.MILLISECOND);
+            charBuffer[MILLIS_2] = Character.forDigit(millis % 10, 10);
+            millis /= 10;
+            charBuffer[MILLIS_1] = Character.forDigit(millis % 10, 10);
+            millis /= 10;
+            charBuffer[MILLIS_0] = Character.forDigit(millis % 10, 10);
+        }
 
         return String.valueOf(charBuffer);
     }
