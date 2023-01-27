@@ -103,7 +103,12 @@ public class GameUIRenderer extends UIRenderer {
                 if (keycode == Input.Keys.F5 && (loadWindow == null || !loadWindow.isVisible())) {
                     if (saveWindow == null) {
                         saveWindow = createSaveLoadWindow(false, uiSkin);
-                        saveWindow.open();
+                        saveWindow.open(bb -> {
+                            bb.put((byte) 1);
+                            bb.putChar('H');
+                            bb.putChar('i');
+                            bb.putLong(System.currentTimeMillis());
+                        });
                     } else {
                         saveWindow.toggle();
                     }
@@ -111,7 +116,11 @@ public class GameUIRenderer extends UIRenderer {
                 } else if (keycode == Input.Keys.F6 && (saveWindow == null || !saveWindow.isVisible())) {
                     if (loadWindow == null) {
                         loadWindow = createSaveLoadWindow(true, uiSkin);
-                        loadWindow.open();
+                        loadWindow.open(bb -> {
+                            while (bb.hasRemaining()) {
+                                log.debug(String.valueOf(bb.get()));
+                            }
+                        });
                     } else {
                         loadWindow.toggle();
                     }
@@ -323,14 +332,11 @@ public class GameUIRenderer extends UIRenderer {
     private SaveLoadWindow createSaveLoadWindow(boolean load, Skin skin) {
         ConfigManager config = AbstractFactory.getInstance().configManager();
         SaveLoadWindow window = new SaveLoadWindow(
-                load ? "Load" : "Save",
                 skin,
                 config.getString("saves.dir", DEFAULT_SAVE_DIR),
-                TREE_EXTENSION
+                TREE_EXTENSION,
+                load
         );
-        if (load) {
-            window.setLoad();
-        }
 
         stage.addActor(window);
         window.setWidth(config.getFloat("ui.saveload.width"));

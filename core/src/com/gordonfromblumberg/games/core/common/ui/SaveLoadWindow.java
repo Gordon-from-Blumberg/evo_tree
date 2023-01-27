@@ -15,32 +15,45 @@ import com.gordonfromblumberg.games.core.common.log.Logger;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.utils.DateTimeFormatter;
 
-import java.io.File;
-import java.io.FilenameFilter;
+import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.function.Consumer;
 
 public class SaveLoadWindow extends UIWindow {
     private enum Type {
         SAVE, LOAD
     }
 
+    private static final Color DEFAULT_FONT_COLOR = Color.WHITE;
+    private static final Color MUTED_FONT_COLOR = Color.LIGHT_GRAY;
+    private static final Color SELECTED_FONT_COLOR = Color.YELLOW;
+    private static final Color SELECTED_MUTED_FONT_COLOR = new Color(SELECTED_FONT_COLOR).mul(MUTED_FONT_COLOR);
+
     private static final Logger log = LogManager.create(SaveLoadWindow.class);
-    private static final Comparator<File> fileComparator = (o1, o2) -> (int) (o2.lastModified() - o1.lastModified());
+    private static final Comparator<File> fileComparator = (o1, o2) -> {
+        long diff = o2.lastModified() - o1.lastModified();
+        return diff > 0 ? 1 : diff < 0 ? -1 : 0;
+    };
 
     private final DateTimeFormatter dateTimeFormatter = new DateTimeFormatter(false);
+    private final ByteBuffer byteBuffer = ByteBuffer.allocateDirect(1000);
 
     private final FileList fileList = new FileList();
     private FileHandle saveDir;
     private Table fileTable;
     private TextButton saveLoadButton;
     private String fileExtension;
-    private Type type = Type.SAVE;
+    private final Type type;
     private FilenameFilter extensionFilter;
 
-    public SaveLoadWindow(String title, Skin skin, String path, String extension) {
-        super(title, skin);
+    private Consumer<ByteBuffer> handler;
 
+    public SaveLoadWindow(Skin skin, String path, String extension, boolean load) {
+        super(load ? "Load" : "Save", skin);
+
+        type = load ? Type.LOAD : Type.SAVE;
         ConfigManager config = AbstractFactory.getInstance().configManager();
         saveDir = Main.WORK_DIR.child(path);
         if (!saveDir.exists()) {
@@ -53,7 +66,8 @@ public class SaveLoadWindow extends UIWindow {
         row();
         Table buttons = new Table(skin);
         add(buttons).align(Align.bottom);
-        saveLoadButton = new TextButton("", skin);
+        saveLoadButton = new TextButton(load ? "Load" : "Save", skin);
+        saveLoadButton.setDisabled(true);
         saveLoadButton.addListener(new ClickListener(Input.Buttons.LEFT) {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -75,20 +89,55 @@ public class SaveLoadWindow extends UIWindow {
 
         extensionFilter = createFileFilter(extension);
 
+        fileTable.addListener(new ClickListener(Input.Buttons.LEFT) {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (event.getTarget() instanceof Label && event.getTarget().getUserObject() instanceof FileRow) {
+                    int clickCount = getTapCount();
+                    FileRow fileRow = (FileRow) event.getTarget().getUserObject();
+                    if (clickCount == 1) {
+                        fileList.select(fileRow);
+                    } else if (clickCount == 2 && fileRow == fileList.selected) {
+                        saveOrLoad();
+                        close();
+                        setTapCount(0);
+                    }
+                }
+            }
+        });
         setOnOpenHandler(this::onOpen);
+        setOnCloseHandler(this::onClose);
     }
 
-    public void setLoad() {
-        type = Type.LOAD;
+    public void open(Consumer<ByteBuffer> handler) {
+        this.handler = handler;
+        open();
     }
 
     private void saveOrLoad() {
-
+        if (fileList.selected != null) {
+            byteBuffer.clear();
+            if (type == Type.LOAD) {
+                try (FileInputStream is = new FileInputStream(fileList.selected.file)) {
+                    is.getChannel().read(byteBuffer);
+                    byteBuffer.flip();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            handler.accept(byteBuffer);
+            if (type == Type.SAVE) {
+                try (FileOutputStream os = new FileOutputStream(fileList.selected.file)) {
+                    byteBuffer.flip();
+                    os.getChannel().write(byteBuffer);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
     }
 
     private void onOpen() {
-        saveLoadButton.setText(type == Type.SAVE ? "Save" : "Load");
-
         File[] files = saveDir.file().listFiles(extensionFilter);
         if (files != null) {
             Arrays.sort(files, fileComparator);
@@ -102,6 +151,10 @@ public class SaveLoadWindow extends UIWindow {
         } else {
             throw new IllegalStateException(saveDir.path() + " is not a directory");
         }
+    }
+
+    private void onClose() {
+        fileList.unselect();
     }
 
     private class FileList {
@@ -135,6 +188,27 @@ public class SaveLoadWindow extends UIWindow {
                 row.nameCell.clearActor();
                 row.lastModifiedCell.clearActor();
                 row.file = null;
+            }
+        }
+
+        void select(FileRow fileRow) {
+            if (fileRow != selected) {
+                if (selected != null) {
+                    unselect();
+                }
+                fileRow.nameLabel.setColor(SELECTED_FONT_COLOR);
+                fileRow.lastModifiedLabel.setColor(SELECTED_MUTED_FONT_COLOR);
+                selected = fileRow;
+                saveLoadButton.setDisabled(false);
+            }
+        }
+
+        void unselect() {
+            if (selected != null) {
+                selected.nameLabel.setColor(DEFAULT_FONT_COLOR);
+                selected.lastModifiedLabel.setColor(MUTED_FONT_COLOR);
+                selected = null;
+                saveLoadButton.setDisabled(true);
             }
         }
 
