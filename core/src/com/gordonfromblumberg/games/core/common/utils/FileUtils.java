@@ -1,9 +1,6 @@
 package com.gordonfromblumberg.games.core.common.utils;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 
 public class FileUtils {
     public static String readFile(String path) {
@@ -23,5 +20,11 @@ public class FileUtils {
         }
 
         return text;
+    }
+
+    public static String getNameWithoutExtension(File file) {
+        String name = file.getName();
+        int lastDotIndex = name.lastIndexOf('.');
+        return lastDotIndex > -1 ? name.substring(0, lastDotIndex) : name;
     }
 }

@@ -1,9 +1,9 @@
 package com.gordonfromblumberg.games.core.common.ui;
 
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
@@ -14,6 +14,7 @@ import com.gordonfromblumberg.games.core.common.log.LogManager;
 import com.gordonfromblumberg.games.core.common.log.Logger;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.utils.DateTimeFormatter;
+import com.gordonfromblumberg.games.core.common.utils.FileUtils;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -21,7 +22,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.function.Consumer;
 
-public class SaveLoadWindow extends UIWindow {
+public class SaveLoadWindow extends DialogExt {
     private enum Type {
         SAVE, LOAD
     }
@@ -41,55 +42,61 @@ public class SaveLoadWindow extends UIWindow {
     private final ByteBuffer byteBuffer = ByteBuffer.allocateDirect(1000);
 
     private final FileList fileList = new FileList();
-    private FileHandle saveDir;
-    private Table fileTable;
+    private File saveDir;
     private TextButton saveLoadButton;
     private String fileExtension;
     private final Type type;
     private FilenameFilter extensionFilter;
 
+    private final TextFieldDialogFactory fileNameEditorFactory;
+    private final ConfirmationDialogFactory confirmationFactory;
+
     private Consumer<ByteBuffer> handler;
 
-    public SaveLoadWindow(Skin skin, String path, String extension, boolean load) {
-        super(load ? "Load" : "Save", skin);
+    public SaveLoadWindow(Stage stage, Skin skin, String path, String extension, boolean load) {
+        super(stage, load ? "Load" : "Save", skin);
 
         type = load ? Type.LOAD : Type.SAVE;
         ConfigManager config = AbstractFactory.getInstance().configManager();
-        saveDir = Main.WORK_DIR.child(path);
+        saveDir = Main.WORK_DIR.child(path).file();
         if (!saveDir.exists()) {
             saveDir.mkdirs();
         }
 
-        fileTable = new Table(skin);
-        add(fileTable).expand().fillX().align(Align.top).minWidth(0).pad(10f);
+        fileNameEditorFactory = new TextFieldDialogFactory(stage, skin)
+                .title("Save")
+                .text("Type in file name");
+        confirmationFactory = new ConfirmationDialogFactory(stage, skin)
+                .title("Confirmation")
+                .text("File with this name exists. Override?");
 
-        row();
-        Table buttons = new Table(skin);
-        add(buttons).align(Align.bottom);
+        getContentTable().defaults().pad(5f).left();
+        getButtonTable().defaults().pad(5f);
+
         saveLoadButton = new TextButton(load ? "Load" : "Save", skin);
         saveLoadButton.setDisabled(true);
         saveLoadButton.addListener(new ClickListener(Input.Buttons.LEFT) {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 if (!saveLoadButton.isDisabled()) {
-                    saveOrLoad();
-                    close();
+                    if (run()) hide();
                 }
             }
         });
-        buttons.add(saveLoadButton).expandX().align(Align.left).pad(10f);
+        getButtonTable().add(saveLoadButton).expandX().align(Align.left);
+
         TextButton cancelButton = new TextButton("Cancel", skin);
         cancelButton.addListener(new ClickListener(Input.Buttons.LEFT) {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                close();
+                hide();
             }
         });
-        buttons.add(cancelButton).align(Align.right).pad(10f);
+        getButtonTable().add(cancelButton).align(Align.right);
 
-        extensionFilter = createFileFilter(extension);
+        extensionFilter = createFileFilter(fileExtension = extension);
 
-        fileTable.addListener(new ClickListener(Input.Buttons.LEFT) {
+        getContentTable().addListener(new ClickListener(Input.Buttons.LEFT) {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 if (event.getTarget() instanceof Label && event.getTarget().getUserObject() instanceof FileRow) {
@@ -98,47 +105,17 @@ public class SaveLoadWindow extends UIWindow {
                     if (clickCount == 1) {
                         fileList.select(fileRow);
                     } else if (clickCount == 2 && fileRow == fileList.selected) {
-                        saveOrLoad();
-                        close();
+                        if (run()) hide();
                         setTapCount(0);
                     }
                 }
             }
         });
-        setOnOpenHandler(this::onOpen);
-        setOnCloseHandler(this::onClose);
     }
 
     public void open(Consumer<ByteBuffer> handler) {
         this.handler = handler;
-        open();
-    }
-
-    private void saveOrLoad() {
-        if (fileList.selected != null) {
-            byteBuffer.clear();
-            if (type == Type.LOAD) {
-                try (FileInputStream is = new FileInputStream(fileList.selected.file)) {
-                    is.getChannel().read(byteBuffer);
-                    byteBuffer.flip();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            handler.accept(byteBuffer);
-            if (type == Type.SAVE) {
-                try (FileOutputStream os = new FileOutputStream(fileList.selected.file)) {
-                    byteBuffer.flip();
-                    os.getChannel().write(byteBuffer);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-    }
-
-    private void onOpen() {
-        File[] files = saveDir.file().listFiles(extensionFilter);
+        File[] files = saveDir.listFiles(extensionFilter);
         if (files != null) {
             Arrays.sort(files, fileComparator);
 
@@ -149,12 +126,76 @@ public class SaveLoadWindow extends UIWindow {
             fileList.end();
 
         } else {
-            throw new IllegalStateException(saveDir.path() + " is not a directory");
+            throw new IllegalStateException(saveDir.getName() + " is not a directory");
+        }
+        open();
+    }
+
+    @Override
+    public void hide() {
+        super.hide();
+        fileList.unselect();
+    }
+
+    /**
+     * @return True if SaveLoadWindow should be hidden and false otherwise
+     */
+    private boolean run() {
+        if (type == Type.SAVE) {
+            save();
+            return false;
+        }
+        load();
+        return true;
+    }
+
+    private void save() {
+        if (fileList.selected != null) {
+            String selectedFileName = fileList.selected.file != null
+                    ? FileUtils.getNameWithoutExtension(fileList.selected.file)
+                    : null;
+            fileNameEditorFactory.create(selectedFileName, this::checkAndSave)
+                    .open();
         }
     }
 
-    private void onClose() {
-        fileList.unselect();
+    private void checkAndSave(String fileName) {
+        File saveFile = new File(saveDir, fileName + '.' + fileExtension);
+        log.debug("save to file " + saveFile.getPath());
+        try {
+            if (saveFile.createNewFile()) {
+                saveToFile(saveFile);
+            } else {
+                confirmationFactory.create(() -> saveToFile(saveFile)).open();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Could not create file " + saveFile.getPath(), e);
+        }
+        hide();
+    }
+
+    private void saveToFile(File file) {
+        byteBuffer.clear();
+        handler.accept(byteBuffer);
+        try (FileOutputStream os = new FileOutputStream(file)) {
+            byteBuffer.flip();
+            os.getChannel().write(byteBuffer);
+        } catch (IOException e) {
+            throw new RuntimeException("Could not write to file " + file.getPath(), e);
+        }
+    }
+
+    private void load() {
+        if (fileList.selected != null) {
+            byteBuffer.clear();
+            try (FileInputStream is = new FileInputStream(fileList.selected.file)) {
+                is.getChannel().read(byteBuffer);
+                byteBuffer.flip();
+                handler.accept(byteBuffer);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private class FileList {
@@ -164,6 +205,13 @@ public class SaveLoadWindow extends UIWindow {
 
         void start() {
             index = 0;
+            if (type == Type.SAVE) {
+                if (list.isEmpty()) list.add(createRow());
+
+                FileRow newFileRow = list.get(index++);
+                newFileRow.nameLabel.setText("New file");
+                newFileRow.lastModifiedLabel.setText(" - - - - - ");
+            }
         }
 
         void add(File file) {
@@ -214,12 +262,13 @@ public class SaveLoadWindow extends UIWindow {
 
         FileRow createRow() {
             Skin skin = getSkin();
+            Table fileTable = getContentTable();
             FileRow fileRow = new FileRow();
             fileTable.row();
 
             fileRow.nameLabel = new Label("", skin);
             fileRow.nameLabel.setUserObject(fileRow);
-            fileRow.nameCell = fileTable.add(fileRow.nameLabel).padRight(5f);
+            fileRow.nameCell = fileTable.add(fileRow.nameLabel);
 
             fileRow.lastModifiedLabel = new Label("", skin);
             fileRow.lastModifiedLabel.setUserObject(fileRow);

@@ -332,16 +332,15 @@ public class GameUIRenderer extends UIRenderer {
     private SaveLoadWindow createSaveLoadWindow(boolean load, Skin skin) {
         ConfigManager config = AbstractFactory.getInstance().configManager();
         SaveLoadWindow window = new SaveLoadWindow(
+                stage,
                 skin,
                 config.getString("saves.dir", DEFAULT_SAVE_DIR),
                 TREE_EXTENSION,
                 load
         );
 
-        stage.addActor(window);
         window.setWidth(config.getFloat("ui.saveload.width"));
         window.setHeight(config.getFloat("ui.saveload.height"));
-        window.toScreenCenter();
 
         return window;
     }
