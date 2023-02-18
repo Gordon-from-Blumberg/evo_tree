@@ -44,7 +44,7 @@ public class CellGrid {
                     cell.updateSunLight(light);
                 } else {
                     Cell upperCell = cells[i][j + 1];
-                    cell.underSun = upperCell.underSun && upperCell.treePart == null;
+                    cell.underSun = upperCell.underSun && upperCell.object == null;
                     cell.updateSunLight(cell.underSun ? light : upperCell.sunLight - 2);
 
                     if (!cell.underSun && !treeHeightUpdated) {

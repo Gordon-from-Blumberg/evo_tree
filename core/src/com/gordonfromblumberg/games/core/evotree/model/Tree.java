@@ -36,7 +36,7 @@ public class Tree implements Poolable {
         MAX_LIFETIME = configManager.getInteger("tree.maxLifetime");
     }
 
-    static final Array<Shoot> newShoots = new Array<>();
+    private static final Array<TreePart> newShoots = new Array<>();
 
     int id;
     int generation;
@@ -45,8 +45,7 @@ public class Tree implements Poolable {
     int energy;
     Cell root;
     int maxHeight;
-    final Array<Wood> woods = new Array<>();
-    final Array<Shoot> shoots = new Array<>();
+    final Array<TreePart> treeParts = new Array<>();
     private final Color color = new Color();
 
     boolean justSprouted;
@@ -91,74 +90,65 @@ public class Tree implements Poolable {
         }
 
         CellGrid grid = world.getGrid();
-        for (Wood wood : woods) {
-            energy += wood.calcEnergy(grid);
-        }
-        for (Shoot shoot : shoots) {
-            energy += shoot.calcEnergy(grid);
+        for (TreePart treePart : treeParts) {
+            energy += treePart.calcEnergy(grid);
         }
 
-        energy -= getSize() * Wood.ENERGY_CONSUMPTION;
+        energy -= getSize() * TreePart.ENERGY_CONSUMPTION;
 
         if (energy <= 0) {
             log.debug("Tree #" + id + " has no energy and dies");
-//            Gdx.app.log("TREE", );
             return true;
         }
 
-        Iterator<Shoot> it = shoots.iterator();
+        Iterator<TreePart> it = treeParts.iterator();
         while (it.hasNext()) {
-            Shoot shoot = it.next();
-            if (shoot.update(grid, newShoots)) {
+            TreePart part = it.next();
+            if (part.type == TreePartType.SHOOT && part.update(grid, newShoots)) {
                 it.remove();
-                shoot.release();
+                part.release();
             }
         }
-        for (Shoot newShoot : newShoots) {
-            addShoot(newShoot);
+        for (TreePart newShoot : newShoots) {
+            addPart(newShoot);
         }
         newShoots.clear();
 
         return false;
     }
 
-    public void addShoot(Shoot shoot) {
-        shoots.add(shoot);
-        shoot.tree = this;
-        if (shoot.cell.y > maxHeight) {
-            maxHeight = shoot.cell.y;
+    public void addPart(TreePart part) {
+        treeParts.add(part);
+        part.tree = this;
+        if (part.cell.y > maxHeight) {
+            maxHeight = part.cell.y;
         }
-    }
-
-    public void addWood(Wood wood) {
-        if (wood instanceof Shoot) {
-            throw new IllegalArgumentException("Shoot should be added as shoot");
-        }
-        woods.add(wood);
-        wood.tree = this;
     }
 
     private void produceSeeds(EvoTreeWorld world) {
-        log.info("Tree #" + id + " attempts to produce seeds: energy=" + energy + ", shoots=" + shoots.size);
-//        Gdx.app.log("TREE", "Tree #" + id + " attempts to produce seeds: energy=" + energy + ", shoots=" + shoots.size);
-        if (energy >= shoots.size && shoots.size > 0) {
-            int energyPerSeed = (energy / shoots.size) + 1;
+        int shootCount = 0;
+        for (TreePart part : treeParts) {
+            if (part.type == TreePartType.SHOOT) ++shootCount;
+        }
+        log.info("Tree #" + id + " attempts to produce seeds: energy=" + energy + ", shoots=" + shootCount);
+        if (energy >= shootCount && shootCount > 0) {
+            int energyPerSeed = (energy / shootCount) + 1;
             if (energyPerSeed > MAX_ENERGY_PER_SEED) {
                 energyPerSeed = MAX_ENERGY_PER_SEED;
             }
             int nextGeneration = generation + 1;
-            for (Shoot shoot : shoots) {
-                Seed seed = Seed.getInstance();
-                seed.setCell(shoot.cell);
-                seed.generation = nextGeneration;
-                seed.dna.set(this.dna);
-                seed.dna.mutate();
-                seed.energy = energyPerSeed;
-                world.addSeed(seed);
-                log.info("Seed #" + seed.id + " was produced by tree #" + id
-                        + " with energy " + energyPerSeed + " of gen " + nextGeneration);
-//                Gdx.app.log("SEED", "Seed #" + seed.id + " was produced by tree #" + id
-//                        + " with energy " + energyPerSeed + " of gen " + nextGeneration);
+            for (TreePart part : treeParts) {
+                if (part.type == TreePartType.SHOOT) {
+                    Seed seed = Seed.getInstance();
+                    seed.setCell(part.cell);
+                    seed.generation = nextGeneration;
+                    seed.dna.set(this.dna);
+                    seed.dna.mutate();
+                    seed.energy = energyPerSeed;
+                    world.addSeed(seed);
+                    log.info("Seed #" + seed.id + " was produced by tree #" + id
+                            + " with energy " + energyPerSeed + " of gen " + nextGeneration);
+                }
             }
         }
     }
@@ -172,7 +162,7 @@ public class Tree implements Poolable {
     }
 
     public int getSize() {
-        return woods.size + shoots.size;
+        return treeParts.size;
     }
 
     public Color getColor() {
@@ -205,14 +195,10 @@ public class Tree implements Poolable {
         energy = 0;
         root = null;
         maxHeight = 0;
-        for (Wood wood : woods) {
-            wood.release();
+        for (TreePart part : treeParts) {
+            part.release();
         }
-        woods.clear();
-        for (Shoot shoot : shoots) {
-            shoot.release();
-        }
-        shoots.clear();
+        treeParts.clear();
         color.set(0);
     }
 }

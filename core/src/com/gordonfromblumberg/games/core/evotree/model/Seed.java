@@ -7,7 +7,7 @@ import com.gordonfromblumberg.games.core.common.log.Logger;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
 
-public class Seed extends TreePart {
+public class Seed extends LivingCellObject {
     private static final Pool<Seed> pool = new Pool<Seed>() {
         @Override
         protected Seed newObject() {
@@ -17,6 +17,7 @@ public class Seed extends TreePart {
     private static final Logger log = LogManager.create(Seed.class);
 
     private static final int ENERGY_REQUIRED_TO_SPROUT = 10;
+    private static final int ENERGY_CONSUMPTION = 4;
 
     private static final int MIN_LIGHT_TO_SPROUT;
     private static final int MAX_LIGHT_TO_SPROUT;
@@ -34,7 +35,7 @@ public class Seed extends TreePart {
     int lightToSprout;
 
     private Seed() {
-        super(4);
+        super(ENERGY_CONSUMPTION);
     }
 
     public static Seed getInstance() {
@@ -62,14 +63,14 @@ public class Seed extends TreePart {
             Cell next = cell;
             for (int i = 0; i < 3; ++i) {
                 Cell c = grid.getCell(next, Direction.down);
-                if (c != null && c.treePart == null) {
+                if (c != null && c.object == null) {
                     next = c;
                 } else {
                     break;
                 }
             }
             if (cell != next) {
-                cell.treePart = null;
+                cell.object = null;
                 setCell(next);
             }
             return false;
@@ -77,8 +78,8 @@ public class Seed extends TreePart {
 
         if (energy > ENERGY_REQUIRED_TO_SPROUT
                 && calcLight(grid) >= lightToSprout
-                && !(grid.getCell(cell, Direction.left).treePart instanceof Wood)
-                && !(grid.getCell(cell, Direction.right).treePart instanceof Wood)) {
+                && !(grid.getCell(cell, Direction.left).object instanceof TreePart)
+                && !(grid.getCell(cell, Direction.right).object instanceof TreePart)) {
             energy -= ENERGY_REQUIRED_TO_SPROUT;
             sprout(world);
             return true;
@@ -93,11 +94,12 @@ public class Seed extends TreePart {
         tree.init();
         tree.energy = this.energy;
         tree.root = this.cell;
-        Shoot shoot = Shoot.getInstance();
-        shoot.setCell(this.cell);
-        shoot.activeGene = tree.dna.getGene(0);
-        shoot.lightAbsorption = Wood.calcLightAbsorption(shoot.activeGene.getValue(Gene.LIGHT_ABSORPTION));
-        tree.addShoot(shoot);
+        TreePart treePart = TreePart.getInstance();
+        treePart.type = TreePartType.SHOOT;
+        treePart.setCell(this.cell);
+        treePart.activeGene = tree.dna.getGene(0);
+        treePart.lightAbsorption = TreePart.calcLightAbsorption(treePart.activeGene.getValue(Gene.LIGHT_ABSORPTION));
+        tree.addPart(treePart);
         tree.justSprouted = true;
         world.addTree(tree);
         log.info("Tree #" + tree.id + " was sprouted from seed #" + id + " with energy " + tree.energy);

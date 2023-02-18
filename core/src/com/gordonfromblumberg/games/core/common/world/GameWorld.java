@@ -17,7 +17,6 @@ import com.gordonfromblumberg.games.core.common.log.Logger;
 import com.gordonfromblumberg.games.core.common.utils.ClickHandler;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.utils.RandomUtils;
-import com.gordonfromblumberg.games.core.evotree.event.SelectTreeEvent;
 import com.gordonfromblumberg.games.core.evotree.model.*;
 import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
 
@@ -245,9 +244,9 @@ public class GameWorld implements EvoTreeWorld, Disposable {
     private void selectTree(int b, float x, float y) {
         Cell cell = cellGrid.findCell((int) x, (int) y);
         if (cell != null) {
-            TreePart treePart = cell.getTreePart();
-            if (treePart instanceof Wood) {
-                selectTree(((Wood) treePart).getTree());
+            CellObject treePart = cell.getObject();
+            if (treePart instanceof TreePart) {
+                selectTree(((TreePart) treePart).getTree());
                 return;
             }
         }
@@ -264,14 +263,14 @@ public class GameWorld implements EvoTreeWorld, Disposable {
     private void testLighting(int b, float x, float y) {
         Cell cell = cellGrid.findCell((int) x, (int) y);
         if (cell != null) {
-            TreePart treePart = cell.getTreePart();
+            CellObject treePart = cell.getObject();
             if (treePart == null) {
                 treePart = new LightingTest(5);
-                cell.setTreePart(treePart);
+                cell.setObject(treePart);
             } else {
                 int absorption = treePart.getLightAbsorption() + 5;
                 if (absorption > 30) {
-                    cell.setTreePart(null);
+                    cell.setObject(null);
                 } else {
                     ((LightingTest) treePart).setLightAbsorption(absorption);
                 }

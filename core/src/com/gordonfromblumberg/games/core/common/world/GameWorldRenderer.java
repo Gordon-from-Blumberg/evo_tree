@@ -102,7 +102,7 @@ public class GameWorldRenderer extends FBORenderer {
         for (int i = 0, w = world.cellGrid.getWidth(); i < w; ++i) {
             for (int j = 0, h = world.cellGrid.getHeight(); j < h; ++j) {
                 final Cell cell = cells[i][j];
-                final TreePart treePart = cell.getTreePart();
+                final CellObject treePart = cell.getObject();
                 if (treePart == null) {
                     float k = cell.getSunLight() / MAX_SUN_LIGHT;
                     shapeRenderer.setColor(
@@ -113,9 +113,9 @@ public class GameWorldRenderer extends FBORenderer {
                 } else {
                     if (treePart instanceof Seed) {
                         shapeRenderer.setColor(SEED_COLOR);
-                    } else if (treePart instanceof Wood) {
-                        Color treeColor = ((Wood) treePart).getTree().getColor();
-                        float k = (treePart instanceof Shoot) ? 1.25f : 1;
+                    } else if (treePart instanceof TreePart) {
+                        Color treeColor = ((TreePart) treePart).getTree().getColor();
+                        float k = ((TreePart) treePart).getType() == TreePartType.SHOOT ? 1.25f : 1;
                         float o = treePart.getLightAbsorption() / 44f * (1f - 0.2f) + 0.2f;
                         if (o > 1f) o = 1f;
                         shapeRenderer.setColor(
@@ -143,9 +143,9 @@ public class GameWorldRenderer extends FBORenderer {
         for (int i = 0, w = world.cellGrid.getWidth(); i < w; ++i) {
             Cell[] col = cells[i];
             for (int j = 0, h = world.cellGrid.getHeight(); j < h; ++j) {
-                TreePart treePart = col[j].getTreePart();
+                CellObject treePart = col[j].getObject();
                 if (treePart != null) {
-                    if (treePart instanceof Shoot) {
+                    if (treePart instanceof TreePart && ((TreePart) treePart).getType() == TreePartType.SHOOT) {
                         shapeRenderer.setColor(0.4f, 0.3f, 0f, 1f);
                     } else {
                         shapeRenderer.setColor(0.5f, 0.5f, 0.5f, 1f);

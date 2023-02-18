@@ -206,16 +206,16 @@ public class GameUIRenderer extends UIRenderer {
         table.row();
         table.add(new Label("Absorption", uiSkin))
                 .padRight(pad).right();
-        table.add(new UpdatableLabel(uiSkin, () -> cell != null && cell.getTreePart() != null
-                ? cell.getTreePart().getLightAbsorption() : "No tree part")
+        table.add(new UpdatableLabel(uiSkin, () -> cell != null && cell.getObject() != null
+                ? cell.getObject().getLightAbsorption() : "No tree part")
         )
                 .left();
 
         table.row();
         table.add(new Label("Energy", uiSkin))
                 .padRight(pad).right();
-        table.add(new UpdatableLabel(uiSkin, () -> cell != null && cell.getTreePart() != null
-                ? cell.getTreePart().calcEnergy(world.getGrid()) : "No tree part")
+        table.add(new UpdatableLabel(uiSkin, () -> cell != null && cell.getObject() instanceof TreePart
+                ? ((TreePart) cell.getObject()).calcEnergy(world.getGrid()) : "No tree part")
         )
                 .left();
 
@@ -223,12 +223,12 @@ public class GameUIRenderer extends UIRenderer {
         table.add(new Label("Tree", uiSkin))
                 .padRight(pad).right();
         table.add(new UpdatableLabel(uiSkin, () -> {
-                    TreePart treePart = cell != null ? cell.getTreePart() : null;
+                    CellObject treePart = cell != null ? cell.getObject() : null;
                     if (treePart instanceof Seed) {
                         return "Seed #" + ((Seed) treePart).getId();
                     }
-                    if (treePart instanceof Wood) {
-                        return "#" + ((Wood) treePart).getTree().getId() + ", " + treePart.getClass().getSimpleName();
+                    if (treePart instanceof TreePart) {
+                        return "#" + ((TreePart) treePart).getTree().getId() + ", " + treePart.getClass().getSimpleName();
                     }
                     return treePart != null ? treePart.getClass().getSimpleName() : "No tree";
                 }))
@@ -238,9 +238,9 @@ public class GameUIRenderer extends UIRenderer {
         table.add(new Label("Tree energy", uiSkin))
                 .padRight(pad).right();
         table.add(new UpdatableLabel(uiSkin, () -> {
-            TreePart treePart = cell != null ? cell.getTreePart() : null;
-            if (treePart instanceof Wood) {
-                return  ((Wood) treePart).getTree().getEnergy();
+            CellObject treePart = cell != null ? cell.getObject() : null;
+            if (treePart instanceof TreePart) {
+                return  ((TreePart) treePart).getTree().getEnergy();
             }
             return "No tree";
         }))
@@ -250,9 +250,9 @@ public class GameUIRenderer extends UIRenderer {
         table.add(new Label("Tree size", uiSkin))
                 .padRight(pad).right();
         table.add(new UpdatableLabel(uiSkin, () -> {
-                    TreePart treePart = cell != null ? cell.getTreePart() : null;
-                    if (treePart instanceof Wood) {
-                        return  ((Wood) treePart).getTree().getSize();
+                    CellObject treePart = cell != null ? cell.getObject() : null;
+                    if (treePart instanceof TreePart) {
+                        return  ((TreePart) treePart).getTree().getSize();
                     }
                     return "No tree";
                 }))

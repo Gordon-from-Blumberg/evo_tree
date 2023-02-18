@@ -4,7 +4,7 @@ public class Cell {
     int x, y;
     int sunLight;
     boolean underSun;
-    TreePart treePart;
+    CellObject object;
 
     Cell(int x, int y) {
         this.x = x;
@@ -12,7 +12,7 @@ public class Cell {
     }
 
     int updateSunLight(int light) {
-        TreePart tp = treePart;
+        CellObject tp = object;
         if (tp != null) {
             light -= tp.getLightAbsorption();
         }
@@ -32,12 +32,12 @@ public class Cell {
         return underSun;
     }
 
-    public TreePart getTreePart() {
-        return treePart;
+    public CellObject getObject() {
+        return object;
     }
 
-    public void setTreePart(TreePart treePart) {
-        this.treePart = treePart;
+    public void setObject(CellObject object) {
+        this.object = object;
     }
 
     public int getX() {
