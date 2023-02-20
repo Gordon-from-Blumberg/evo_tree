@@ -10,39 +10,37 @@ import java.util.function.IntConsumer;
 public class IntChangeableLabel extends HorizontalGroup {
     private final Button prev;
     private final Button next;
-    private final Label valueLabel;
-    private final IntConsumer onChangeListener;
+    private final IntField valueField;
 
-    private int minValue = Integer.MIN_VALUE;
-    private int maxValue = Integer.MAX_VALUE;
-    private int value;
     private int step = 1;
     private ChangeFunction changeFunction = ChangeFunction.linear;
 
     public IntChangeableLabel(Skin skin, IntConsumer onChangeListener) {
         this.prev = new TextButton("<", skin);
         this.next = new TextButton(">", skin);
-        this.valueLabel = new Label(String.valueOf(value), skin);
-        this.onChangeListener = onChangeListener;
+        this.valueField = IntField.builder()
+                .skin(skin)
+                .value(0)
+                .handler(onChangeListener)
+                .build();
+        this.valueField.setDisabled(true);
 
         addClickListeners();
         addActor(prev);
-        addActor(valueLabel);
+        addActor(valueField);
         addActor(next);
     }
 
     public void setMinValue(int minValue) {
-        this.minValue = minValue;
+        valueField.minValue = minValue;
     }
 
     public void setMaxValue(int maxValue) {
-        this.maxValue = maxValue;
+        valueField.maxValue = maxValue;
     }
 
     public void setValue(int value) {
-        this.value = value;
-        checkValue();
-        valueLabel.setText(this.value);
+        valueField.setValue(value);
     }
 
     public void setStep(int step) {
@@ -57,16 +55,15 @@ public class IntChangeableLabel extends HorizontalGroup {
         changeFunction = ChangeFunction.geometric;
     }
 
-    private void checkValue() {
-        if (value < minValue) value = minValue;
-        else if (value > maxValue) value = maxValue;
+    public void setFieldWidth(float width) {
+        valueField.setWidth(width);
     }
 
     private void addClickListeners() {
         ClickListener clickListener = new ClickListener(Input.Buttons.LEFT) {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                int v = value;
+                int v = valueField.getValue();
                 switch (changeFunction) {
                     case linear:
                         if (event.getListenerActor() == prev) {
@@ -84,10 +81,11 @@ public class IntChangeableLabel extends HorizontalGroup {
                         break;
                 }
 
-                value = v;
-                checkValue();
-                valueLabel.setText(value);
-                onChangeListener.accept(value);
+                try {
+                    valueField.setValue(v);
+                } catch (IllegalArgumentException e) {
+                    //do nothing
+                }
             }
         };
         prev.addListener(clickListener);

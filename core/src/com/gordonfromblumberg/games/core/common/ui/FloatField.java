@@ -5,22 +5,78 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.gordonfromblumberg.games.core.common.utils.FloatConsumer;
 
 public class FloatField extends TextField {
-    public FloatField(String text, Skin skin) {
-        super(text, skin);
+    private Skin skin;
+    private float value;
+    float minValue, maxValue;
+    private FloatConsumer handler;
+
+    private FloatField(Skin skin, float value, float minValue, float maxValue, FloatConsumer handler) {
+        super(String.valueOf(value), skin);
+
+        if (minValue > maxValue)
+            throw new IllegalArgumentException("Min " + minValue + " can not be greater than max " + maxValue);
+
+        this.skin = skin;
+        this.value = value;
+        this.minValue = minValue;
+        this.maxValue = maxValue;
+        this.handler = handler;
+
+        setTextFieldListener(new TextFieldListener() {
+            @Override
+            public void keyTyped(TextField textField, char c) {
+                try {
+                    float newValue = Float.parseFloat(textField.getText());
+                    if (!checkValue(newValue)) {
+                        trySetError(textField);
+                        return;
+                    }
+
+                    setValueInternal(newValue);
+                    textField.setStyle(skin.get(TextFieldStyle.class));
+                } catch (NumberFormatException e) {
+                    trySetError(textField);
+                }
+            }
+
+            private void trySetError(TextField textField) {
+                textField.setStyle(skin.get("error", TextFieldStyle.class));
+            }
+        });
+
+        setTextFieldFilter((textField, c) -> Character.isDigit(c)
+                || c == '.' || c == ','
+                || textField.getCursorPosition() == 0 && c == '-');
     }
 
     public static FloatFieldBuilder builder() {
         return new FloatFieldBuilder();
     }
 
+    public float getValue() {
+        return value;
+    }
+
+    public void setValue(float value) {
+        if (!checkValue(value)) {
+            throw new IllegalArgumentException("Value " + value + " is out of range [" + minValue + ", " + maxValue + "]");
+        }
+        setValueInternal(value);
+    }
+
+    @Override
+    public float getPrefWidth() {
+        return getWidth();
+    }
+
     public static class FloatFieldBuilder {
-        private String text;
         private Skin skin;
+        private float value;
         private float minValue = -Float.MAX_VALUE, maxValue = Float.MAX_VALUE;
         private FloatConsumer handler;
 
-        public FloatFieldBuilder text(String text) {
-            this.text = text;
+        public FloatFieldBuilder value(float value) {
+            this.value = value;
             return this;
         }
 
@@ -45,42 +101,17 @@ public class FloatField extends TextField {
         }
 
         public FloatField build() {
-            final FloatField floatField = new FloatField(text, skin);
-            floatField.setTextFieldListener(new FloatFieldListener(skin, handler, minValue, maxValue));
-            return floatField;
+            return new FloatField(skin, value, minValue, maxValue, handler);
         }
     }
 
-    private static class FloatFieldListener implements TextFieldListener {
-        private Skin skin;
-        private FloatConsumer handler;
-        private float minValue, maxValue;
+    private boolean checkValue(float value) {
+        return minValue <= value && value <= maxValue;
+    }
 
-        private FloatFieldListener(Skin skin, FloatConsumer handler, float minValue, float maxValue) {
-            this.skin = skin;
-            this.handler = handler;
-            this.minValue = minValue;
-            this.maxValue = maxValue;
-        }
-
-        @Override
-        public void keyTyped(TextField textField, char c) {
-            try {
-                float newValue = Float.parseFloat(textField.getText());
-                if (newValue < minValue || newValue > maxValue) {
-                    trySetError(textField);
-                    return;
-                }
-
-                handler.accept(newValue);
-                textField.setStyle(skin.get(TextFieldStyle.class));
-            } catch (NumberFormatException e) {
-                trySetError(textField);
-            }
-        }
-
-        private void trySetError(TextField textField) {
-            textField.setStyle(skin.get("error", TextFieldStyle.class));
-        }
+    private void setValueInternal(float value) {
+        this.value = value;
+        setText(String.valueOf(value));
+        handler.accept(value);
     }
 }
