@@ -62,10 +62,12 @@ public class GameUIRenderer extends UIRenderer {
     }
 
     void click(int button, float screenX, float screenY) {
-        screenCoord.setText(screenX + ", " + screenY);
-        toGameView.convert(screenX, screenY, CLICK_COORDS);
-        toGameWorld.convert(CLICK_COORDS.x, CLICK_COORDS.y, CLICK_COORDS);
-        worldCoord.setText(CLICK_COORDS.x + ", " + CLICK_COORDS.y);
+        if (Main.DEBUG) {
+            screenCoord.setText(screenX + ", " + screenY);
+            toGameView.convert(screenX, screenY, CLICK_COORDS);
+            toGameWorld.convert(CLICK_COORDS.x, CLICK_COORDS.y, CLICK_COORDS);
+            worldCoord.setText(CLICK_COORDS.x + ", " + CLICK_COORDS.y);
+        }
     }
 
     private void init() {
@@ -270,6 +272,7 @@ public class GameUIRenderer extends UIRenderer {
         IntChangeableLabel speedControl = new IntChangeableLabel(uiSkin, world::setTurnsPerSecond);
         speedControl.setMinValue(4);
         speedControl.setMaxValue(64);
+        speedControl.setFieldWidth(30);
         speedControl.geometric();
         speedControl.setStep(2);
         speedControl.setValue(initialValue);

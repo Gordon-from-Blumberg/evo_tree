@@ -59,6 +59,10 @@ public class IntChangeableLabel extends HorizontalGroup {
         valueField.setWidth(width);
     }
 
+    public void setFieldDisabled(boolean disabled) {
+        valueField.setDisabled(disabled);
+    }
+
     private void addClickListeners() {
         ClickListener clickListener = new ClickListener(Input.Buttons.LEFT) {
             @Override

@@ -61,7 +61,8 @@ public class GameWorld implements EvoTreeWorld, Disposable {
         final AssetManager assets = Main.getInstance().assets();
         pauseText = new BitmapFontCache(assets.get("ui/uiskin.json", Skin.class).getFont("default-font"));
 
-        cellGrid = new CellGrid(params.width, params.height, params.cellSize);
+        final ConfigManager configManager = AbstractFactory.getInstance().configManager();
+        cellGrid = new CellGrid(params.width, params.height, configManager.getInteger("world.cellSize"));
         LightDistribution original = new SimpleLightDistribution(params.width, params.height, params.sunLight, 2);
         lightDistribution = new ChangeLightByTime(original,15, -15, 1000, 1);
 //        lightDistribution = new ChangeLightByX(original,15);

@@ -13,6 +13,7 @@ import com.gordonfromblumberg.games.core.common.log.LogManager;
 import com.gordonfromblumberg.games.core.common.log.Logger;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.world.GameWorld;
+import com.gordonfromblumberg.games.core.common.world.GameWorldParams;
 import com.gordonfromblumberg.games.core.common.world.GameWorldRenderer;
 
 public class GameScreen extends AbstractScreen {
@@ -24,10 +25,10 @@ public class GameScreen extends AbstractScreen {
     private final Vector3 viewCoords3 = new Vector3();
     private final Vector3 worldCoords3 = new Vector3();
 
-    protected GameScreen(SpriteBatch batch) {
+    protected GameScreen(SpriteBatch batch, GameWorldParams worldParams) {
         super(batch);
         log.info("GameScreen constructor");
-        gameWorld = new GameWorld();
+        gameWorld = new GameWorld(worldParams);
     }
 
     @Override
