@@ -63,7 +63,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
 
         final ConfigManager configManager = AbstractFactory.getInstance().configManager();
         cellGrid = new CellGrid(params.width, params.height, configManager.getInteger("world.cellSize"));
-        LightDistribution original = new SimpleLightDistribution(params.width, params.height, params.sunLight, 2);
+        LightDistribution original = new SimpleLightDistribution(params.width, params.height, params.sunLight, params.lightAbsorptionStep);
         lightDistribution = new ChangeLightByTime(original,15, -15, 1000, 1);
 //        lightDistribution = new ChangeLightByX(original,15);
 //        lightDistribution = original;

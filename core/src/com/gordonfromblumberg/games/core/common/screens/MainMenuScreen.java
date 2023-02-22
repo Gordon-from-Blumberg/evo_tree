@@ -93,7 +93,7 @@ public class MainMenuScreen extends AbstractScreen {
 
     private Table createSunTable(Skin skin, ConfigManager config) {
         Table table = UIUtils.createTable();
-        table.add(new Label("World sun light level", skin))
+        table.add(new Label("Sun light distribution", skin))
                 .center().colspan(2);
 
         table.row();
@@ -107,6 +107,19 @@ public class MainMenuScreen extends AbstractScreen {
         sunLightField.setStep(5);
         sunLightField.setValue(config.getInteger("world.sunLight"));
         table.add(sunLightField)
+                .left();
+
+        table.row();
+        table.add(new Label("Light absorption step", skin))
+                .right();
+        IntChangeableLabel lightAbsorptionField = new IntChangeableLabel(skin, worldParams::setLightAbsorptionStep);
+        lightAbsorptionField.setMinValue(1);
+        lightAbsorptionField.setMaxValue(10);
+        lightAbsorptionField.setFieldWidth(30);
+        lightAbsorptionField.setFieldDisabled(false);
+        lightAbsorptionField.setStep(1);
+        lightAbsorptionField.setValue(config.getInteger("world.lightAbsorptionStep"));
+        table.add(lightAbsorptionField)
                 .left();
         return table;
     }
