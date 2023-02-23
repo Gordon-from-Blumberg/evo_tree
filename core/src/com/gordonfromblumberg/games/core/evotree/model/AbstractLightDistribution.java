@@ -21,7 +21,7 @@ public abstract class AbstractLightDistribution implements LightDistribution {
     }
 
     @Override
-    public void nextTurn() {
-        ++turn;
+    public int nextTurn() {
+        return ++turn;
     }
 }

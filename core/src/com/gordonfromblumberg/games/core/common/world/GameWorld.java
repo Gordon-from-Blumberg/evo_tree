@@ -35,12 +35,12 @@ public class GameWorld implements EvoTreeWorld, Disposable {
     private final EventProcessor eventProcessor = new EventProcessor();
 
     CellGrid cellGrid;
+    private SimpleLightDistribution simpleLightDistribution;
     LightDistribution lightDistribution;
 
     boolean running;
     boolean paused;
-    private final Color pauseColor = Color.GRAY;
-    final BitmapFontCache pauseText;
+//    final BitmapFontCache pauseText;
 
     private int maxSeeds = 0;
     private int maxTrees = 0;
@@ -51,22 +51,17 @@ public class GameWorld implements EvoTreeWorld, Disposable {
 
     final Array<ClickHandler> clickHandlers = new Array<>(1);
 
-    public GameWorld() {
-        this(new GameWorldParams());
-    }
-
     public GameWorld(GameWorldParams params) {
         log.info("GameWorld constructor");
 
         final AssetManager assets = Main.getInstance().assets();
-        pauseText = new BitmapFontCache(assets.get("ui/uiskin.json", Skin.class).getFont("default-font"));
+//        pauseText = new BitmapFontCache(assets.get("ui/uiskin.json", Skin.class).getFont("default-font"));
 
         final ConfigManager configManager = AbstractFactory.getInstance().configManager();
         cellGrid = new CellGrid(params.width, params.height, configManager.getInteger("world.cellSize"));
-        LightDistribution original = new SimpleLightDistribution(params.width, params.height, params.sunLight, params.lightAbsorptionStep);
-        lightDistribution = new ChangeLightByTime(original,15, -15, 1000, 1);
+        simpleLightDistribution = new SimpleLightDistribution(params.width, params.height, params.sunLight, params.lightAbsorptionStep);
+        lightDistribution = params.decorate(simpleLightDistribution);
 //        lightDistribution = new ChangeLightByX(original,15);
-//        lightDistribution = original;
     }
 
     public void initialize() {

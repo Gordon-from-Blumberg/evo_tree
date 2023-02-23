@@ -6,5 +6,5 @@ public interface LightDistribution {
 
     int getLight(int x, int y);
 
-    void nextTurn();
+    int nextTurn();
 }

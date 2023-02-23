@@ -3,14 +3,18 @@ package com.gordonfromblumberg.games.core.evotree.model;
 import com.badlogic.gdx.math.MathUtils;
 
 public class ChangeLightByX extends AbstractLightDistributionDecorator {
-    private int[] shifts = new int[width];
-    private int halfMagnitude;
-    private int periods = 1;
+    public static final LightDistributionDecoratorProducer PRODUCER = (original, params) -> new ChangeLightByX(
+            original,
+            (int) params.get("ChangeLightByX.halfMagnitude")
+    );
 
-    public ChangeLightByX(LightDistribution original, int halfMagnitude) {
+    private final int[] shifts;
+
+    private ChangeLightByX(LightDistribution original, int halfMagnitude) {
         super(original);
 
-        for (int i = 0, n = width; i < n; ++i) {
+        shifts = new int[original.getWidth()];
+        for (int i = 0, n = shifts.length; i < n; ++i) {
             shifts[i] = MathUtils.round(MathUtils.sin(MathUtils.PI2 * (i + 0.5f) / n) * halfMagnitude);
         }
     }
