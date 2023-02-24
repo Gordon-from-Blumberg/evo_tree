@@ -1,6 +1,7 @@
 package com.gordonfromblumberg.games.core.common.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -14,13 +15,13 @@ import com.gordonfromblumberg.games.core.common.log.LogManager;
 import com.gordonfromblumberg.games.core.common.log.Logger;
 import com.gordonfromblumberg.games.core.common.ui.IntChangeableLabel;
 import com.gordonfromblumberg.games.core.common.ui.UIUtils;
-import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.world.GameWorldParams;
 import com.gordonfromblumberg.games.core.evotree.model.ChangeLightByTime;
 import com.gordonfromblumberg.games.core.evotree.model.ChangeLightByX;
 
 public class MainMenuScreen extends AbstractScreen {
     private static final Logger log = LogManager.create(MainMenuScreen.class);
+    private static final String LAST_USED_CONFIG_KEY = "last-used-config";
 
     TextButton textButton;
     final GameWorldParams worldParams = new GameWorldParams();
@@ -29,24 +30,21 @@ public class MainMenuScreen extends AbstractScreen {
         super(batch);
 
         color = Color.FOREST;
-
-        log.debug("Local storage path = " + Gdx.files.getLocalStoragePath());
-        log.debug("External storage path = " + Gdx.files.getExternalStoragePath());
     }
 
     @Override
     protected void createUiRenderer() {
         super.createUiRenderer();
 
-        final ConfigManager config = AbstractFactory.getInstance().configManager();
+        loadDefaults();
         final Skin uiSkin = assets.get("ui/uiskin.json", Skin.class);
         final Table rootTable = uiRenderer.rootTable;
 
         final float fieldWidth = 50f;
-        rootTable.add(createSizeTable(uiSkin, config, fieldWidth)).left();
+        rootTable.add(createSizeTable(uiSkin, fieldWidth)).left();
 
         rootTable.row();
-        rootTable.add(createSunTable(uiSkin, config, fieldWidth)).left();
+        rootTable.add(createSunTable(uiSkin, fieldWidth)).left();
 
         rootTable.row();
         rootTable.add(createLightDistribution(uiSkin)).left();
@@ -56,13 +54,17 @@ public class MainMenuScreen extends AbstractScreen {
         textButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                Preferences prefs = Gdx.app.getPreferences(LAST_USED_CONFIG_KEY);
+                worldParams.saveToPreferences(prefs);
+                prefs.putBoolean("exists", true);
+                prefs.flush();
                 Main.getInstance().setScreen(new GameScreen(batch, worldParams));
             }
         });
         rootTable.add(textButton);
     }
 
-    private Table createSizeTable(Skin skin, ConfigManager config, float fieldWidth) {
+    private Table createSizeTable(Skin skin, float fieldWidth) {
         Table table = UIUtils.createTable();
         table.add(new Label("World size", skin))
                 .center().colspan(2);
@@ -74,7 +76,7 @@ public class MainMenuScreen extends AbstractScreen {
         widthField.setFieldWidth(fieldWidth);
         widthField.setFieldDisabled(false);
         widthField.setStep(50);
-        widthField.setValue(config.getInteger("world.width"));
+        widthField.setValue(worldParams.getWidth());
         table.add(widthField)
                 .left();
         table.add(new Label("Width", skin))
@@ -87,7 +89,7 @@ public class MainMenuScreen extends AbstractScreen {
         heightField.setFieldWidth(fieldWidth);
         heightField.setFieldDisabled(false);
         heightField.setStep(5);
-        heightField.setValue(config.getInteger("world.height"));
+        heightField.setValue(worldParams.getHeight());
         table.add(heightField)
                 .left();
         table.add(new Label("Height", skin))
@@ -96,7 +98,7 @@ public class MainMenuScreen extends AbstractScreen {
         return table;
     }
 
-    private Table createSunTable(Skin skin, ConfigManager config, float fieldWidth) {
+    private Table createSunTable(Skin skin, float fieldWidth) {
         Table table = UIUtils.createTable();
         table.add(new Label("Sun light distribution", skin))
                 .center().colspan(2);
@@ -108,7 +110,7 @@ public class MainMenuScreen extends AbstractScreen {
         sunLightField.setFieldWidth(fieldWidth);
         sunLightField.setFieldDisabled(false);
         sunLightField.setStep(5);
-        sunLightField.setValue(config.getInteger("world.sunLight"));
+        sunLightField.setValue(worldParams.getSunLight());
         table.add(sunLightField)
                 .left();
         table.add(new Label("Sun light", skin))
@@ -121,7 +123,7 @@ public class MainMenuScreen extends AbstractScreen {
         lightAbsorptionField.setFieldWidth(fieldWidth);
         lightAbsorptionField.setFieldDisabled(false);
         lightAbsorptionField.setStep(1);
-        lightAbsorptionField.setValue(config.getInteger("world.lightAbsorptionStep"));
+        lightAbsorptionField.setValue(worldParams.getLightAbsorptionStep());
         table.add(lightAbsorptionField)
                 .left();
         table.add(new Label("Light absorption step", skin))
@@ -132,10 +134,12 @@ public class MainMenuScreen extends AbstractScreen {
     private Table createLightDistribution(Skin skin) {
         Table table = UIUtils.createTable();
         CheckBox byTimeCheckBox = new CheckBox("Change by time", skin);
+        byTimeCheckBox.setChecked(worldParams.isSelected(ChangeLightByTime.class.getSimpleName()));
         table.add(byTimeCheckBox).colspan(2);
 
         final float indent = 20f;
         final float fieldWidth = 50f;
+        ChangeLightByTime.register();
         table.row();
         IntChangeableLabel byTimeMaxField = new IntChangeableLabel(skin,
                 v -> worldParams.setDecoratorParam("ChangeLightByTime.max", v));
@@ -188,14 +192,16 @@ public class MainMenuScreen extends AbstractScreen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 if (((CheckBox) event.getListenerActor()).isChecked())
-                    worldParams.addDecorator(ChangeLightByTime.PRODUCER);
+                    worldParams.addDecorator(ChangeLightByTime.class.getSimpleName());
                 else
-                    worldParams.removeDecorator(ChangeLightByTime.PRODUCER);
+                    worldParams.removeDecorator(ChangeLightByTime.class.getSimpleName());
             }
         });
 
+        ChangeLightByX.register();
         table.row();
         CheckBox byXCheckBox = new CheckBox("Change by X axis", skin);
+        byXCheckBox.setChecked(worldParams.isSelected(ChangeLightByX.class.getSimpleName()));
         table.add(byXCheckBox).colspan(2);
 
         table.row();
@@ -214,11 +220,22 @@ public class MainMenuScreen extends AbstractScreen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 if (((CheckBox) event.getListenerActor()).isChecked())
-                    worldParams.addDecorator(ChangeLightByX.PRODUCER);
+                    worldParams.addDecorator(ChangeLightByX.class.getSimpleName());
                 else
-                    worldParams.removeDecorator(ChangeLightByX.PRODUCER);
+                    worldParams.removeDecorator(ChangeLightByX.class.getSimpleName());
             }
         });
         return table;
+    }
+
+    private void loadDefaults() {
+        Preferences lastUsedPrefs = Gdx.app.getPreferences(LAST_USED_CONFIG_KEY);
+        if (lastUsedPrefs.getBoolean("exists")) {
+            log.debug("Load config from preferences");
+            worldParams.loadFromPreferences(lastUsedPrefs);
+        } else {
+            log.debug("Load config from config");
+            worldParams.loadFromConfig(AbstractFactory.getInstance().configManager());
+        }
     }
 }

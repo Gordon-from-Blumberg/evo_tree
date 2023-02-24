@@ -1,7 +1,7 @@
 package com.gordonfromblumberg.games.core.evotree.model;
 
 public class ChangeLightByTime extends AbstractLightDistributionDecorator {
-    public static final LightDistributionDecoratorProducer PRODUCER = (original, params) -> new ChangeLightByTime(
+    private static final LightDistributionDecoratorProducer PRODUCER = (original, params) -> new ChangeLightByTime(
             original,
             (int) params.get("ChangeLightByTime.max"),
             (int) params.get("ChangeLightByTime.min"),
@@ -23,6 +23,10 @@ public class ChangeLightByTime extends AbstractLightDistributionDecorator {
         this.min = min;
         this.delay = delay;
         this.step = step;
+    }
+
+    public static void register() {
+        decorators.put(ChangeLightByTime.class.getSimpleName(), PRODUCER);
     }
 
     @Override

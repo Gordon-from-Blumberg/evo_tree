@@ -2,7 +2,7 @@
   <configuration default="false" name="DesktopLauncher" type="Application" factoryName="Application" nameIsGenerated="true">
     <option name="MAIN_CLASS_NAME" value="com.gordonfromblumberg.games.desktop.common.DesktopLauncher" />
     <module name="evo_tree.desktop.main" />
-    <option name="PROGRAM_PARAMETERS" value="-debug -workDir=E:\games\evo_tree" />
+    <option name="PROGRAM_PARAMETERS" value="-debug -workDir=E:\games\evo_tree -prefDir=E:\games\evo_tree\prefs" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

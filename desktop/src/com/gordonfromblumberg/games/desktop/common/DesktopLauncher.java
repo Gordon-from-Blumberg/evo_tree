@@ -1,5 +1,6 @@
 package com.gordonfromblumberg.games.desktop.common;
 
+import com.badlogic.gdx.Files;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.gordonfromblumberg.games.core.common.Main;
@@ -36,13 +37,23 @@ public class DesktopLauncher {
 			if (arg.startsWith(workDirPrefix)) {
 				String workDir = arg.substring(workDirPrefix.length());
 				File workDirFile = new File(workDir);
-				if (!workDirFile.exists()) {
-					if (!workDirFile.mkdirs()) {
-						System.err.println("Incorrect work dir " + workDir);
-						continue;
-					}
+				if (!workDirFile.exists() && !workDirFile.mkdirs()) {
+					System.err.println("Incorrect work dir " + workDir);
+					continue;
 				}
 				Main.WORK_DIR_PATH = workDir;
+				continue;
+			}
+			String prefDirPrefix = "-prefDir=";
+			if (arg.startsWith(prefDirPrefix)) {
+				String prefDir = arg.substring(prefDirPrefix.length());
+				File prefDirFile = new File(prefDir);
+				if (!prefDirFile.exists() && !prefDirFile.mkdirs()) {
+					System.err.println("Incorrect work dir " + prefDir);
+					continue;
+				}
+				config.preferencesDirectory = prefDir;
+				config.preferencesFileType = Files.FileType.Absolute;
 				continue;
 			}
 		}
