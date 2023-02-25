@@ -3,10 +3,12 @@ package com.gordonfromblumberg.games.core.common.world;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.Queue;
+import com.gordonfromblumberg.games.core.common.utils.ByteBufferUtils;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.evotree.model.AbstractLightDistributionDecorator;
 import com.gordonfromblumberg.games.core.evotree.model.LightDistribution;
 
+import java.nio.ByteBuffer;
 import java.util.Map;
 
 public class GameWorldParams {
@@ -49,6 +51,10 @@ public class GameWorldParams {
         this.lightAbsorptionStep = lightAbsorptionStep;
     }
 
+    public Object getDecoratorParam(String name) {
+        return decoratorParams.get(name);
+    }
+
     public void setDecoratorParam(String name, Object value) {
         decoratorParams.put(name, value);
     }
@@ -78,7 +84,7 @@ public class GameWorldParams {
         return false;
     }
 
-    public void loadFromConfig(ConfigManager config) {
+    public void load(ConfigManager config) {
         width = config.getInteger("world.width");
         height = config.getInteger("world.height");
         sunLight = config.getInteger("world.sunLight");
@@ -86,7 +92,24 @@ public class GameWorldParams {
         selectedDecorators.clear();
     }
 
-    public void loadFromPreferences(Preferences prefs) {
+    public void save(Preferences prefs) {
+        prefs.putInteger("world.width", width);
+        prefs.putInteger("world.height", height);
+        prefs.putInteger("world.sunLight", sunLight);
+        prefs.putInteger("world.lightAbsorptionStep", lightAbsorptionStep);
+        prefs.putString("selectedDecorators", selectedDecorators.toString(","));
+        for (ObjectMap.Entry<String, Object> entry : decoratorParams) {
+            String key = "decorator.param." + entry.key;
+            if (entry.value instanceof Boolean) prefs.putBoolean(key, (Boolean) entry.value);
+            else if (entry.value instanceof Integer) prefs.putInteger(key, (Integer) entry.value);
+            else if (entry.value instanceof Long) prefs.putLong(key, (Long) entry.value);
+            else if (entry.value instanceof String) prefs.putString(key, (String) entry.value);
+            else if (entry.value instanceof Float) prefs.putFloat(key, (Float) entry.value);
+            else throw new IllegalStateException("Unexpected decorator parameter: " + entry);
+        }
+    }
+
+    public void load(Preferences prefs) {
         width = prefs.getInteger("world.width");
         height = prefs.getInteger("world.height");
         sunLight = prefs.getInteger("world.sunLight");
@@ -110,20 +133,41 @@ public class GameWorldParams {
         }
     }
 
-    public void saveToPreferences(Preferences prefs) {
-        prefs.putInteger("world.width", width);
-        prefs.putInteger("world.height", height);
-        prefs.putInteger("world.sunLight", sunLight);
-        prefs.putInteger("world.lightAbsorptionStep", lightAbsorptionStep);
-        prefs.putString("selectedDecorators", selectedDecorators.toString(","));
+    public void save(ByteBuffer bb) {
+        bb.putInt(width);
+        bb.putInt(height);
+        bb.putInt(sunLight);
+        bb.putInt(lightAbsorptionStep);
+
+        bb.putInt(selectedDecorators.size);
+        for (String selectedDecorator : selectedDecorators) {
+            ByteBufferUtils.putString(selectedDecorator, bb);
+        }
+
+        bb.putInt(decoratorParams.size);
         for (ObjectMap.Entry<String, Object> entry : decoratorParams) {
-            String key = "decorator.param." + entry.key;
-            if (entry.value instanceof Boolean) prefs.putBoolean(key, (Boolean) entry.value);
-            else if (entry.value instanceof Integer) prefs.putInteger(key, (Integer) entry.value);
-            else if (entry.value instanceof Long) prefs.putLong(key, (Long) entry.value);
-            else if (entry.value instanceof String) prefs.putString(key, (String) entry.value);
-            else if (entry.value instanceof Float) prefs.putFloat(key, (Float) entry.value);
-            else throw new IllegalStateException("Unexpected decorator parameter: " + entry);
+            ByteBufferUtils.putString(entry.key, bb);
+            ByteBufferUtils.putObject(entry.value, bb);
+        }
+    }
+
+    public void load(ByteBuffer bb) {
+        width = bb.getInt();
+        height = bb.getInt();
+        sunLight = bb.getInt();
+        lightAbsorptionStep = bb.getInt();
+
+        int decoratorCount = bb.getInt();
+        selectedDecorators.clear();
+        while (decoratorCount-- > 0) {
+            selectedDecorators.addLast(ByteBufferUtils.getString(bb));
+        }
+
+        int paramCount = bb.getInt();
+        while (paramCount-- > 0) {
+            String key = ByteBufferUtils.getString(bb);
+            Object value = ByteBufferUtils.getObject(bb);
+            decoratorParams.put(key, value);
         }
     }
 }

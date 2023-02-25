@@ -200,7 +200,7 @@ public class SaveLoadWindow extends DialogExt {
                 byteBuffer.flip();
                 handler.accept(byteBuffer);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Could not read file " + fileList.selected.file.getPath(), e);
             }
         }
     }
