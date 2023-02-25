@@ -25,6 +25,7 @@ import com.gordonfromblumberg.games.core.evotree.model.*;
 import com.gordonfromblumberg.games.core.evotree.model.Cell;
 import com.gordonfromblumberg.games.core.evotree.model.Tree;
 
+import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 
 import static com.gordonfromblumberg.games.core.common.utils.StringUtils.padLeft;
@@ -103,28 +104,30 @@ public class GameUIRenderer extends UIRenderer {
             @Override
             public boolean keyDown(InputEvent event, int keycode) {
                 if (keycode == Input.Keys.F5 && (loadWindow == null || !loadWindow.isVisible())) {
+                    Consumer<ByteBuffer> saveHandler = bb -> {
+                        bb.put((byte) 1);
+                        bb.putChar('H');
+                        bb.putChar('i');
+                        bb.putLong(System.currentTimeMillis());
+                    };
                     if (saveWindow == null) {
                         saveWindow = createSaveLoadWindow(false, uiSkin);
-                        saveWindow.open(bb -> {
-                            bb.put((byte) 1);
-                            bb.putChar('H');
-                            bb.putChar('i');
-                            bb.putLong(System.currentTimeMillis());
-                        });
+                        saveWindow.open(saveHandler);
                     } else {
-                        saveWindow.toggle();
+                        saveWindow.toggle(saveHandler);
                     }
                     return true;
                 } else if (keycode == Input.Keys.F6 && (saveWindow == null || !saveWindow.isVisible())) {
+                    Consumer<ByteBuffer> loadHandler = bb -> {
+                        while (bb.hasRemaining()) {
+                            log.debug(String.valueOf(bb.get()));
+                        }
+                    };
                     if (loadWindow == null) {
                         loadWindow = createSaveLoadWindow(true, uiSkin);
-                        loadWindow.open(bb -> {
-                            while (bb.hasRemaining()) {
-                                log.debug(String.valueOf(bb.get()));
-                            }
-                        });
+                        loadWindow.open(loadHandler);
                     } else {
-                        loadWindow.toggle();
+                        loadWindow.toggle(loadHandler);
                     }
                     return true;
                 }

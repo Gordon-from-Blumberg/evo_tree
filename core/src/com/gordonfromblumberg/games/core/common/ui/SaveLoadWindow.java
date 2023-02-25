@@ -137,6 +137,13 @@ public class SaveLoadWindow extends DialogExt {
         fileList.unselect();
     }
 
+    public void toggle(Consumer<ByteBuffer> handler) {
+        if (isVisible())
+            hide();
+        else
+            open(handler);
+    }
+
     /**
      * @return True if SaveLoadWindow should be hidden and false otherwise
      */
