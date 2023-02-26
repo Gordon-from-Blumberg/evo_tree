@@ -8,7 +8,8 @@ public class Gene {
     private static final Logger log = LogManager.create(Gene.class);
 
     static final RandomGen RAND = RandomGen.INSTANCE;
-    static final int MAX_VALUE = 42;
+    static final int MIN_VALUE = -20;
+    static final int MAX_VALUE = 32 + 20;
     public static final int LIGHT_ABSORPTION;
     public static final int CONDITION1;
     public static final int PARAMETER1;
@@ -25,7 +26,8 @@ public class Gene {
         CONDITION2 = valueCount++;
         PARAMETER2 = valueCount++;
         MOVE_TO = valueCount++;
-        VALUE_COUNT = valueCount;
+//        VALUE_COUNT = valueCount;
+        VALUE_COUNT = 5;
     }
 
     private final byte[] values = new byte[VALUE_COUNT];
@@ -34,12 +36,12 @@ public class Gene {
 
     void setRandom() {
         for (int i = 0; i < VALUE_COUNT; ++i) {
-            values[i] = (byte) RAND.nextInt(0, MAX_VALUE);
+            values[i] = (byte) RAND.nextInt(MIN_VALUE, MAX_VALUE); //todo determine optimal interval
         }
     }
 
     void mutate() {
-        values[RAND.nextInt(0, 4)] = (byte) RAND.nextInt(0, MAX_VALUE);
+        values[RAND.nextInt(0, VALUE_COUNT)] = (byte) RAND.nextInt(MIN_VALUE, MAX_VALUE);  //todo determine optimal interval
     }
 
     void set(Gene other) {

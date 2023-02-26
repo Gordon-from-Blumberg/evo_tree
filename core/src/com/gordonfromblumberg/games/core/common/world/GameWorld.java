@@ -73,7 +73,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
         if (configManager.contains("world.turnsPerSecond"))
             updateDelay = 1f / configManager.getInteger("world.turnsPerSecond");
 
-        for (int i = 5; i < cellGrid.getWidth(); i += 10) {
+        for (int i = 5; i < cellGrid.getWidth(); i += 5) {
             Seed seed = Seed.getInstance();
             seed.setCell(cellGrid.cells[i][RandomGen.INSTANCE.nextInt(0, cellGrid.getHeight() / 2)]);
             seed.setGeneration(1);

@@ -58,7 +58,7 @@ public class DNA {
     }
 
     Gene getSpecialGene(int valueIndex) {
-        return genes[genes[SPECIAL].getValue(valueIndex) % SPROUT_GENES_COUNT];
+        return genes[(genes[SPECIAL].getValue(valueIndex) - Byte.MIN_VALUE) % SPROUT_GENES_COUNT];
     }
 
     public void reset() {

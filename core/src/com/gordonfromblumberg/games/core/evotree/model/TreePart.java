@@ -63,8 +63,9 @@ public class TreePart extends LivingCellObject {
         while (shouldCheckCondition(gene)
                 && checkCondition(gene.getValue(Gene.CONDITION1), gene.getValue(Gene.PARAMETER1), grid)
                 && checkCondition(gene.getValue(Gene.CONDITION2), gene.getValue(Gene.PARAMETER2), grid)) {
-            if (gene.getValue(Gene.MOVE_TO) < DNA.SPROUT_GENES_COUNT) {
-                Gene next = tree.dna.getGene(gene.getValue(Gene.MOVE_TO));
+            int geneValue = gene.getValue(Gene.MOVE_TO);
+            if (0 <= geneValue && geneValue < DNA.SPROUT_GENES_COUNT) {
+                Gene next = tree.dna.getGene(geneValue);
                 if (!PROCESSED_GENES.contains(next)) {
                     gene = next;
                     PROCESSED_GENES.add(next);
@@ -99,7 +100,7 @@ public class TreePart extends LivingCellObject {
 
         for (Direction dir : Direction.ALL) {
             int nextActiveGene = activeGene.getValue(dir);
-            if (nextActiveGene < DNA.SPROUT_GENES_COUNT) {
+            if (0 <= nextActiveGene && nextActiveGene < DNA.SPROUT_GENES_COUNT) {
                 Cell neib = grid.getCell(cell, dir);
                 if (neib != null && neib.object == null) {
                     TreePart shoot = getInstance();
@@ -122,7 +123,7 @@ public class TreePart extends LivingCellObject {
         int result = 0;
         for (Direction dir : Direction.ALL) {
             int nextGene = activeGene.getValue(dir);
-            if (nextGene < DNA.SPROUT_GENES_COUNT) {
+            if (0 <= nextGene && nextGene < DNA.SPROUT_GENES_COUNT) {
                 Cell neib = grid.getCell(cell, dir);
                 if (neib != null && neib.object == null) {
                     int x = calcLightAbsorption(tree.dna.getGene(nextGene).getValue(Gene.LIGHT_ABSORPTION)) - 4;
@@ -163,10 +164,11 @@ public class TreePart extends LivingCellObject {
     }
 
     private boolean shouldCheckCondition(Gene gene) {
-        byte condition1 = gene.getValue(Gene.CONDITION1);
-        byte condition2 = gene.getValue(Gene.CONDITION2);
-        return condition1 >= MIN_CONDITION && condition1 <= MAX_CONDITION
-                || condition2 >= MIN_CONDITION && condition2 <= MAX_CONDITION;
+        return false;
+//        byte condition1 = gene.getValue(Gene.CONDITION1);
+//        byte condition2 = gene.getValue(Gene.CONDITION2);
+//        return condition1 >= MIN_CONDITION && condition1 <= MAX_CONDITION
+//                || condition2 >= MIN_CONDITION && condition2 <= MAX_CONDITION;
     }
 
     private boolean checkCondition(byte condition, byte parameter, CellGrid grid) {
@@ -225,7 +227,7 @@ public class TreePart extends LivingCellObject {
     }
 
     protected static int calcLightAbsorption(int geneValue) {
-        int absorption = MIN_ABSORPTION + geneValue;
+        int absorption = geneValue < 0 ? MIN_ABSORPTION : MIN_ABSORPTION + geneValue;
         return absorption > MAX_ABSORPTION ? MAX_ABSORPTION : absorption;
     }
 
