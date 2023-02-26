@@ -15,6 +15,7 @@ import com.gordonfromblumberg.games.core.common.screens.AbstractScreen;
 import com.gordonfromblumberg.games.core.common.screens.MainMenuScreen;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.utils.JsonConfigLoader;
+import com.gordonfromblumberg.games.core.common.utils.RandomGen;
 import com.gordonfromblumberg.games.core.common.utils.StringUtils;
 
 import java.io.File;
@@ -73,6 +74,12 @@ public class Main extends Game {
 		LogManager.addAppender(new FileLogAppender(logFile));
 		LogManager.init();
 		log.info("INIT: Work dir = " + WORK_DIR_PATH);
+
+		long seed = configManager.contains("seed")
+				? configManager.getLong("seed")
+				: new RandomGen().nextLong();
+		log.info("Set seed = " + seed);
+		RandomGen.setSeed(seed);
 
 	    assetManager.load("image/texture_pack.atlas", TextureAtlas.class);
 		loadUiAssets();

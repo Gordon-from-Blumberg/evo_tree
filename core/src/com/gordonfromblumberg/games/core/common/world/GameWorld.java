@@ -1,9 +1,6 @@
 package com.gordonfromblumberg.games.core.common.world;
 
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFontCache;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 
@@ -16,7 +13,7 @@ import com.gordonfromblumberg.games.core.common.log.LogManager;
 import com.gordonfromblumberg.games.core.common.log.Logger;
 import com.gordonfromblumberg.games.core.common.utils.ClickHandler;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
-import com.gordonfromblumberg.games.core.common.utils.RandomUtils;
+import com.gordonfromblumberg.games.core.common.utils.RandomGen;
 import com.gordonfromblumberg.games.core.evotree.model.*;
 import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
 
@@ -78,7 +75,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
 
         for (int i = 5; i < cellGrid.getWidth(); i += 10) {
             Seed seed = Seed.getInstance();
-            seed.setCell(cellGrid.cells[i][RandomUtils.nextInt(0, cellGrid.getHeight() / 2)]);
+            seed.setCell(cellGrid.cells[i][RandomGen.INSTANCE.nextInt(0, cellGrid.getHeight() / 2)]);
             seed.setGeneration(1);
             seed.setEnergy(100);
             addSeed(seed);

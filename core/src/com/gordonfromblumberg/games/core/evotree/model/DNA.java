@@ -4,7 +4,7 @@ import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
 import com.gordonfromblumberg.games.core.common.log.LogManager;
 import com.gordonfromblumberg.games.core.common.log.Logger;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
-import com.gordonfromblumberg.games.core.common.utils.RandomUtils;
+import com.gordonfromblumberg.games.core.common.utils.RandomGen;
 
 public class DNA {
     private static final Logger log = LogManager.create(DNA.class);
@@ -44,7 +44,7 @@ public class DNA {
     }
 
     public void mutate() {
-        final RandomUtils.RandomGen rand = Gene.RAND;
+        final RandomGen rand = Gene.RAND;
         for (Gene gene : genes) {
             if (rand.nextBool(MUTATION_CHANCE)) {
                 gene.mutate();

@@ -1,15 +1,13 @@
 package com.gordonfromblumberg.games.core.evotree.model;
 
-import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
 import com.gordonfromblumberg.games.core.common.log.LogManager;
 import com.gordonfromblumberg.games.core.common.log.Logger;
-import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
-import com.gordonfromblumberg.games.core.common.utils.RandomUtils;
+import com.gordonfromblumberg.games.core.common.utils.RandomGen;
 
 public class Gene {
     private static final Logger log = LogManager.create(Gene.class);
 
-    static final RandomUtils.RandomGen RAND;
+    static final RandomGen RAND = RandomGen.INSTANCE;
     static final int MAX_VALUE = 42;
     public static final int LIGHT_ABSORPTION;
     public static final int CONDITION1;
@@ -20,12 +18,6 @@ public class Gene {
     static final int VALUE_COUNT;
 
     static {
-        ConfigManager configManager = AbstractFactory.getInstance().configManager();
-        long seed = configManager.contains("seed")
-                ? configManager.getLong("seed")
-                : RandomUtils.nextLong();
-        log.info("Seed = " + seed);
-        RAND = RandomUtils.randomGen(seed);
         int valueCount = Direction.ALL.length;
         LIGHT_ABSORPTION = valueCount++;
         CONDITION1 = valueCount++;
