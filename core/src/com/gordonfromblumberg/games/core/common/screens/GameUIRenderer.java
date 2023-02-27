@@ -316,7 +316,7 @@ public class GameUIRenderer extends UIRenderer {
                                 .append("  ")
                                 .append(padLeft(gene.getValue(Gene.CONDITION1), 2)).append(" ")
                                 .append(padLeft(gene.getValue(Gene.PARAMETER1), 2)).append(" ")
-                                .append(padLeft(gene.getValue(Gene.MOVE_TO), 2))
+//                                .append(padLeft(gene.getValue(Gene.MOVE_TO), 2))
                                 .append('\n')
 
                                 .append("     ").append(padLeft(gene.getValue(Direction.down), 2))

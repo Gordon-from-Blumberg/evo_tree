@@ -8,14 +8,14 @@ public class Gene {
     private static final Logger log = LogManager.create(Gene.class);
 
     static final RandomGen RAND = RandomGen.INSTANCE;
-    static final int MIN_VALUE = -20;
-    static final int MAX_VALUE = 32 + 20;
+    static final int MIN_VALUE = -32;
+    static final int MAX_VALUE = 32 + 32;
     public static final int LIGHT_ABSORPTION;
     public static final int CONDITION1;
     public static final int PARAMETER1;
     public static final int CONDITION2;
     public static final int PARAMETER2;
-    public static final int MOVE_TO;
+    public static final int ACTION;
     static final int VALUE_COUNT;
 
     static {
@@ -25,9 +25,9 @@ public class Gene {
         PARAMETER1 = valueCount++;
         CONDITION2 = valueCount++;
         PARAMETER2 = valueCount++;
-        MOVE_TO = valueCount++;
-//        VALUE_COUNT = valueCount;
-        VALUE_COUNT = 5;
+        ACTION = valueCount;
+        VALUE_COUNT = valueCount + 3; // for 2 conditions - 4 possible actions (0 - default)
+//        VALUE_COUNT = 5;
     }
 
     private final byte[] values = new byte[VALUE_COUNT];

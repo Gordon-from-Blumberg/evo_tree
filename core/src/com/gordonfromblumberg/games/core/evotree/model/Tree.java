@@ -101,10 +101,11 @@ public class Tree implements Poolable {
             return true;
         }
 
+        GeneticRules rules = world.getGeneticRules();
         Iterator<TreePart> it = treeParts.iterator();
         while (it.hasNext()) {
             TreePart part = it.next();
-            if (part.type == TreePartType.SHOOT && part.update(grid, newShoots)) {
+            if (part.type == TreePartType.SHOOT && part.update(grid, newShoots, rules)) {
                 it.remove();
                 part.release();
             }

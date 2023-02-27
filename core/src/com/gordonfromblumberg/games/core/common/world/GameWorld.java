@@ -35,6 +35,8 @@ public class GameWorld implements EvoTreeWorld, Disposable {
     private SimpleLightDistribution simpleLightDistribution;
     LightDistribution lightDistribution;
 
+    GeneticRules geneticRules = new GeneticRules();
+
     boolean running;
     boolean paused;
 //    final BitmapFontCache pauseText;
@@ -120,6 +122,11 @@ public class GameWorld implements EvoTreeWorld, Disposable {
     @Override
     public CellGrid getGrid() {
         return cellGrid;
+    }
+
+    @Override
+    public GeneticRules getGeneticRules() {
+        return geneticRules;
     }
 
     private int diff = 1;
