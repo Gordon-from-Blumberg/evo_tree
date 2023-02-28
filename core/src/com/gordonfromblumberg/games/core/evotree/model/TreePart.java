@@ -21,6 +21,8 @@ public class TreePart extends LivingCellObject {
     static final int ENERGY_CONSUMPTION = 10;
 
     Tree tree;
+    TreePart parent;
+    Array<TreePart> children = new Array<>(4);
     TreePartType type;
     Gene activeGene;
 
@@ -91,6 +93,7 @@ public class TreePart extends LivingCellObject {
                     newShoots.add(shoot);
                     shoot.activeGene = tree.dna.getGene(nextActiveGene);
                     shoot.lightAbsorption = calcLightAbsorption(shoot.activeGene.getValue(Gene.LIGHT_ABSORPTION));
+                    addChild(shoot);
                 }
             }
         }
@@ -158,6 +161,16 @@ public class TreePart extends LivingCellObject {
         return tree;
     }
 
+    void addChild(TreePart child) {
+        child.parent = this;
+        children.add(child);
+    }
+
+    void removeFromParent() {
+        parent.children.removeValue(this, true);
+        parent = null;
+    }
+
     public TreePartType getType() {
         return type;
     }
@@ -167,6 +180,8 @@ public class TreePart extends LivingCellObject {
         super.reset();
 
         tree = null;
+        parent = null;
+        children.clear();
         type = null;
     }
 

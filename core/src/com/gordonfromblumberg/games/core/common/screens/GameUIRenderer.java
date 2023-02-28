@@ -27,6 +27,7 @@ import com.gordonfromblumberg.games.core.evotree.model.Tree;
 
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static com.gordonfromblumberg.games.core.common.utils.StringUtils.padLeft;
 
@@ -222,6 +223,15 @@ public class GameUIRenderer extends UIRenderer {
         table.add(new UpdatableLabel(uiSkin, () -> cell != null && cell.getObject() instanceof TreePart
                 ? ((TreePart) cell.getObject()).calcEnergy(world.getGrid()) : "No tree part")
         )
+                .left();
+
+        table.row();
+        table.add(new Label("Life time (rest)", uiSkin))
+                .padRight(pad).right();
+        final Function<Tree, String> lifeTime = tree -> tree.getLifetime() + " (" + tree.getRestLifeTime() + ")";
+        table.add(new UpdatableLabel(uiSkin, () -> cell != null && cell.getObject() instanceof TreePart
+                        ? lifeTime.apply(((TreePart) cell.getObject()).getTree()) : "No tree part")
+                )
                 .left();
 
         table.row();

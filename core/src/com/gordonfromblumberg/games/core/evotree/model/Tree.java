@@ -41,6 +41,7 @@ public class Tree implements Poolable {
     int id;
     int generation;
     int lifetime;
+    int age;
     final DNA dna = new DNA();
     int energy;
     Cell root;
@@ -68,9 +69,12 @@ public class Tree implements Poolable {
         Gene treeLifetime = dna.getSpecialGene(DNA.LIFETIME);
         int lifetime = 0;
         for (int i = 0; i < Gene.VALUE_COUNT; ++i) {
-            lifetime += treeLifetime.getValue(i);
+            int value = treeLifetime.getValue(i);
+            if (value > 0)
+                lifetime += value;
         }
-        this.lifetime = (lifetime - MIN_LIFETIME + 1) % (MAX_LIFETIME - MIN_LIFETIME) + MIN_LIFETIME;
+        this.lifetime = (lifetime + 1) % (MAX_LIFETIME - MIN_LIFETIME) + MIN_LIFETIME;
+        this.age = 0;
     }
 
     /**
@@ -84,7 +88,7 @@ public class Tree implements Poolable {
             return false;
         }
 
-        if (--lifetime < 0) {
+        if (++age == lifetime) {
             produceSeeds(world);
             return true;
         }
@@ -182,6 +186,18 @@ public class Tree implements Poolable {
         return dna;
     }
 
+    public int getLifetime() {
+        return lifetime;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public int getRestLifeTime() {
+        return lifetime - age;
+    }
+
     @Override
     public void release() {
         pool.free(this);
@@ -192,6 +208,7 @@ public class Tree implements Poolable {
         id = 0;
         generation = 0;
         lifetime = 0;
+        age = 0;
         dna.reset();
         energy = 0;
         root = null;

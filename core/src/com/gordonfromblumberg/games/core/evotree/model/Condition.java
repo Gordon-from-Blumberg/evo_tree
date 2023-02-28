@@ -58,13 +58,13 @@ public enum Condition {
     TREE_SIZE_LESS((byte) -10) {
         @Override
         boolean check(CellGrid grid, TreePart treePart, byte parameter) {
-            return treePart.tree.getSize() < parameter * 2;
+            return treePart.tree.getSize() < parameter * 3;
         }
     },
     TREE_SIZE_MORE((byte) -11) {
         @Override
         boolean check(CellGrid grid, TreePart treePart, byte parameter) {
-            return treePart.tree.getSize() > parameter * 2;
+            return treePart.tree.getSize() > parameter * 3;
         }
     },
     TREE_ENERGY_LESS((byte) -12) {
@@ -100,13 +100,13 @@ public enum Condition {
     TREE_LIFETIME_LESS((byte) -17) {
         @Override
         boolean check(CellGrid grid, TreePart treePart, byte parameter) {
-            return  treePart.tree.lifetime < parameter;
+            return  treePart.tree.getRestLifeTime() < parameter;
         }
     },
     TREE_LIFETIME_MORE((byte) -18) {
         @Override
         boolean check(CellGrid grid, TreePart treePart, byte parameter) {
-            return  treePart.tree.lifetime > parameter;
+            return  treePart.tree.getRestLifeTime() > parameter;
         }
     },
     IS_BLOCKED_TO_SPROUT((byte) -19) {
@@ -131,6 +131,18 @@ public enum Condition {
         @Override
         boolean check(CellGrid grid, TreePart treePart, byte parameter) {
             return  !treePart.isBlocked(grid, (byte) (parameter % DIRS_MOD), false);
+        }
+    },
+    TREE_AGE_LESS((byte) -23) {
+        @Override
+        boolean check(CellGrid grid, TreePart treePart, byte parameter) {
+            return treePart.tree.age < parameter;
+        }
+    },
+    TREE_AGE_MORE((byte) -24) {
+        @Override
+        boolean check(CellGrid grid, TreePart treePart, byte parameter) {
+            return treePart.tree.age > parameter;
         }
     }
     ;
