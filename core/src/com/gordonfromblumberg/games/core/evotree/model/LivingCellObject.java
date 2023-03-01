@@ -6,15 +6,6 @@ public abstract class LivingCellObject extends CellObject {
     protected static final int[] LIGHT_MODS = new int[] {1, 2, 4, 2};
 
     /**
-     * This field should be reset in child class
-     */
-    protected int energyConsumption;
-
-    protected LivingCellObject(int energyConsumption) {
-        this.energyConsumption = energyConsumption;
-    }
-
-    /**
      * Updates state of this tree part
      * @param world Game world
      * @return true if this part should be removed from world

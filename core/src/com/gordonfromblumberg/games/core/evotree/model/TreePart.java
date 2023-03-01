@@ -26,9 +26,7 @@ public class TreePart extends LivingCellObject {
     TreePartType type;
     Gene activeGene;
 
-    private TreePart() {
-        super(ENERGY_CONSUMPTION);
-    }
+    private TreePart() {}
 
     public static TreePart getInstance() {
         return pool.obtain();

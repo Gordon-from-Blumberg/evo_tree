@@ -41,7 +41,7 @@ public class Gene {
     }
 
     void mutate() {
-        values[RAND.nextInt(0, VALUE_COUNT)] = (byte) RAND.nextInt(MIN_VALUE, MAX_VALUE);  //todo determine optimal interval
+        values[RAND.nextInt(VALUE_COUNT)] = (byte) RAND.nextInt(MIN_VALUE, MAX_VALUE);  //todo determine optimal interval
     }
 
     void set(Gene other) {

@@ -149,6 +149,7 @@ public class Tree implements Poolable {
                     seed.generation = nextGeneration;
                     seed.dna.set(this.dna);
                     seed.dna.mutate();
+                    seed.init();
                     seed.energy = energyPerSeed;
                     world.addSeed(seed);
                     log.info("Seed #" + seed.id + " was produced by tree #" + id
