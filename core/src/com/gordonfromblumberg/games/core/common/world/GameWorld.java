@@ -77,7 +77,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
 
         for (int i = 5; i < cellGrid.getWidth(); i += 5) {
             Seed seed = Seed.getInstance();
-            seed.setCell(cellGrid.cells[i][RandomGen.INSTANCE.nextInt(0, cellGrid.getHeight() / 2)]);
+            seed.setCell(cellGrid.cells[i][RandomGen.INSTANCE.nextInt(cellGrid.getHeight() / 2)]);
             seed.setGeneration(1);
             seed.setEnergy(100);
             addSeed(seed);

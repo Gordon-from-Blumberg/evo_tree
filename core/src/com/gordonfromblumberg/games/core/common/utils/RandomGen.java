@@ -13,12 +13,21 @@ public class RandomGen {
         INSTANCE.rand.setSeed(seed);
     }
 
+    /**
+     * @param to Upper bound (exclusive)
+     * @return random int from [0; to)
+     */
     public int nextInt(int to) {
         return rand.nextInt(to);
     }
 
+    /**
+     * @param from Lower bound (inclusive)
+     * @param to Upper bound (inclusive)
+     * @return random int from [from; to]
+     */
     public int nextInt(int from, int to) {
-        return from == to ? from : from + rand.nextInt(to - from);
+        return from == to ? from : from + rand.nextInt(to - from + 1);
     }
 
     public float nextFloat() {
