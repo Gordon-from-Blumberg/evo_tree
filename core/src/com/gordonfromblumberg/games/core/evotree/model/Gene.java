@@ -27,7 +27,6 @@ public class Gene {
         PARAMETER2 = valueCount++;
         ACTION = valueCount;
         VALUE_COUNT = valueCount + 3; // for 2 conditions - 4 possible actions (0 - default)
-//        VALUE_COUNT = 5;
     }
 
     private final byte[] values = new byte[VALUE_COUNT];

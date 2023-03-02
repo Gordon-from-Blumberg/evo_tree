@@ -8,6 +8,7 @@ import com.gordonfromblumberg.games.core.common.log.LogManager;
 import com.gordonfromblumberg.games.core.common.log.Logger;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.common.utils.Poolable;
+import com.gordonfromblumberg.games.core.common.utils.RandomGen;
 import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
 
 import java.util.Iterator;
@@ -50,6 +51,7 @@ public class Tree implements Poolable {
     private final Color color = new Color();
 
     boolean justSprouted;
+    boolean isDead;
 
     private Tree() {}
 
@@ -88,29 +90,34 @@ public class Tree implements Poolable {
             return false;
         }
 
-        if (++age == lifetime) {
-            produceSeeds(world);
-            return true;
-        }
-
         CellGrid grid = world.getGrid();
-        for (TreePart treePart : treeParts) {
-            energy += treePart.calcEnergy(grid);
-        }
+        if (!isDead) {
+            if (++age == lifetime) {
+                produceSeeds(world);
+                die();
+                return false;
+            }
 
-        energy -= getSize() * TreePart.ENERGY_CONSUMPTION;
+            for (TreePart treePart : treeParts) {
+                energy += treePart.calcEnergy(grid);
+            }
 
-        if (energy <= 0) {
-            log.debug("Tree #" + id + " has no energy and dies");
-            return true;
+            energy -= getSize() * TreePart.ENERGY_CONSUMPTION;
+
+            if (energy <= 0) {
+                log.debug("Tree #" + id + " has no energy and dies");
+                die();
+                return false;
+            }
         }
 
         GeneticRules rules = world.getGeneticRules();
         Iterator<TreePart> it = treeParts.iterator();
         while (it.hasNext()) {
             TreePart part = it.next();
-            if (part.type == TreePartType.SHOOT && part.update(grid, newShoots, rules)) {
+            if (part.update(grid, newShoots, rules)) {
                 it.remove();
+                part.removeFromParent();
                 part.release();
             }
         }
@@ -119,7 +126,7 @@ public class Tree implements Poolable {
         }
         newShoots.clear();
 
-        return false;
+        return treeParts.isEmpty();
     }
 
     public void addPart(TreePart part) {
@@ -128,6 +135,7 @@ public class Tree implements Poolable {
         if (part.cell.y > maxHeight) {
             maxHeight = part.cell.y;
         }
+        part.turnsToDisappear = RandomGen.INSTANCE.nextInt(1, getRestLifeTime());
     }
 
     private void produceSeeds(EvoTreeWorld world) {
@@ -142,7 +150,9 @@ public class Tree implements Poolable {
                 energyPerSeed = MAX_ENERGY_PER_SEED;
             }
             int nextGeneration = generation + 1;
-            for (TreePart part : treeParts) {
+            Iterator<TreePart> it = treeParts.iterator();
+            while (it.hasNext()) {
+                TreePart part = it.next();
                 if (part.type == TreePartType.SHOOT) {
                     Seed seed = Seed.getInstance();
                     seed.setCell(part.cell);
@@ -154,8 +164,18 @@ public class Tree implements Poolable {
                     world.addSeed(seed);
                     log.info("Seed #" + seed.id + " was produced by tree #" + id
                             + " with energy " + energyPerSeed + " of gen " + nextGeneration);
+                    it.remove();
+                    part.removeFromParent();
+                    part.release();
                 }
             }
+        }
+    }
+
+    private void die() {
+        isDead = true;
+        for (TreePart part : treeParts) {
+            part.type = TreePartType.DEAD;
         }
     }
 
@@ -219,5 +239,6 @@ public class Tree implements Poolable {
         }
         treeParts.clear();
         color.set(0);
+        isDead = false;
     }
 }

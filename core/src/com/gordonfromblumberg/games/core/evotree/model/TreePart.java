@@ -25,6 +25,7 @@ public class TreePart extends LivingCellObject {
     Array<TreePart> children = new Array<>(4);
     TreePartType type;
     Gene activeGene;
+    int turnsToDisappear;
 
     private TreePart() {}
 
@@ -33,6 +34,14 @@ public class TreePart extends LivingCellObject {
     }
 
     boolean update(CellGrid grid, Array<TreePart> newShoots, GeneticRules rules) {
+        if (type == TreePartType.WOOD) {
+            return false;
+        }
+
+        if (type == TreePartType.DEAD) {
+            return --turnsToDisappear == 0;
+        }
+
         if (rules.hasActiveConditions()) {
             Gene gene = activeGene;
             while (!PROCESSED_GENES.contains(gene)) {
@@ -165,8 +174,10 @@ public class TreePart extends LivingCellObject {
     }
 
     void removeFromParent() {
-        parent.children.removeValue(this, true);
-        parent = null;
+        if (parent != null) {
+            parent.children.removeValue(this, true);
+            parent = null;
+        }
     }
 
     public TreePartType getType() {
@@ -181,6 +192,7 @@ public class TreePart extends LivingCellObject {
         parent = null;
         children.clear();
         type = null;
+        turnsToDisappear = 0;
     }
 
     @Override

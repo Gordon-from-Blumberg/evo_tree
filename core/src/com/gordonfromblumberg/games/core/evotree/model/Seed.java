@@ -58,7 +58,7 @@ public class Seed extends LivingCellObject {
         }
         this.lightToSprout = (lightToSprout + 1) % (MAX_LIGHT_TO_SPROUT - MIN_LIGHT_TO_SPROUT) + MIN_LIGHT_TO_SPROUT;
         this.state = State.WAITING;
-        this.turnsToSprout = RandomGen.INSTANCE.nextInt(3, 8);
+        this.turnsToSprout = RandomGen.INSTANCE.nextInt(4, 10);
     }
 
     @Override
