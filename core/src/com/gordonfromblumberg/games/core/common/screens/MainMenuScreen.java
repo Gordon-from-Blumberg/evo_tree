@@ -167,7 +167,7 @@ public class MainMenuScreen extends AbstractScreen {
         byTimeMaxField.setFieldWidth(fieldWidth);
         byTimeMaxField.setFieldDisabled(false);
         byTimeMaxField.setStep(1);
-        byTimeMaxField.setValue(15);
+        byTimeMaxField.setValue((int) worldParams.getDecoratorParam("ChangeLightByTime.max"));
         table.add(byTimeMaxField).padLeft(indent).left();
         table.add(new Label("Max", skin)).left();
         updateListeners.add(params -> byTimeMaxField.setValue((int) worldParams.getDecoratorParam("ChangeLightByTime.max")));
@@ -180,7 +180,7 @@ public class MainMenuScreen extends AbstractScreen {
         byTimeMinField.setFieldWidth(fieldWidth);
         byTimeMinField.setFieldDisabled(false);
         byTimeMinField.setStep(1);
-        byTimeMinField.setValue(-15);
+        byTimeMinField.setValue((int) worldParams.getDecoratorParam("ChangeLightByTime.min"));
         table.add(byTimeMinField).padLeft(indent).left();
         table.add(new Label("Min", skin)).left();
         updateListeners.add(params -> byTimeMinField.setValue((int) worldParams.getDecoratorParam("ChangeLightByTime.min")));
@@ -193,7 +193,7 @@ public class MainMenuScreen extends AbstractScreen {
         byTimeDelayField.setFieldWidth(fieldWidth);
         byTimeDelayField.setFieldDisabled(false);
         byTimeDelayField.setStep(50);
-        byTimeDelayField.setValue(500);
+        byTimeDelayField.setValue((int) worldParams.getDecoratorParam("ChangeLightByTime.delay"));
         table.add(byTimeDelayField).padLeft(indent).left();
         table.add(new Label("Delay", skin)).left();
         updateListeners.add(params -> byTimeDelayField.setValue((int) worldParams.getDecoratorParam("ChangeLightByTime.delay")));
@@ -206,7 +206,7 @@ public class MainMenuScreen extends AbstractScreen {
         byTimeStepField.setFieldWidth(fieldWidth);
         byTimeStepField.setFieldDisabled(false);
         byTimeStepField.setStep(1);
-        byTimeStepField.setValue(1);
+        byTimeStepField.setValue((int) worldParams.getDecoratorParam("ChangeLightByTime.step"));
         table.add(byTimeStepField).padLeft(indent).left();
         table.add(new Label("Step", skin)).left();
         updateListeners.add(params -> byTimeStepField.setValue((int) worldParams.getDecoratorParam("ChangeLightByTime.step")));
@@ -236,7 +236,7 @@ public class MainMenuScreen extends AbstractScreen {
         byXHalfMagnitudeField.setFieldWidth(fieldWidth);
         byXHalfMagnitudeField.setFieldDisabled(false);
         byXHalfMagnitudeField.setStep(1);
-        byXHalfMagnitudeField.setValue(15);
+        byXHalfMagnitudeField.setValue((int) worldParams.getDecoratorParam("ChangeLightByX.halfMagnitude"));
         table.add(byXHalfMagnitudeField).padLeft(indent).left();
         table.add(new Label("Half magnitude", skin)).left();
         updateListeners.add(params -> byXHalfMagnitudeField.setValue((int) worldParams.getDecoratorParam("ChangeLightByX.halfMagnitude")));

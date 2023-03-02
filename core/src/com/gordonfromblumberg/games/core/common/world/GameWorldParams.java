@@ -128,7 +128,7 @@ public class GameWorldParams {
         for (Map.Entry<String, ?> entry : prefs.get().entrySet()) {
             String key = entry.getKey();
             if (key.startsWith(keyPrefix)) {
-                decoratorParams.put(key.substring(keyPrefix.length()), entry.getValue());
+                decoratorParams.put(key.substring(keyPrefix.length()), Integer.parseInt((String) entry.getValue()));
             }
         }
     }
