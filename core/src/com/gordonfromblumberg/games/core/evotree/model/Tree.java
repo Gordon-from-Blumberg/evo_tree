@@ -22,7 +22,7 @@ public class Tree implements Poolable {
     };
     private static final Logger log = LogManager.create(Tree.class);
 
-    private static final int MAX_ENERGY_PER_SEED;
+    static final int MAX_ENERGY_PER_SEED;
     private static final float MIN_COLOR_VALUE;
     private static final float MAX_COLOR_VALUE;
     private static final int MIN_LIFETIME;
@@ -48,6 +48,7 @@ public class Tree implements Poolable {
     Cell root;
     int maxHeight;
     final Array<TreePart> treeParts = new Array<>();
+    int shootCount; // is updated inside #update()
     private final Color color = new Color();
 
     boolean justSprouted;
@@ -92,7 +93,7 @@ public class Tree implements Poolable {
 
         CellGrid grid = world.getGrid();
         if (!isDead) {
-            if (++age == lifetime) {
+            if (++age >= lifetime) {
                 produceSeeds(world);
                 die();
                 return false;
@@ -111,11 +112,10 @@ public class Tree implements Poolable {
             }
         }
 
-        GeneticRules rules = world.getGeneticRules();
         Iterator<TreePart> it = treeParts.iterator();
         while (it.hasNext()) {
             TreePart part = it.next();
-            if (part.update(grid, newShoots, rules)) {
+            if (part.update(grid, newShoots, world)) {
                 it.remove();
                 part.removeFromParent();
                 part.release();
@@ -135,14 +135,25 @@ public class Tree implements Poolable {
         if (part.cell.y > maxHeight) {
             maxHeight = part.cell.y;
         }
-        part.turnsToDisappear = RandomGen.INSTANCE.nextInt(1, getRestLifeTime());
+        int restLifeTime = getRestLifeTime();
+        part.turnsToDisappear = RandomGen.INSTANCE.nextInt(1, restLifeTime > 0 ? restLifeTime : 1);
+        if (part.type == TreePartType.SHOOT) {
+            ++shootCount;
+        }
+    }
+
+    Seed createSeed(int energy, Cell cell) {
+        Seed seed = Seed.getInstance();
+        seed.setCell(cell);
+        seed.generation = generation + 1;
+        seed.dna.set(this.dna);
+        seed.dna.mutate();
+        seed.init();
+        seed.energy = energy;
+        return seed;
     }
 
     private void produceSeeds(EvoTreeWorld world) {
-        int shootCount = 0;
-        for (TreePart part : treeParts) {
-            if (part.type == TreePartType.SHOOT) ++shootCount;
-        }
         log.info("Tree #" + id + " attempts to produce seeds: energy=" + energy + ", shoots=" + shootCount);
         if (energy >= shootCount && shootCount > 0) {
             int energyPerSeed = (energy / shootCount) + 1;
@@ -154,13 +165,7 @@ public class Tree implements Poolable {
             while (it.hasNext()) {
                 TreePart part = it.next();
                 if (part.type == TreePartType.SHOOT) {
-                    Seed seed = Seed.getInstance();
-                    seed.setCell(part.cell);
-                    seed.generation = nextGeneration;
-                    seed.dna.set(this.dna);
-                    seed.dna.mutate();
-                    seed.init();
-                    seed.energy = energyPerSeed;
+                    Seed seed = createSeed(energyPerSeed, part.cell);
                     world.addSeed(seed);
                     log.info("Seed #" + seed.id + " was produced by tree #" + id
                             + " with energy " + energyPerSeed + " of gen " + nextGeneration);
@@ -238,6 +243,7 @@ public class Tree implements Poolable {
             part.release();
         }
         treeParts.clear();
+        shootCount = 0;
         color.set(0);
         isDead = false;
     }

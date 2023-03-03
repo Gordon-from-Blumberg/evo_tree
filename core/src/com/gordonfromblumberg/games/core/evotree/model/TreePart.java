@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.utils.Pool;
 import com.gordonfromblumberg.games.core.common.log.LogManager;
 import com.gordonfromblumberg.games.core.common.log.Logger;
+import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
 
 public class TreePart extends LivingCellObject {
     private static final Logger log = LogManager.create(TreePart.class);
@@ -33,7 +34,7 @@ public class TreePart extends LivingCellObject {
         return pool.obtain();
     }
 
-    boolean update(CellGrid grid, Array<TreePart> newShoots, GeneticRules rules) {
+    boolean update(CellGrid grid, Array<TreePart> newShoots, EvoTreeWorld world) {
         if (type == TreePartType.WOOD) {
             return false;
         }
@@ -42,6 +43,7 @@ public class TreePart extends LivingCellObject {
             return --turnsToDisappear == 0;
         }
 
+        GeneticRules rules = world.getGeneticRules();
         if (rules.hasActiveConditions()) {
             Gene gene = activeGene;
             while (!PROCESSED_GENES.contains(gene)) {
@@ -63,11 +65,11 @@ public class TreePart extends LivingCellObject {
                     break;
                 } else {
 //                    log.debug("Conditions " + condition1 + ", " + condition2 + "; check res = " + checkResult);
-                    int action = gene.getValue(Gene.ACTION + checkResult - 1);
+                    byte action = gene.getValue(Gene.ACTION + checkResult - 1);
                     if (0 <= action && action < DNA.SPROUT_GENES_COUNT) {
                         gene = tree.dna.getGene(action);
-                    } else {
-                        // todo implement actions
+                    } else if (rules.isActiveAction(action)) {
+                        return Action.of(action).act(grid, this, world);
                     }
                 }
             }
@@ -106,9 +108,10 @@ public class TreePart extends LivingCellObject {
         }
     }
 
-    private void becomeWood() {
+    void becomeWood() {
         type = TreePartType.WOOD;
         activeGene = null;
+        --tree.shootCount;
     }
 
     int calcSproutCost(CellGrid grid) {
