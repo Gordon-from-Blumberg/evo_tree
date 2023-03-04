@@ -25,6 +25,6 @@ public abstract class LivingCellObject extends CellObject {
                 }
             }
         }
-        return Math.min(max, getLightAbsorption());
+        return max;
     }
 }

@@ -8,7 +8,7 @@ public class Gene {
     private static final Logger log = LogManager.create(Gene.class);
 
     static final RandomGen RAND = RandomGen.INSTANCE;
-    static final int MIN_VALUE = -32;
+    static final int MIN_VALUE = -40;
     static final int MAX_VALUE = 32 + 32;
     public static final int LIGHT_ABSORPTION;
     public static final int CONDITION1;

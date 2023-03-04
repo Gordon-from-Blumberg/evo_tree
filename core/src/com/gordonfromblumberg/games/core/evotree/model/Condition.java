@@ -144,6 +144,30 @@ public enum Condition {
         boolean check(CellGrid grid, TreePart treePart, byte parameter) {
             return treePart.tree.age > parameter;
         }
+    },
+    LIGHT_ABSORBED_LESS((byte) -25) {
+        @Override
+        boolean check(CellGrid grid, TreePart treePart, byte parameter) {
+            return treePart.calcAbsorbedLight(grid) <= parameter;
+        }
+    },
+    LIGHT_ABSORBED_MORE((byte) -26) {
+        @Override
+        boolean check(CellGrid grid, TreePart treePart, byte parameter) {
+            return treePart.calcAbsorbedLight(grid) > parameter;
+        }
+    },
+    ABSORPTION_LESS((byte) -27) {
+        @Override
+        boolean check(CellGrid grid, TreePart treePart, byte parameter) {
+            return treePart.getLightAbsorption() <= parameter;
+        }
+    },
+    ABSORPTION_MORE((byte) -28) {
+        @Override
+        boolean check(CellGrid grid, TreePart treePart, byte parameter) {
+            return treePart.getLightAbsorption() > parameter;
+        }
     }
     ;
 

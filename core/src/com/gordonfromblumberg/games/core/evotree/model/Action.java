@@ -74,6 +74,26 @@ public enum Action {
             }
             return true;
         }
+    },
+    INCREASE_ABSORPTION((byte) -7) {
+        @Override
+        boolean act(CellGrid grid, TreePart treePart, EvoTreeWorld world) {
+            int requiredEnergy = 20;
+            if (treePart.tree.energy > requiredEnergy) {
+                treePart.tree.energy -= requiredEnergy;
+                ++treePart.lightAbsorption;
+            }
+            return false;
+        }
+    },
+    DECREASE_ABSORPTION((byte) -8) {
+        @Override
+        boolean act(CellGrid grid, TreePart treePart, EvoTreeWorld world) {
+            if (treePart.lightAbsorption > 0) {
+                --treePart.lightAbsorption;
+            }
+            return false;
+        }
     }
     ;
 

@@ -135,8 +135,11 @@ public class Tree implements Poolable {
         if (part.cell.y > maxHeight) {
             maxHeight = part.cell.y;
         }
-        int restLifeTime = getRestLifeTime();
-        part.turnsToDisappear = RandomGen.INSTANCE.nextInt(1, restLifeTime > 0 ? restLifeTime : 1);
+        int max = getRestLifeTime();
+        if (max < 1) max = 1;
+        int min = max / 2;
+        if (min < 1) min = 1;
+        part.turnsToDisappear = RandomGen.INSTANCE.nextInt(min, max);
         if (part.type == TreePartType.SHOOT) {
             ++shootCount;
         }

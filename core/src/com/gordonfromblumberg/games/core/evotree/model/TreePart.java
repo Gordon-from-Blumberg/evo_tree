@@ -158,8 +158,12 @@ public class TreePart extends LivingCellObject {
         return false;
     }
 
+    public int calcAbsorbedLight(CellGrid grid) {
+        return Math.min(calcLight(grid), getLightAbsorption());
+    }
+
     public int calcEnergy(CellGrid grid) {
-        return 2 * calcLight(grid);
+        return 2 * calcAbsorbedLight(grid);
     }
 
     protected static int calcLightAbsorption(int geneValue) {
