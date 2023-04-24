@@ -18,7 +18,6 @@ public class CellObject implements Poolable {
 
     public void setCell(Cell cell) {
         this.cell = cell;
-        cell.object = this;
     }
 
     public int getLightAbsorption() {
@@ -29,7 +28,7 @@ public class CellObject implements Poolable {
     public void reset() {
         if (cell != null) {
             if (cell.object == this) {
-                cell.object = null;
+                throw new IllegalStateException("Do not reset an object until it is removed from the grid");
             }
             cell = null;
         }

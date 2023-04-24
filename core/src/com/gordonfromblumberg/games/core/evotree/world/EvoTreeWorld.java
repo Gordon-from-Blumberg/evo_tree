@@ -10,7 +10,6 @@ public interface EvoTreeWorld {
     void removeSeed(Seed seed);
 
     void addTree(Tree tree);
-    void removeTree(Tree tree);
 
     CellGrid getGrid();
     GeneticRules getGeneticRules();

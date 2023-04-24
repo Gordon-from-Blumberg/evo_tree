@@ -238,14 +238,15 @@ public class GameUIRenderer extends UIRenderer {
         table.add(new Label("Tree", uiSkin))
                 .padRight(pad).right();
         table.add(new UpdatableLabel(uiSkin, () -> {
-                    CellObject treePart = cell != null ? cell.getObject() : null;
-                    if (treePart instanceof Seed) {
-                        return "Seed #" + ((Seed) treePart).getId();
+                    CellObject cellObject = cell != null ? cell.getObject() : null;
+                    if (cellObject instanceof Seed) {
+                        return "Seed #" + ((Seed) cellObject).getId();
                     }
-                    if (treePart instanceof TreePart) {
-                        return "#" + ((TreePart) treePart).getTree().getId() + ", " + treePart.getClass().getSimpleName();
+                    if (cellObject instanceof TreePart) {
+                        TreePart treePart = (TreePart) cellObject;
+                        return "#" + treePart.getTree().getId() + ", " + treePart.getType();
                     }
-                    return treePart != null ? treePart.getClass().getSimpleName() : "No tree";
+                    return cellObject != null ? cellObject.getClass().getSimpleName() : "No tree";
                 }))
                 .minWidth(160);
 

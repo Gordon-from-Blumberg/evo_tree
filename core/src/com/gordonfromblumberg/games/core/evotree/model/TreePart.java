@@ -27,6 +27,8 @@ public class TreePart extends LivingCellObject {
     TreePartType type;
     Gene activeGene;
     int turnsToDisappear;
+    final DNA buffer = new DNA();
+    boolean isBufferFilled = false;
 
     private TreePart() {}
 
@@ -98,10 +100,12 @@ public class TreePart extends LivingCellObject {
                 if (neib != null && neib.object == null) {
                     TreePart shoot = getInstance();
                     shoot.type = TreePartType.SHOOT;
-                    shoot.setCell(neib);
+                    grid.addCellObject(shoot, neib);
                     newShoots.add(shoot);
                     shoot.activeGene = tree.dna.getGene(nextActiveGene);
                     shoot.lightAbsorption = calcLightAbsorption(shoot.activeGene.getValue(Gene.LIGHT_ABSORPTION));
+                    shoot.buffer.set(this.buffer);
+                    shoot.isBufferFilled = this.isBufferFilled;
                     addChild(shoot);
                 }
             }
@@ -200,6 +204,8 @@ public class TreePart extends LivingCellObject {
         children.clear();
         type = null;
         turnsToDisappear = 0;
+        buffer.reset();
+        isBufferFilled = false;
     }
 
     @Override

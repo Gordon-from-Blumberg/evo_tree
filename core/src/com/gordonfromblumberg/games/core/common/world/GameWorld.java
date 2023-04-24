@@ -57,7 +57,9 @@ public class GameWorld implements EvoTreeWorld, Disposable {
 //        pauseText = new BitmapFontCache(assets.get("ui/uiskin.json", Skin.class).getFont("default-font"));
 
         final ConfigManager configManager = AbstractFactory.getInstance().configManager();
-        cellGrid = new CellGrid(params.width, params.height, configManager.getInteger("world.cellSize"));
+        cellGrid = new CellGrid(params.width, params.height,
+                configManager.getInteger("world.cellSize"),
+                configManager.getInteger("world.chunkSize"));
         simpleLightDistribution = new SimpleLightDistribution(params.width, params.height, params.sunLight, params.lightAbsorptionStep);
         lightDistribution = params.decorate(simpleLightDistribution);
 //        lightDistribution = new ChangeLightByX(original,15);
@@ -78,7 +80,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
         for (int i = 5; i < cellGrid.getWidth(); i += 5) {
             Seed seed = Seed.getInstance();
             seed.init();
-            seed.setCell(cellGrid.cells[i][RandomGen.INSTANCE.nextInt(cellGrid.getHeight() / 2)]);
+            cellGrid.addCellObject(seed, i, RandomGen.INSTANCE.nextInt(cellGrid.getHeight() / 2));
             seed.setGeneration(1);
             seed.setEnergy(100);
             addSeed(seed);
@@ -115,12 +117,6 @@ public class GameWorld implements EvoTreeWorld, Disposable {
     }
 
     @Override
-    public void removeTree(Tree tree) {
-        trees.removeValue(tree, true);
-        tree.release();
-    }
-
-    @Override
     public CellGrid getGrid() {
         return cellGrid;
     }
@@ -145,11 +141,13 @@ public class GameWorld implements EvoTreeWorld, Disposable {
             }
             time = 0;
 
+            CellGrid grid = this.cellGrid;
             Iterator<Seed> seedIterator = seeds.iterator();
             while (seedIterator.hasNext()) {
                 Seed seed = seedIterator.next();
                 if (seed.update(this)) {
                     seedIterator.remove();
+                    grid.removeCellObject(seed);
                     seed.release();
                 }
             }

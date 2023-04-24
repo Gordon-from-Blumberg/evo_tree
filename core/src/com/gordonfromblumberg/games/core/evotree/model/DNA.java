@@ -43,6 +43,14 @@ public class DNA {
         }
     }
 
+    public void set(DNA parent1, DNA parent2) {
+        final RandomGen rand = Gene.RAND;
+        for (int i = 0; i < GENES_COUNT; ++i) {
+            DNA parent = rand.nextBool() ? parent1 : parent2;
+            this.genes[i].set(parent.genes[i]);
+        }
+    }
+
     public void mutate() {
         final RandomGen rand = Gene.RAND;
         for (Gene gene : genes) {

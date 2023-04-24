@@ -1,6 +1,7 @@
 package com.gordonfromblumberg.games.core.common.utils;
 
 import com.badlogic.gdx.math.RandomXS128;
+import com.badlogic.gdx.utils.Array;
 
 import java.util.Random;
 
@@ -52,5 +53,9 @@ public class RandomGen {
 
     public boolean nextBool(float chance) {
         return rand.nextFloat() < chance;
+    }
+
+    public <T> T getRandomItem(Array<T> array) {
+        return array.get(nextInt(array.size));
     }
 }

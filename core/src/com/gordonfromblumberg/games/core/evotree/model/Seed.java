@@ -80,8 +80,7 @@ public class Seed extends LivingCellObject {
                 }
             }
             if (cell != next) {
-                cell.object = null;
-                setCell(next);
+                grid.moveCellObjectTo(this, next);
             }
             return false;
         } else if (state == State.WAITING) {
@@ -103,6 +102,7 @@ public class Seed extends LivingCellObject {
     }
 
     private void sprout(EvoTreeWorld world) {
+        CellGrid grid = world.getGrid();
         Tree tree = Tree.getInstance();
         tree.generation = this.generation;
         tree.dna.set(this.dna);
@@ -111,7 +111,8 @@ public class Seed extends LivingCellObject {
         tree.root = this.cell;
         TreePart treePart = TreePart.getInstance();
         treePart.type = TreePartType.SHOOT;
-        treePart.setCell(this.cell);
+        treePart.buffer.set(this.dna);
+        grid.addCellObject(treePart, tree.root);
         treePart.activeGene = tree.dna.getGene(0);
         treePart.lightAbsorption = TreePart.calcLightAbsorption(treePart.activeGene.getValue(Gene.LIGHT_ABSORPTION));
         tree.addPart(treePart);

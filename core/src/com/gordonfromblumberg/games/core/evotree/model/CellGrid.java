@@ -1,5 +1,8 @@
 package com.gordonfromblumberg.games.core.evotree.model;
 
+import com.badlogic.gdx.utils.Array;
+import com.gordonfromblumberg.games.core.common.chunk.ChunkManager;
+
 public class CellGrid {
     private static final int[][] NEIGHBORS = new int[][] {
             {0, 1},
@@ -12,8 +15,9 @@ public class CellGrid {
     int cellSize;
     public final Cell[][] cells;
     private final int[] treeHeights;
+    private final ChunkManager<CellObject> chunkManager;
 
-    public CellGrid(int width, int height, int cellSize) {
+    public CellGrid(int width, int height, int cellSize, int chunkSize) {
         this.width = width;
         this.height = height;
         this.cellSize = cellSize;
@@ -22,9 +26,11 @@ public class CellGrid {
 
         for (int i = 0; i < width; ++i) {
             for (int j = 0; j < height; ++j) {
-                cells[i][j] = new Cell(i, j);
+                this.cells[i][j] = new Cell(i, j);
             }
         }
+
+        this.chunkManager = new ChunkManager<>(width, height, chunkSize);
     }
 
     public void updateSunLight(LightDistribution lightDistribution) {
@@ -113,6 +119,51 @@ public class CellGrid {
         if (x < 0) x = width - 1;
         if (x == width) x = 0;
         return cells[x][y];
+    }
+
+    public void addCellObject(CellObject cellObject, int x, int y) {
+        addCellObject(cellObject, cells[x][y]);
+    }
+
+    public void addCellObject(CellObject cellObject, Cell cell) {
+        cellObject.setCell(cell);
+        cell.object = cellObject;
+        if (cellObject instanceof TreePart && ((TreePart) cellObject).type == TreePartType.SHOOT) {
+            chunkManager.addObject(cellObject, cell.x, cell.y);
+        }
+    }
+
+    public void moveCellObjectTo(CellObject cellObject, Cell target) {
+        Cell old = cellObject.cell;
+        if (old != null) {
+            old.object = null;
+        }
+        cellObject.setCell(target);
+        target.object = cellObject;
+        if (cellObject instanceof TreePart && ((TreePart) cellObject).type == TreePartType.SHOOT) {
+            if (old != null) {
+                chunkManager.removeObject(cellObject, old.x, old.y);
+            }
+            chunkManager.addObject(cellObject, target.x, target.y);
+        }
+    }
+
+    public void removeCellObject(CellObject cellObject) {
+        Cell cell = cellObject.cell;
+        cellObject.setCell(null);
+        if (cell.object == cellObject) {
+            cell.object = null;
+        }
+        if (cellObject instanceof TreePart && ((TreePart) cellObject).type == TreePartType.SHOOT) {
+            chunkManager.removeObject(cellObject, cell.x, cell.y);
+        }
+    }
+
+    /**
+     * x1, x2 may be < 0 and > width
+     */
+    public Array<CellObject> findObjectsUnderLine(int x1, int y1, int x2, int y2) {
+        return chunkManager.findObjectsUnderLine(x1, y1, x2, y2);
     }
 
     public int getWidth() {

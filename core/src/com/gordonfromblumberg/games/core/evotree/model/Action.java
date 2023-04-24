@@ -1,5 +1,7 @@
 package com.gordonfromblumberg.games.core.evotree.model;
 
+import com.gordonfromblumberg.games.core.common.log.LogManager;
+import com.gordonfromblumberg.games.core.common.log.Logger;
 import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
 
 public enum Action {
@@ -19,7 +21,7 @@ public enum Action {
             if (tree.energy > requiredEnergy + seedEnergy) {
                 tree.energy -= requiredEnergy + seedEnergy;
                 --tree.shootCount;
-                Seed seed = tree.createSeed(seedEnergy, treePart.cell);
+                Seed seed = tree.createSeed(seedEnergy, treePart.cell, grid, treePart);
                 world.addSeed(seed);
                 return true;
             }
@@ -39,7 +41,7 @@ public enum Action {
                 for (Direction dir : priorityDirs) {
                     Cell seedCell = grid.getCell(treePart.cell, dir);
                     if (seedCell != null && seedCell.object == null) {
-                        Seed seed = tree.createSeed(seedEnergy, seedCell);
+                        Seed seed = tree.createSeed(seedEnergy, seedCell, grid, treePart);
                         world.addSeed(seed);
                         break;
                     }
@@ -69,6 +71,7 @@ public enum Action {
             if (parent != null && parent.type == TreePartType.WOOD) {
                 parent.type = TreePartType.SHOOT;
                 parent.activeGene = treePart.activeGene;
+                parent.buffer.set(treePart.buffer);
             } else {
                 --treePart.tree.shootCount;
             }
@@ -97,6 +100,7 @@ public enum Action {
     }
     ;
 
+    private static final Logger log = LogManager.create(Action.class);
     static final Action[] ALL = values();
     final byte value;
 

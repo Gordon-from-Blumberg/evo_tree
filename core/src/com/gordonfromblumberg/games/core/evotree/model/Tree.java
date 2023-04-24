@@ -27,6 +27,8 @@ public class Tree implements Poolable {
     private static final float MAX_COLOR_VALUE;
     private static final int MIN_LIFETIME;
     private static final int MAX_LIFETIME;
+    private static final int POLLEN_SPREAD_RADIUS;
+    private static final float POLLINATE_CHANCE;
 
     static {
         ConfigManager configManager = AbstractFactory.getInstance().configManager();
@@ -35,9 +37,12 @@ public class Tree implements Poolable {
         MAX_COLOR_VALUE = configManager.getFloat("tree.maxColor");
         MIN_LIFETIME = configManager.getInteger("tree.minLifetime");
         MAX_LIFETIME = configManager.getInteger("tree.maxLifetime");
+        POLLEN_SPREAD_RADIUS = configManager.getInteger("tree.pollenSpreadRadius");
+        POLLINATE_CHANCE = configManager.getFloat("tree.pollinateChance");
     }
 
     private static final Array<TreePart> newShoots = new Array<>();
+    private static final Array<CellObject> cellObjects = new Array<>();
 
     int id;
     int generation;
@@ -118,6 +123,7 @@ public class Tree implements Poolable {
             if (part.update(grid, newShoots, world)) {
                 it.remove();
                 part.removeFromParent();
+                grid.removeCellObject(part);
                 part.release();
             }
         }
@@ -145,11 +151,14 @@ public class Tree implements Poolable {
         }
     }
 
-    Seed createSeed(int energy, Cell cell) {
+    Seed createSeed(int energy, Cell cell, CellGrid grid, TreePart origin) {
         Seed seed = Seed.getInstance();
-        seed.setCell(cell);
+        grid.addCellObject(seed, cell);
         seed.generation = generation + 1;
-        seed.dna.set(this.dna);
+        if (origin.isBufferFilled)
+            seed.dna.set(this.dna, origin.buffer);
+        else
+            seed.dna.set(this.dna);
         seed.dna.mutate();
         seed.init();
         seed.energy = energy;
@@ -159,25 +168,71 @@ public class Tree implements Poolable {
     private void produceSeeds(EvoTreeWorld world) {
         log.info("Tree #" + id + " attempts to produce seeds: energy=" + energy + ", shoots=" + shootCount);
         if (energy >= shootCount && shootCount > 0) {
+            CellGrid grid = world.getGrid();
             int energyPerSeed = (energy / shootCount) + 1;
             if (energyPerSeed > MAX_ENERGY_PER_SEED) {
                 energyPerSeed = MAX_ENERGY_PER_SEED;
             }
             int nextGeneration = generation + 1;
             Iterator<TreePart> it = treeParts.iterator();
+            int pollenRadius = energyPerSeed * POLLEN_SPREAD_RADIUS / MAX_ENERGY_PER_SEED;
+            log.debug("Pollen radius = " + pollenRadius);
             while (it.hasNext()) {
                 TreePart part = it.next();
                 if (part.type == TreePartType.SHOOT) {
-                    Seed seed = createSeed(energyPerSeed, part.cell);
+                    Seed seed = createSeed(energyPerSeed, part.cell, grid, part);
                     world.addSeed(seed);
                     log.info("Seed #" + seed.id + " was produced by tree #" + id
                             + " with energy " + energyPerSeed + " of gen " + nextGeneration);
+                    pollinate(grid, part.cell, pollenRadius);
                     it.remove();
                     part.removeFromParent();
                     part.release();
                 }
             }
         }
+    }
+
+    private void pollinate(CellGrid grid, Cell shootCell, int radius) {
+        Array<CellObject> array = cellObjects;
+
+        int dx = radius + shootCell.y;
+        // top cell inside grid
+        if (dx < grid.height) {
+            // left line
+            array.addAll(grid.findObjectsUnderLine(shootCell.x - dx, 0, shootCell.x, dx));
+            // right line
+            array.addAll(grid.findObjectsUnderLine(shootCell.x, dx, shootCell.x + dx, 0));
+
+        // top cell above grid
+        } else {
+            int dy = dx - grid.height + 1;
+            int topY = grid.height - 1;
+            // left line
+            array.addAll(grid.findObjectsUnderLine(shootCell.x - dx, 0, shootCell.x - dy, topY));
+            // right line
+            array.addAll(grid.findObjectsUnderLine(shootCell.x + dy, topY,shootCell.x + dx, 0));
+            // middle line
+            array.addAll(grid.findObjectsUnderLine(shootCell.x - dy + 1, topY,shootCell.x + dy - 1, topY));
+        }
+
+        int n = 0;
+        for (CellObject cellObject : array) {
+            if (cellObject instanceof TreePart) {
+                TreePart treePart = (TreePart) cellObject;
+                if (treePart.type == TreePartType.SHOOT
+                        && RandomGen.INSTANCE.nextBool(POLLINATE_CHANCE)
+                        && !treePart.isBufferFilled
+                        && treePart.tree != this) {
+                    treePart.buffer.set(dna);
+                    treePart.isBufferFilled = true;
+                    ++n;
+                }
+            }
+        }
+        log.debug("From shoot at " + shootCell.x + ", " + shootCell.y + " " + n + " shoots have been pollinated");
+
+        array.clear();
     }
 
     private void die() {
@@ -225,6 +280,14 @@ public class Tree implements Poolable {
 
     public int getRestLifeTime() {
         return lifetime - age;
+    }
+
+    public boolean isDead() {
+        return isDead;
+    }
+
+    public int getShootCount() {
+        return shootCount;
     }
 
     @Override
