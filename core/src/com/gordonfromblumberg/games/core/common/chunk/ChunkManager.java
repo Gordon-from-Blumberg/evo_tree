@@ -48,7 +48,10 @@ public class ChunkManager<T> {
 
         final int chunkSize = this.chunkSize;
         final Chunk<T>[][] chunks = this.chunks;
-        float k = x2 != x1 ? ((float) y2 - y1) / (x2 - x1) : 0;
+        int dx = x2 - x1;
+        if (dx < 0)
+            dx += gridWidth;
+        float k = x2 != x1 ? ((float) y2 - y1) / dx : 0;
 
         int minChunkX = x1 / chunkSize;
         int maxChunkX = x2 / chunkSize;
