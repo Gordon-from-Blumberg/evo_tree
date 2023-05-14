@@ -126,20 +126,17 @@ public class GameWorld implements EvoTreeWorld, Disposable {
         return geneticRules;
     }
 
-    private int diff = 1;
-
     public void update(float delta) {
         if (running && !paused) {
-            ++turn;
-
-            lightDistribution.nextTurn();
-
             time += delta;
-
             if (time < updateDelay) {
                 return;
             }
             time = 0;
+
+            ++turn;
+
+            lightDistribution.nextTurn();
 
             CellGrid grid = this.cellGrid;
             Iterator<Seed> seedIterator = seeds.iterator();

@@ -3,9 +3,9 @@ package com.gordonfromblumberg.games.core.common.world;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Vector3;
@@ -14,13 +14,13 @@ import com.gordonfromblumberg.games.core.common.Main;
 import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
 import com.gordonfromblumberg.games.core.common.log.LogManager;
 import com.gordonfromblumberg.games.core.common.log.Logger;
-import com.gordonfromblumberg.games.core.common.screens.FBORenderer;
+import com.gordonfromblumberg.games.core.common.screens.AbstractRenderer;
 import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.evotree.model.*;
 
 import java.util.Iterator;
 
-public class GameWorldRenderer extends FBORenderer {
+public class GameWorldRenderer extends AbstractRenderer {
     private static final Logger log = LogManager.create(GameWorldRenderer.class);
 
     private static final Color LIGHT_COLOR = new Color(0.4f, 0.8f, 1f, 1f);
@@ -50,6 +50,7 @@ public class GameWorldRenderer extends FBORenderer {
     }
 
     private final GameWorld world;
+    private FrameBuffer fbo;
     private final Batch batch;
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
     private final Matrix3 viewToWorld = new Matrix3();
@@ -58,6 +59,8 @@ public class GameWorldRenderer extends FBORenderer {
     final Array<ClickPoint> clickPoints = new Array<>();
 
     private final Color pauseColor = Color.GRAY;
+
+    private int lastTurnRendered = -1;
 
     public GameWorldRenderer(GameWorld world, Batch batch) {
         super();
@@ -70,12 +73,17 @@ public class GameWorldRenderer extends FBORenderer {
         log.info("GameWorldRenderer init");
         final AssetManager assets = Main.getInstance().assets();
 
-        float worldHeight = world.cellGrid.getHeight() * world.cellGrid.getCellSize();
+        int cellSize = world.cellGrid.getCellSize();
+        int worldHeight = world.cellGrid.getHeight() * cellSize;
         if (worldHeight > viewport.getWorldHeight()) {
             float ration = viewport.getWorldWidth() / viewport.getWorldHeight();
             viewport.setWorldSize(ration * worldHeight, worldHeight);
             viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
         }
+
+        fbo = new FrameBuffer(Pixmap.Format.RGBA8888, world.cellGrid.getWidth() * cellSize, worldHeight, false);
+        Texture texture = fbo.getColorBufferTexture();
+        texture.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.ClampToEdge);
     }
 
     @Override
@@ -87,74 +95,93 @@ public class GameWorldRenderer extends FBORenderer {
         }
 
         final ShapeRenderer shapeRenderer = this.shapeRenderer;
-        shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        int cellSize = world.cellGrid.getCellSize();
-        Cell[][] cells = world.cellGrid.cells;
-        final float nightR = DARK_COLOR.r, nightG = DARK_COLOR.g, nightB = DARK_COLOR.b;
-        final float diffR = LIGHT_COLOR.r - DARK_COLOR.r,
-                diffG = LIGHT_COLOR.g - DARK_COLOR.g,
-                diffB = LIGHT_COLOR.b - DARK_COLOR.b;
-        final float absR = MAX_ABS_COLOR.r, absG = MAX_ABS_COLOR.g, absB = MAX_ABS_COLOR.b;
-        final float daR = MIN_ABS_COLOR.r - MAX_ABS_COLOR.r,
-                daG = MIN_ABS_COLOR.g - MAX_ABS_COLOR.g,
-                daB = MIN_ABS_COLOR.b - MAX_ABS_COLOR.b;
-        for (int i = 0, w = world.cellGrid.getWidth(); i < w; ++i) {
-            for (int j = 0, h = world.cellGrid.getHeight(); j < h; ++j) {
-                final Cell cell = cells[i][j];
-                final CellObject treePart = cell.getObject();
-                if (treePart == null) {
-                    float k = cell.getSunLight() / MAX_SUN_LIGHT;
-                    shapeRenderer.setColor(
-                            nightR + diffR * k,
-                            nightG + diffG * k,
-                            nightB + diffB * k,
-                            1);
-                } else {
-                    if (treePart instanceof Seed) {
-                        shapeRenderer.setColor(SEED_COLOR);
-                    } else if (treePart instanceof TreePart) {
-                        Color treeColor = ((TreePart) treePart).getTree().getColor();
-                        float k = ((TreePart) treePart).getType() == TreePartType.SHOOT ? 1.25f : 1;
-                        float o = treePart.getLightAbsorption() / 44f * (1f - 0.2f) + 0.2f;
-                        if (o > 1f) o = 1f;
+        if (lastTurnRendered < world.getTurn()) {
+            fbo.begin();
+            Gdx.gl.glClearColor(0, 0, 0, 1);
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+//            shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
+            shapeRenderer.getProjectionMatrix().setToOrtho2D(0, 0, fbo.getWidth(), fbo.getHeight());
+            shapeRenderer.identity();
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            int cellSize = world.cellGrid.getCellSize();
+            Cell[][] cells = world.cellGrid.cells;
+            final float nightR = DARK_COLOR.r, nightG = DARK_COLOR.g, nightB = DARK_COLOR.b;
+            final float diffR = LIGHT_COLOR.r - DARK_COLOR.r,
+                    diffG = LIGHT_COLOR.g - DARK_COLOR.g,
+                    diffB = LIGHT_COLOR.b - DARK_COLOR.b;
+            final float absR = MAX_ABS_COLOR.r, absG = MAX_ABS_COLOR.g, absB = MAX_ABS_COLOR.b;
+            final float daR = MIN_ABS_COLOR.r - MAX_ABS_COLOR.r,
+                    daG = MIN_ABS_COLOR.g - MAX_ABS_COLOR.g,
+                    daB = MIN_ABS_COLOR.b - MAX_ABS_COLOR.b;
+            for (int i = 0, w = world.cellGrid.getWidth(); i < w; ++i) {
+                for (int j = 0, h = world.cellGrid.getHeight(); j < h; ++j) {
+                    final Cell cell = cells[i][j];
+                    final CellObject treePart = cell.getObject();
+                    if (treePart == null) {
+                        float k = cell.getSunLight() / MAX_SUN_LIGHT;
                         shapeRenderer.setColor(
-                                (k * treeColor.r - MID_COLOR.r) * o + MID_COLOR.r,
-                                (k * treeColor.g - MID_COLOR.g) * o + MID_COLOR.g,
-                                (k * treeColor.b - MID_COLOR.b) * o + MID_COLOR.b,
-                                1f);
-                    } else {
-                        float k = 1 - treePart.getLightAbsorption() / MAX_ABSORPTION;
-                        shapeRenderer.setColor(
-                                absR + daR * k,
-                                absG + daG * k,
-                                absB + daB * k,
+                                nightR + diffR * k,
+                                nightG + diffG * k,
+                                nightB + diffB * k,
                                 1);
+                    } else {
+                        if (treePart instanceof Seed) {
+                            shapeRenderer.setColor(SEED_COLOR);
+                        } else if (treePart instanceof TreePart) {
+                            Color treeColor = ((TreePart) treePart).getTree().getColor();
+                            float k = ((TreePart) treePart).getType() == TreePartType.SHOOT ? 1.25f : 1;
+                            float o = treePart.getLightAbsorption() / 44f * (1f - 0.2f) + 0.2f;
+                            if (o > 1f) o = 1f;
+                            shapeRenderer.setColor(
+                                    (k * treeColor.r - MID_COLOR.r) * o + MID_COLOR.r,
+                                    (k * treeColor.g - MID_COLOR.g) * o + MID_COLOR.g,
+                                    (k * treeColor.b - MID_COLOR.b) * o + MID_COLOR.b,
+                                    1f);
+                        } else {
+                            float k = 1 - treePart.getLightAbsorption() / MAX_ABSORPTION;
+                            shapeRenderer.setColor(
+                                    absR + daR * k,
+                                    absG + daG * k,
+                                    absB + daB * k,
+                                    1);
+                        }
+                    }
+                    shapeRenderer.rect(i * cellSize, j * cellSize, cellSize, cellSize);
+                }
+            }
+            shapeRenderer.end();
+
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+//        Gdx.gl.glEnable(GL20.GL_BLEND);
+            Gdx.gl20.glLineWidth(1f / ((OrthographicCamera) viewport.getCamera()).zoom);
+            for (int i = 0, w = world.cellGrid.getWidth(); i < w; ++i) {
+                Cell[] col = cells[i];
+                for (int j = 0, h = world.cellGrid.getHeight(); j < h; ++j) {
+                    CellObject treePart = col[j].getObject();
+                    if (treePart != null) {
+                        if (treePart instanceof TreePart && ((TreePart) treePart).getType() == TreePartType.SHOOT) {
+                            shapeRenderer.setColor(0.4f, 0.3f, 0f, 1f);
+                        } else {
+                            shapeRenderer.setColor(0.5f, 0.5f, 0.5f, 1f);
+                        }
+                        shapeRenderer.rect(i * cellSize + 1, j * cellSize + 1, cellSize - 2, cellSize - 2);
                     }
                 }
-                shapeRenderer.rect(i * cellSize, j * cellSize, cellSize, cellSize);
             }
+            shapeRenderer.end();
+
+            fbo.end();
+            lastTurnRendered = world.getTurn();
         }
-        shapeRenderer.end();
+
+        Texture texture = fbo.getColorBufferTexture();
+        batch.setProjectionMatrix(viewport.getCamera().combined);
+        batch.begin();
+        batch.draw(texture, -texture.getWidth(), 0, 3 * texture.getWidth(), texture.getHeight(), -1, 0, 2, 1);
+        batch.end();
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-//        Gdx.gl.glEnable(GL20.GL_BLEND);
-        Gdx.gl20.glLineWidth(1f / ((OrthographicCamera) viewport.getCamera()).zoom);
-        for (int i = 0, w = world.cellGrid.getWidth(); i < w; ++i) {
-            Cell[] col = cells[i];
-            for (int j = 0, h = world.cellGrid.getHeight(); j < h; ++j) {
-                CellObject treePart = col[j].getObject();
-                if (treePart != null) {
-                    if (treePart instanceof TreePart && ((TreePart) treePart).getType() == TreePartType.SHOOT) {
-                        shapeRenderer.setColor(0.4f, 0.3f, 0f, 1f);
-                    } else {
-                        shapeRenderer.setColor(0.5f, 0.5f, 0.5f, 1f);
-                    }
-                    shapeRenderer.rect(i * cellSize + 1, j * cellSize + 1, cellSize - 2, cellSize - 2);
-                }
-            }
-        }
-
         final Iterator<ClickPoint> it = clickPoints.iterator();
         while (it.hasNext()) {
             ClickPoint cp = it.next();
@@ -200,10 +227,19 @@ public class GameWorldRenderer extends FBORenderer {
 
     private void updateCamera() {
         float cameraSpeed = 8 * camera.zoom;
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
+        float textureWidth = fbo.getWidth();
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             camera.translate(-cameraSpeed, 0);
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
+            if (camera.position.x < -textureWidth / 2) {
+                camera.position.x += textureWidth;
+            }
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             camera.translate(cameraSpeed, 0);
+            if (camera.position.x > 1.5f * textureWidth) {
+                camera.position.x -= textureWidth;
+            }
+        }
 //        if (Gdx.input.isKeyPressed(Input.Keys.UP))
 //            camera.translate(0, cameraSpeed);
 //        if (Gdx.input.isKeyPressed(Input.Keys.DOWN))
