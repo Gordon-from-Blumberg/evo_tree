@@ -12,6 +12,12 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 
 public class GameWorldParams {
+    private static final String[] knownDecoratorParameters = new String[] {
+            "ChangeLightByTime.max", "ChangeLightByTime.min",
+            "ChangeLightByTime.delay", "ChangeLightByTime.step",
+            "ChangeLightByX.halfMagnitude"
+    };
+
     int width = 250;
     int height = 50;
     int sunLight = 60;
@@ -90,6 +96,10 @@ public class GameWorldParams {
         sunLight = config.getInteger("world.sunLight");
         lightAbsorptionStep = config.getInteger("world.lightAbsorptionStep");
         selectedDecorators.clear();
+
+        for (String parameter : knownDecoratorParameters) {
+            decoratorParams.put(parameter, config.getInteger("world.decorators." + parameter));
+        }
     }
 
     public void save(Preferences prefs) {
