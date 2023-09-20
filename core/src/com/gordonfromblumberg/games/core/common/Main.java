@@ -24,6 +24,7 @@ import java.util.function.Consumer;
 public class Main extends Game {
 	public static boolean DEBUG;
 	public static boolean DEBUG_UI;
+	public static boolean LIGHTING_TEST;
 
 	public static final String NAME = "evo_tree";
 	public static String WORK_DIR_PATH;

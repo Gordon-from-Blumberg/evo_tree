@@ -18,7 +18,6 @@ public class DesktopLauncher {
 		config.title = Main.NAME;
 
 		DesktopFactory.init();
-		ConfigManager cfgMgr = AbstractFactory.getInstance().configManager();
 
 		for (String arg : args) {
 			if ("-debug".equals(arg)) {
@@ -30,7 +29,7 @@ public class DesktopLauncher {
 				continue;
 			}
 			if ("-lightingTest".equals(arg)) {
-				cfgMgr.setBoolean("lightingTest", true);
+				Main.LIGHTING_TEST = true;
 				continue;
 			}
 			String workDirPrefix = "-workDir=";

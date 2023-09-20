@@ -68,7 +68,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
     public void initialize() {
         log.info("GameWorld init");
         ConfigManager configManager = AbstractFactory.getInstance().configManager();
-        if (configManager.getBoolean("lightingTest")) {
+        if (Main.LIGHTING_TEST) {
             addClickHandler(this::testLighting);
         } else {
             addClickHandler(this::selectTree);
@@ -77,13 +77,15 @@ public class GameWorld implements EvoTreeWorld, Disposable {
         if (configManager.contains("world.turnsPerSecond"))
             updateDelay = 1f / configManager.getInteger("world.turnsPerSecond");
 
-        for (int i = 5; i < cellGrid.getWidth(); i += 5) {
-            Seed seed = Seed.getInstance();
-            seed.init();
-            cellGrid.addCellObject(seed, i, RandomGen.INSTANCE.nextInt(cellGrid.getHeight() / 2));
-            seed.setGeneration(1);
-            seed.setEnergy(100);
-            addSeed(seed);
+        if (!Main.LIGHTING_TEST) {
+            for (int i = 5; i < cellGrid.getWidth(); i += 5) {
+                Seed seed = Seed.getInstance();
+                seed.init();
+                cellGrid.addCellObject(seed, i, RandomGen.INSTANCE.nextInt(cellGrid.getHeight() / 2));
+                seed.setGeneration(1);
+                seed.setEnergy(100);
+                addSeed(seed);
+            }
         }
 
         running = true;
@@ -169,7 +171,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
 //                Gdx.app.log("GameWorld", seeds.size + " seeds in the world of maximum " + maxSeeds);
 //                Gdx.app.log("GameWorld", trees.size + " trees in the world of maximum " + maxTrees);
 //            }
-            if (seeds.isEmpty() && trees.isEmpty()) {
+            if (seeds.isEmpty() && trees.isEmpty() && !Main.LIGHTING_TEST) {
                 running = false;
             }
         }
@@ -259,16 +261,16 @@ public class GameWorld implements EvoTreeWorld, Disposable {
     private void testLighting(int b, float x, float y) {
         Cell cell = cellGrid.findCell((int) x, (int) y);
         if (cell != null) {
-            CellObject treePart = cell.getObject();
-            if (treePart == null) {
-                treePart = new LightingTest(5);
-                cell.setObject(treePart);
+            CellObject cellObject = cell.getObject();
+            if (cellObject == null) {
+                cellObject = new LightingTest(5);
+                cell.setObject(cellObject);
             } else {
-                int absorption = treePart.getLightAbsorption() + 5;
+                int absorption = cellObject.getLightAbsorption() + 5;
                 if (absorption > 30) {
                     cell.setObject(null);
                 } else {
-                    ((LightingTest) treePart).setLightAbsorption(absorption);
+                    ((LightingTest) cellObject).setLightAbsorption(absorption);
                 }
             }
         }
