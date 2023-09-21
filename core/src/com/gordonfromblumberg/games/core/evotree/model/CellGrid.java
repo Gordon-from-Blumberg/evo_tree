@@ -1,6 +1,7 @@
 package com.gordonfromblumberg.games.core.evotree.model;
 
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Queue;
 import com.gordonfromblumberg.games.core.common.chunk.ChunkManager;
 
 public class CellGrid {
@@ -10,12 +11,14 @@ public class CellGrid {
             {0, -1},
             {-1, 0}
     };
+    private static final Queue<Cell> CELL_QUEUE = new Queue<>();
 
     int width, height;
     int cellSize;
     public final Cell[][] cells;
     private final int[] treeHeights;
     private final ChunkManager<CellObject> chunkManager;
+    private final Array<LightSource> lightSources = new Array<>();
 
     public CellGrid(int width, int height, int cellSize, int chunkSize) {
         this.width = width;
@@ -34,6 +37,48 @@ public class CellGrid {
     }
 
     public void updateSunLight(LightDistribution lightDistribution) {
+        final Cell[][] cells = this.cells;
+        final Queue<Cell> cellQueue = CELL_QUEUE;
+        final float lightAbsorption = lightDistribution.getLightAbsorption();
+
+        for (int i = 0, w = width; i < w; ++i) {
+            for (int j = 0, h = height; j < h; ++j) {
+                cells[i][j].sunLight = 0;
+            }
+        }
+
+        for (LightSource lightSource : lightSources) {
+            Cell lightSourceCell = lightSource.cell;
+            int light = (int) ((lightSource.light) * lightAbsorption);
+            for (Direction dir : Direction.ALL) {
+                Cell neib = getCell(lightSourceCell, dir);
+                if (neib != null && !(neib.object instanceof LightSource)) {
+                    cellQueue.addLast(neib);
+                    if (light > neib.sunLight) {
+                        neib.updateSunLight(light);
+                    }
+                }
+            }
+        }
+
+        while (cellQueue.notEmpty()) {
+            Cell cell = cellQueue.removeFirst();
+            int light = (int) ((cell.getSunLight()) * lightAbsorption);
+            if (light == cell.getSunLight()) --light;
+            if (light <= 0)
+                continue;
+
+            for (Direction dir : Direction.ALL) {
+                Cell neib = getCell(cell, dir);
+                if (neib != null && !(neib.object instanceof LightSource) && neib.sunLight < light) {
+                    neib.updateSunLight(light);
+                    cellQueue.addLast(neib);
+                }
+            }
+        }
+    }
+
+    public void updateSunLightOld(LightDistribution lightDistribution) {
         final Cell[][] cells = this.cells;
         final int[] treeHeights = this.treeHeights;
         // go from top to bottom and calculate sunlight for each cell
@@ -84,16 +129,16 @@ public class CellGrid {
     private void calcLight(Cell cell, int light, Direction dir) {
         int old = cell.getSunLight();
         if (light > old) {
-            if (cell.updateSunLight(light) > old) {
-                for (Direction d : Direction.ALL) {
-                    if (d != dir.opposite()) {
-                        Cell next = getCell(cell, d);
-                        if (next != null && !next.underSun) {
-                            calcLight(next, cell.getSunLight() - 2, d);
-                        }
-                    }
-                }
-            }
+//            if (cell.updateSunLight(light) > old) {
+//                for (Direction d : Direction.ALL) {
+//                    if (d != dir.opposite()) {
+//                        Cell next = getCell(cell, d);
+//                        if (next != null && !next.underSun) {
+//                            calcLight(next, cell.getSunLight() - 2, d);
+//                        }
+//                    }
+//                }
+//            }
         }
     }
 
@@ -131,6 +176,9 @@ public class CellGrid {
         if (cellObject instanceof TreePart && ((TreePart) cellObject).type == TreePartType.SHOOT) {
             chunkManager.addObject(cellObject, cell.x, cell.y);
         }
+        if (cellObject instanceof LightSource) {
+            lightSources.add((LightSource) cellObject);
+        }
     }
 
     public void moveCellObjectTo(CellObject cellObject, Cell target) {
@@ -156,6 +204,9 @@ public class CellGrid {
         }
         if (cellObject instanceof TreePart && ((TreePart) cellObject).type == TreePartType.SHOOT) {
             chunkManager.removeObject(cellObject, cell.x, cell.y);
+        }
+        if (cellObject instanceof LightSource) {
+            lightSources.removeValue((LightSource) cellObject, true);
         }
     }
 

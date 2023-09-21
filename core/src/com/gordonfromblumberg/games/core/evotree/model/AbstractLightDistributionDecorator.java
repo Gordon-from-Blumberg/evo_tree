@@ -26,6 +26,11 @@ public abstract class AbstractLightDistributionDecorator implements LightDistrib
     }
 
     @Override
+    public float getLightAbsorption() {
+        return original.getLightAbsorption();
+    }
+
+    @Override
     public int nextTurn() {
         return original.nextTurn();
     }

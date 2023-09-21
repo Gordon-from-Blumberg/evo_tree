@@ -21,7 +21,9 @@ public class GameWorldParams {
     int width = 250;
     int height = 50;
     int sunLight = 60;
-    int lightAbsorptionStep = 1;
+    float lightAbsorptionStep = 1;
+    float lightSourcesRatio = 0;
+    int lightSourceStrength = 500;
     final Queue<String> selectedDecorators = new Queue<>(4);
     final ObjectMap<String, Object> decoratorParams = new ObjectMap<>(8);
 
@@ -49,12 +51,32 @@ public class GameWorldParams {
         this.sunLight = sunLight;
     }
 
-    public int getLightAbsorptionStep() {
+    public float getLightAbsorptionStep() {
         return lightAbsorptionStep;
     }
 
-    public void setLightAbsorptionStep(int lightAbsorptionStep) {
+    public void setLightAbsorptionStep(float lightAbsorptionStep) {
         this.lightAbsorptionStep = lightAbsorptionStep;
+    }
+
+    public float getLightSourcesRatio() {
+        return lightSourcesRatio;
+    }
+
+    public void setLightSourcesRatio(float lightSourcesRatio) {
+        this.lightSourcesRatio = lightSourcesRatio;
+    }
+
+    public int getLightSourcesCount() {
+        return (int) (lightSourcesRatio * width);
+    }
+
+    public int getLightSourceStrength() {
+        return lightSourceStrength;
+    }
+
+    public void setLightSourceStrength(int lightSourceStrength) {
+        this.lightSourceStrength = lightSourceStrength;
     }
 
     public Object getDecoratorParam(String name) {
@@ -94,7 +116,9 @@ public class GameWorldParams {
         width = config.getInteger("world.width");
         height = config.getInteger("world.height");
         sunLight = config.getInteger("world.sunLight");
-        lightAbsorptionStep = config.getInteger("world.lightAbsorptionStep");
+        lightAbsorptionStep = config.getFloat("world.lightAbsorptionStep");
+        lightSourcesRatio = config.getFloat("world.lightSources");
+        lightSourceStrength = config.getInteger("world.lightSourceStrength");
         selectedDecorators.clear();
 
         for (String parameter : knownDecoratorParameters) {
@@ -106,7 +130,9 @@ public class GameWorldParams {
         prefs.putInteger("world.width", width);
         prefs.putInteger("world.height", height);
         prefs.putInteger("world.sunLight", sunLight);
-        prefs.putInteger("world.lightAbsorptionStep", lightAbsorptionStep);
+        prefs.putFloat("world.lightAbsorptionStep", lightAbsorptionStep);
+        prefs.putFloat("world.lightSources", lightSourcesRatio);
+        prefs.putInteger("world.lightSourceStrength", lightSourceStrength);
         prefs.putString("selectedDecorators", selectedDecorators.toString(","));
         for (ObjectMap.Entry<String, Object> entry : decoratorParams) {
             String key = "decorator.param." + entry.key;
@@ -123,7 +149,9 @@ public class GameWorldParams {
         width = prefs.getInteger("world.width");
         height = prefs.getInteger("world.height");
         sunLight = prefs.getInteger("world.sunLight");
-        lightAbsorptionStep = prefs.getInteger("world.lightAbsorptionStep");
+        lightAbsorptionStep = prefs.getFloat("world.lightAbsorptionStep");
+        lightSourcesRatio = prefs.getFloat("world.lightSources");
+        lightSourceStrength = prefs.getInteger("world.lightSourceStrength");
 
         selectedDecorators.clear();
         String decorators = prefs.getString("selectedDecorators");
@@ -147,7 +175,9 @@ public class GameWorldParams {
         bb.putInt(width);
         bb.putInt(height);
         bb.putInt(sunLight);
-        bb.putInt(lightAbsorptionStep);
+        bb.putFloat(lightAbsorptionStep);
+        bb.putFloat(lightSourcesRatio);
+        bb.putInt(lightSourceStrength);
 
         bb.putInt(selectedDecorators.size);
         for (String selectedDecorator : selectedDecorators) {
@@ -166,6 +196,8 @@ public class GameWorldParams {
         height = bb.getInt();
         sunLight = bb.getInt();
         lightAbsorptionStep = bb.getInt();
+        lightSourcesRatio = bb.getFloat();
+        lightSourceStrength = bb.getInt();
 
         int decoratorCount = bb.getInt();
         selectedDecorators.clear();

@@ -26,6 +26,7 @@ public class GameWorldRenderer extends AbstractRenderer {
     private static final Color LIGHT_COLOR = new Color(0.4f, 0.8f, 1f, 1f);
     private static final Color DARK_COLOR = new Color(0f, 0.12f, 0.07f, 1f);
     private static final Color MID_COLOR = new Color();
+    private static final Color LIGHT_SOURCE_COLOR = new Color(1f, 1f, 0.3f, 1f);
     private static final float MAX_SUN_LIGHT;
     private static final Color SEED_COLOR = new Color(0.66f, 0.41f, 0.19f, 1f);
 
@@ -39,8 +40,9 @@ public class GameWorldRenderer extends AbstractRenderer {
         ConfigManager configManager = AbstractFactory.getInstance().configManager();
         configManager.getColor("world.lightColor", LIGHT_COLOR);
         configManager.getColor("world.darkColor", DARK_COLOR);
+        configManager.getColor("world.lightSource.color", LIGHT_SOURCE_COLOR);
         MID_COLOR.set(DARK_COLOR).lerp(LIGHT_COLOR, configManager.getFloat("world.midColor"));
-        MAX_SUN_LIGHT = configManager.getInteger("world.sunLight");
+        MAX_SUN_LIGHT = 0.75f * configManager.getInteger("world.lightSourceStrength");
         configManager.getColor("seed.color", SEED_COLOR);
 
         // lighting test
@@ -117,8 +119,8 @@ public class GameWorldRenderer extends AbstractRenderer {
             for (int i = 0, w = world.cellGrid.getWidth(); i < w; ++i) {
                 for (int j = 0, h = world.cellGrid.getHeight(); j < h; ++j) {
                     final Cell cell = cells[i][j];
-                    final CellObject treePart = cell.getObject();
-                    if (treePart == null) {
+                    final CellObject cellObject = cell.getObject();
+                    if (cellObject == null) {
                         float k = cell.getSunLight() / MAX_SUN_LIGHT;
                         shapeRenderer.setColor(
                                 nightR + diffR * k,
@@ -126,20 +128,24 @@ public class GameWorldRenderer extends AbstractRenderer {
                                 nightB + diffB * k,
                                 1);
                     } else {
-                        if (treePart instanceof Seed) {
+                        if (cellObject instanceof Seed) {
                             shapeRenderer.setColor(SEED_COLOR);
-                        } else if (treePart instanceof TreePart) {
-                            Color treeColor = ((TreePart) treePart).getTree().getColor();
-                            float k = ((TreePart) treePart).getType() == TreePartType.SHOOT ? 1.25f : 1;
-                            float o = treePart.getLightAbsorption() / 44f * (1f - 0.2f) + 0.2f;
+
+                        } else if (cellObject instanceof TreePart) {
+                            Color treeColor = ((TreePart) cellObject).getTree().getColor();
+                            float k = ((TreePart) cellObject).getType() == TreePartType.SHOOT ? 1.25f : 1;
+                            float o = cellObject.getLightAbsorption() / 44f * (1f - 0.2f) + 0.2f;
                             if (o > 1f) o = 1f;
                             shapeRenderer.setColor(
                                     (k * treeColor.r - MID_COLOR.r) * o + MID_COLOR.r,
                                     (k * treeColor.g - MID_COLOR.g) * o + MID_COLOR.g,
                                     (k * treeColor.b - MID_COLOR.b) * o + MID_COLOR.b,
                                     1f);
+
+                        } else if (cellObject instanceof LightSource) {
+                            shapeRenderer.setColor(LIGHT_SOURCE_COLOR);
                         } else {
-                            float k = 1 - treePart.getLightAbsorption() / MAX_ABSORPTION;
+                            float k = 1 - cellObject.getLightAbsorption() / MAX_ABSORPTION;
                             shapeRenderer.setColor(
                                     absR + daR * k,
                                     absG + daG * k,

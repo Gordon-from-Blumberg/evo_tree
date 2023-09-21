@@ -5,6 +5,7 @@ public interface LightDistribution {
     int getHeight();
 
     int getLight(int x, int y);
+    float getLightAbsorption();
 
     int nextTurn();
 }

@@ -11,21 +11,12 @@ public class Cell {
         this.y = y;
     }
 
-    int updateSunLight(int light) {
-        CellObject tp = object;
-        if (tp != null) {
-            light -= tp.getLightAbsorption();
-        }
-        sunLight = light;
-        if (sunLight < 0) {
-            sunLight = 0;
-        }
-//        if (y < 10) sunLight >>= 1;
-        return sunLight;
+    void updateSunLight(int light) {
+        sunLight = light < 0 ? 0 : light;
     }
 
     public int getSunLight() {
-        return sunLight;
+        return object != null ? sunLight - object.getLightAbsorption() : sunLight;
     }
 
     public boolean isUnderSun() {

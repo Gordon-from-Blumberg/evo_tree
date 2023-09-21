@@ -62,7 +62,12 @@ public class GameWorld implements EvoTreeWorld, Disposable {
                 configManager.getInteger("world.chunkSize"));
         simpleLightDistribution = new SimpleLightDistribution(params.width, params.height, params.sunLight, params.lightAbsorptionStep);
         lightDistribution = params.decorate(simpleLightDistribution);
-//        lightDistribution = new ChangeLightByX(original,15);
+
+        for (int i = 0, n = params.getLightSourcesCount(); i < n; ++i) {
+            LightSource lightSource = new LightSource(params.getLightSourceStrength());
+            cellGrid.addCellObject(lightSource, i, params.getHeight() - 1);
+            log.info("Created light source with strength " + params.getLightSourceStrength() + " at " + i + ", " + (params.getHeight() - 1));
+        }
     }
 
     public void initialize() {

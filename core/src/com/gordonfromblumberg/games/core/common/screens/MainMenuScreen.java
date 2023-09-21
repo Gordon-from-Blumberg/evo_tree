@@ -132,19 +132,20 @@ public class MainMenuScreen extends AbstractScreen {
                 .left();
         updateListeners.add(params -> sunLightField.setValue(params.getSunLight()));
 
-        table.row();
-        IntChangeableLabel lightAbsorptionField = new IntChangeableLabel(skin, worldParams::setLightAbsorptionStep);
-        lightAbsorptionField.setMinValue(1);
-        lightAbsorptionField.setMaxValue(10);
-        lightAbsorptionField.setFieldWidth(fieldWidth);
-        lightAbsorptionField.setFieldDisabled(false);
-        lightAbsorptionField.setStep(1);
-        lightAbsorptionField.setValue(worldParams.getLightAbsorptionStep());
-        table.add(lightAbsorptionField)
-                .left();
-        table.add(new Label("Light absorption step", skin))
-                .left();
-        updateListeners.add(params -> lightAbsorptionField.setValue(params.getLightAbsorptionStep()));
+//        table.row();
+//        IntChangeableLabel lightAbsorptionField = new IntChangeableLabel(skin, worldParams::setLightAbsorptionStep);
+//        lightAbsorptionField.setMinValue(1);
+//        lightAbsorptionField.setMaxValue(10);
+//        lightAbsorptionField.setFieldWidth(fieldWidth);
+//        lightAbsorptionField.setFieldDisabled(false);
+//        lightAbsorptionField.setStep(1);
+//        lightAbsorptionField.setValue(worldParams.getLightAbsorptionStep());
+//        table.add(lightAbsorptionField)
+//                .left();
+//        table.add(new Label("Light absorption step", skin))
+//                .left();
+//        updateListeners.add(params -> lightAbsorptionField.setValue(params.getLightAbsorptionStep()));
+
         return table;
     }
 

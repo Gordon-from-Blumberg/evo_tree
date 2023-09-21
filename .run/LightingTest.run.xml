@@ -2,7 +2,7 @@
   <configuration default="false" name="LightingTest" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="com.gordonfromblumberg.games.desktop.common.DesktopLauncher" />
     <module name="evo_tree.desktop.main" />
-    <option name="PROGRAM_PARAMETERS" value="-lightingTest -prefDir=E:\games\evo_tree\prefs" />
+    <option name="PROGRAM_PARAMETERS" value="-lightingTest -prefDir=E:\games\evo_tree\test-prefs -debug" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="com.gordonfromblumberg.games.desktop.common.*" />
