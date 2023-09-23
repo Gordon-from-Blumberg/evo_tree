@@ -24,7 +24,7 @@ public class Tree implements Poolable {
 
     static final int MAX_ENERGY_PER_SEED;
     private static final float MIN_COLOR_VALUE;
-    private static final float MAX_COLOR_VALUE;
+    private static final float COLOR_DIFF;
     private static final int MIN_LIFETIME;
     private static final int MAX_LIFETIME;
     private static final int POLLEN_SPREAD_RADIUS;
@@ -34,7 +34,7 @@ public class Tree implements Poolable {
         ConfigManager configManager = AbstractFactory.getInstance().configManager();
         MAX_ENERGY_PER_SEED = configManager.getInteger("tree.maxEnergyPerSeed");
         MIN_COLOR_VALUE = configManager.getFloat("tree.minColor");
-        MAX_COLOR_VALUE = configManager.getFloat("tree.maxColor");
+        COLOR_DIFF = configManager.getFloat("tree.maxColor") - MIN_COLOR_VALUE;
         MIN_LIFETIME = configManager.getInteger("tree.minLifetime");
         MAX_LIFETIME = configManager.getInteger("tree.maxLifetime");
         POLLEN_SPREAD_RADIUS = configManager.getInteger("tree.pollenSpreadRadius");
@@ -67,11 +67,13 @@ public class Tree implements Poolable {
 
     public void init() {
         Gene gene = dna.getSpecialGene(DNA.COLOR);
-        float clrDiff = MAX_COLOR_VALUE - MIN_COLOR_VALUE;
+        int r = Math.max(gene.getValue(0) ^ gene.getValue(1), 0);
+        int g = Math.max(gene.getValue(1) ^ gene.getValue(2), 0);
+        int b = Math.max(gene.getValue(2) ^ gene.getValue(3), 0);
         color.set(
-                MIN_COLOR_VALUE + clrDiff * (gene.getValue(0) ^ gene.getValue(3)) / Gene.MAX_VALUE,
-                MIN_COLOR_VALUE + clrDiff * (gene.getValue(1) ^ gene.getValue(3)) / Gene.MAX_VALUE,
-                MIN_COLOR_VALUE + clrDiff * (gene.getValue(2) ^ gene.getValue(3)) / Gene.MAX_VALUE,
+                MIN_COLOR_VALUE + COLOR_DIFF * r / Gene.MAX_VALUE,
+                MIN_COLOR_VALUE + COLOR_DIFF * g / Gene.MAX_VALUE,
+                MIN_COLOR_VALUE + COLOR_DIFF * b / Gene.MAX_VALUE,
                 1
         );
         Gene treeLifetime = dna.getSpecialGene(DNA.LIFETIME);

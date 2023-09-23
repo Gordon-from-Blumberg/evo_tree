@@ -21,9 +21,12 @@ import java.util.Iterator;
 
 public class GameWorld implements EvoTreeWorld, Disposable {
     private static final Logger log = LogManager.create(GameWorld.class);
+    private static final int MIN_GAME_OBJECTS = 20;
+    private static final int ADD_RANDOM_SEED_DELAY = 30;
     private static int nextTreeId = 1;
     private static int nextSeedId = 1;
     private int turn = 0;
+    private int lastSeedAddedTurn = 0;
 
     private final Array<Seed> seeds = new Array<>();
     private final Array<Tree> trees = new Array<>();
@@ -83,12 +86,12 @@ public class GameWorld implements EvoTreeWorld, Disposable {
             updateDelay = 1f / configManager.getInteger("world.turnsPerSecond");
 
         if (!Main.LIGHTING_TEST) {
-            for (int i = 5; i < cellGrid.getWidth(); i += 5) {
+            for (int i = 5, w = cellGrid.getWidth(); i < w; i += 5) {
                 Seed seed = Seed.getInstance();
                 seed.init();
                 cellGrid.addCellObject(seed, i, RandomGen.INSTANCE.nextInt(cellGrid.getHeight() / 2));
                 seed.setGeneration(1);
-                seed.setEnergy(100);
+                seed.setEnergy(400);
                 addSeed(seed);
             }
         }
@@ -168,6 +171,9 @@ public class GameWorld implements EvoTreeWorld, Disposable {
                 }
             }
 
+            if (turn % 40 == 0) {
+                cellGrid.moveLightSources();
+            }
             cellGrid.updateSunLight(lightDistribution);
 
             eventProcessor.process();
@@ -176,9 +182,33 @@ public class GameWorld implements EvoTreeWorld, Disposable {
 //                Gdx.app.log("GameWorld", seeds.size + " seeds in the world of maximum " + maxSeeds);
 //                Gdx.app.log("GameWorld", trees.size + " trees in the world of maximum " + maxTrees);
 //            }
+
+            int dropRandomSeeds = MIN_GAME_OBJECTS - trees.size - seeds.size;
+            if (dropRandomSeeds > 0 || turn - lastSeedAddedTurn >= ADD_RANDOM_SEED_DELAY) {
+                addRandomSeeds(dropRandomSeeds > 0 ? dropRandomSeeds : 1);
+                lastSeedAddedTurn = turn;
+            }
+
             if (seeds.isEmpty() && trees.isEmpty() && !Main.LIGHTING_TEST) {
                 running = false;
             }
+        }
+    }
+
+    private void addRandomSeeds(int count) {
+        final int y = cellGrid.getHeight() - 1;
+        while (count-- > 0) {
+            Seed seed = Seed.getInstance();
+            seed.initRandom();
+            seed.setGeneration(1);
+            seed.setEnergy(RandomGen.INSTANCE.nextInt(300, 600));
+            addSeed(seed);
+            int x = RandomGen.INSTANCE.nextInt(cellGrid.getWidth());
+            Cell cell = cellGrid.cells[x][y];
+            while (cell.getObject() != null) {
+                cell = cellGrid.getCell(cell, Direction.right);
+            }
+            cellGrid.addCellObject(seed, cell);
         }
     }
 

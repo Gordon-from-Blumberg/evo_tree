@@ -18,7 +18,7 @@ public class CellGrid {
     public final Cell[][] cells;
     private final int[] treeHeights;
     private final ChunkManager<CellObject> chunkManager;
-    private final Array<LightSource> lightSources = new Array<>();
+    private final Queue<LightSource> lightSources = new Queue<>();
 
     public CellGrid(int width, int height, int cellSize, int chunkSize) {
         this.width = width;
@@ -49,7 +49,7 @@ public class CellGrid {
 
         for (LightSource lightSource : lightSources) {
             Cell lightSourceCell = lightSource.cell;
-            int light = (int) ((lightSource.light) * lightAbsorption);
+            int light = nextLight(lightSource.light, lightDistribution);
             for (Direction dir : Direction.ALL) {
                 Cell neib = getCell(lightSourceCell, dir);
                 if (neib != null && !(neib.object instanceof LightSource)) {
@@ -63,7 +63,7 @@ public class CellGrid {
 
         while (cellQueue.notEmpty()) {
             Cell cell = cellQueue.removeFirst();
-            int light = (int) ((cell.getSunLight()) * lightAbsorption);
+            int light = nextLight(cell.getSunLight(), lightDistribution);
             if (light == cell.getSunLight()) --light;
             if (light <= 0)
                 continue;
@@ -76,6 +76,10 @@ public class CellGrid {
                 }
             }
         }
+    }
+
+    private int nextLight(int light, LightDistribution lightDistribution) {
+        return (int) (light * lightDistribution.getLightAbsorption());
     }
 
     public void updateSunLightOld(LightDistribution lightDistribution) {
@@ -142,6 +146,7 @@ public class CellGrid {
         }
     }
 
+    // by world coords
     public Cell findCell(int x, int y) {
         int cellX = x / cellSize;
         if (cellX < 0 || cellX >= width) {
@@ -154,7 +159,7 @@ public class CellGrid {
         return cells[cellX][cellY];
     }
 
-    Cell getCell(Cell cell, Direction dir) {
+    public Cell getCell(Cell cell, Direction dir) {
         int[] dc = NEIGHBORS[dir.getCode()];
         int y = cell.y + dc[1];
         if (y < 0 || y >= height) {
@@ -177,8 +182,27 @@ public class CellGrid {
             chunkManager.addObject(cellObject, cell.x, cell.y);
         }
         if (cellObject instanceof LightSource) {
-            lightSources.add((LightSource) cellObject);
+            lightSources.addLast((LightSource) cellObject);
         }
+    }
+
+    public void moveLightSources() {
+        LightSource first = lightSources.removeFirst();
+        removeCellObject(first);
+        LightSource last = lightSources.last();
+        Cell newCell = getCell(last.cell, Direction.right);
+        CellObject object = newCell.object;
+        if (object != null) {
+            if (object instanceof Seed) {
+                ((Seed) object).energy = 0; // will be removed at next update()
+            } else if (object instanceof TreePart) {
+                TreePart treePart = (TreePart) object;
+                treePart.removeFromParent();
+                removeCellObject(treePart);
+                treePart.tree.treeParts.removeValue(treePart, true);
+            }
+        }
+        addCellObject(first, newCell);
     }
 
     public void moveCellObjectTo(CellObject cellObject, Cell target) {

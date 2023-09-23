@@ -42,7 +42,7 @@ public class GameWorldRenderer extends AbstractRenderer {
         configManager.getColor("world.darkColor", DARK_COLOR);
         configManager.getColor("world.lightSource.color", LIGHT_SOURCE_COLOR);
         MID_COLOR.set(DARK_COLOR).lerp(LIGHT_COLOR, configManager.getFloat("world.midColor"));
-        MAX_SUN_LIGHT = 0.75f * configManager.getInteger("world.lightSourceStrength");
+        MAX_SUN_LIGHT = 0.6f * configManager.getInteger("world.lightSourceStrength");
         configManager.getColor("seed.color", SEED_COLOR);
 
         // lighting test

@@ -61,6 +61,11 @@ public class Seed extends LivingCellObject {
         this.turnsToSprout = RandomGen.INSTANCE.nextInt(4, 10);
     }
 
+    public void initRandom() {
+        dna.setRandom();
+        init();
+    }
+
     @Override
     public boolean update(EvoTreeWorld world) {
         energy -= state.energyConsumption;
@@ -83,7 +88,7 @@ public class Seed extends LivingCellObject {
                 grid.moveCellObjectTo(this, next);
             }
             return false;
-        } else if (state == State.WAITING) {
+        } else if (state == State.WAITING && calcLight(grid) > 0) {
             state = State.SPROUTING;
         }
 

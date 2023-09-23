@@ -19,7 +19,7 @@ public abstract class LivingCellObject extends CellObject {
         for (Direction dir : Direction.ALL) {
             Cell next = grid.getCell(cell, dir);
             if (next != null && next.object == null) {
-                int light = next.getSunLight() / LIGHT_MODS[dir.getCode()];
+                int light = next.getSunLight();
                 if (light > max) {
                     max = light;
                 }

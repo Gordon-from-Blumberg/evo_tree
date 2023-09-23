@@ -51,6 +51,12 @@ public class DNA {
         }
     }
 
+    public void setRandom() {
+        for (int i = 0; i < GENES_COUNT; ++i) {
+            genes[i].setRandom();
+        }
+    }
+
     public void mutate() {
         final RandomGen rand = Gene.RAND;
         for (Gene gene : genes) {
