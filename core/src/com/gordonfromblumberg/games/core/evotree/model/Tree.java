@@ -179,6 +179,7 @@ public class Tree implements Poolable {
             Iterator<TreePart> it = treeParts.iterator();
             int pollenRadius = energyPerSeed * POLLEN_SPREAD_RADIUS / MAX_ENERGY_PER_SEED;
             log.debug("Pollen radius = " + pollenRadius);
+            Cell top = null, left = null, right = null;
             while (it.hasNext()) {
                 TreePart part = it.next();
                 if (part.type == TreePartType.SHOOT) {
@@ -186,13 +187,43 @@ public class Tree implements Poolable {
                     world.addSeed(seed);
                     log.info("Seed #" + seed.id + " was produced by tree #" + id
                             + " with energy " + energyPerSeed + " of gen " + nextGeneration);
-                    pollinate(grid, part.cell, pollenRadius);
+                    if (top == null) {
+                        top = left = right = part.cell;
+                    } else {
+                        top = compareCells(top, part.cell, Direction.up, grid.width);
+                        left = compareCells(top, part.cell, Direction.left, grid.width);
+                        right = compareCells(top, part.cell, Direction.right, grid.width);
+                    }
                     it.remove();
                     part.removeFromParent();
                     part.release();
                 }
             }
+            if (top != null) {
+                pollinate(grid, top, pollenRadius);
+                if (left != top) pollinate(grid, left, pollenRadius);
+                if (right != top && right != left) pollinate(grid, right, pollenRadius);
+            }
         }
+    }
+
+    private Cell compareCells(Cell old, Cell newCell, Direction dir, int gridWidth) {
+        int kx = 0;
+        switch (dir) {
+            case up:
+                return old.y < newCell.y ? newCell : old;
+            case left:
+                kx = -1;
+                break;
+            case right:
+                kx = 1;
+                break;
+        }
+        int oldX = old.x;
+        if (Math.abs(oldX - newCell.x) > 100) {
+            oldX = oldX > newCell.x ? oldX - gridWidth : oldX + gridWidth;
+        }
+        return 2 * old.y + kx * oldX < 2 * newCell.y + kx * newCell.x ? newCell : old;
     }
 
     private void pollinate(CellGrid grid, Cell shootCell, int radius) {
@@ -223,9 +254,9 @@ public class Tree implements Poolable {
             if (cellObject instanceof TreePart) {
                 TreePart treePart = (TreePart) cellObject;
                 if (treePart.type == TreePartType.SHOOT
-                        && RandomGen.INSTANCE.nextBool(POLLINATE_CHANCE)
                         && !treePart.isBufferFilled
-                        && treePart.tree != this) {
+                        && treePart.tree != this
+                        && RandomGen.INSTANCE.nextBool(POLLINATE_CHANCE)) {
                     treePart.buffer.set(dna);
                     treePart.isBufferFilled = true;
                     ++n;

@@ -56,6 +56,7 @@ public class Seed extends LivingCellObject {
         for (int i = 0; i < Gene.VALUE_COUNT; ++i) {
             lightToSprout += lightToSproutGene.getValue(i);
         }
+        if (lightToSprout < 0) lightToSprout = 0;
         this.lightToSprout = (lightToSprout + 1) % (MAX_LIGHT_TO_SPROUT - MIN_LIGHT_TO_SPROUT) + MIN_LIGHT_TO_SPROUT;
         this.state = State.WAITING;
         this.turnsToSprout = RandomGen.INSTANCE.nextInt(4, 10);

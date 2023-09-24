@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
@@ -25,10 +26,13 @@ public class GameWorldRenderer extends AbstractRenderer {
 
     private static final Color LIGHT_COLOR = new Color(0.4f, 0.8f, 1f, 1f);
     private static final Color DARK_COLOR = new Color(0f, 0.12f, 0.07f, 1f);
-    private static final Color MID_COLOR = new Color();
+    private static final Color MID_COLOR = new Color(0.9f, 1f, 0.9f, 0);
     private static final Color LIGHT_SOURCE_COLOR = new Color(1f, 1f, 0.3f, 1f);
     private static final float MAX_SUN_LIGHT;
     private static final Color SEED_COLOR = new Color(0.66f, 0.41f, 0.19f, 1f);
+
+    private static final int TREE_PART_MIN_ABSORPTION;
+    private static final int TREE_PART_MAX_ABSORPTION;
 
     private static final Color MIN_ABS_COLOR = new Color(0.5f, 1f, 0.7f, 1f);
     private static final Color MAX_ABS_COLOR = new Color(0f, 0.6f, 0.1f, 1f);
@@ -41,7 +45,11 @@ public class GameWorldRenderer extends AbstractRenderer {
         configManager.getColor("world.lightColor", LIGHT_COLOR);
         configManager.getColor("world.darkColor", DARK_COLOR);
         configManager.getColor("world.lightSource.color", LIGHT_SOURCE_COLOR);
-        MID_COLOR.set(DARK_COLOR).lerp(LIGHT_COLOR, configManager.getFloat("world.midColor"));
+//        MID_COLOR.set(DARK_COLOR).lerp(LIGHT_COLOR, configManager.getFloat("world.midColor"));
+
+        TREE_PART_MIN_ABSORPTION = configManager.getInteger("treePart.minAbsorption");
+        TREE_PART_MAX_ABSORPTION = configManager.getInteger("treePart.maxAbsorption");
+
         MAX_SUN_LIGHT = 0.6f * configManager.getInteger("world.lightSourceStrength");
         configManager.getColor("seed.color", SEED_COLOR);
 
@@ -132,9 +140,15 @@ public class GameWorldRenderer extends AbstractRenderer {
                             shapeRenderer.setColor(SEED_COLOR);
 
                         } else if (cellObject instanceof TreePart) {
-                            Color treeColor = ((TreePart) cellObject).getTree().getColor();
-                            float k = ((TreePart) cellObject).getType() == TreePartType.SHOOT ? 1.25f : 1;
-                            float o = cellObject.getLightAbsorption() / 44f * (1f - 0.2f) + 0.2f;
+                            TreePart part = (TreePart) cellObject;
+                            Color treeColor = part.getTree().getColor();
+
+                            float k = 1;
+                            if (part.getType() == TreePartType.SHOOT) k = 1.3f;
+                            else if (part.getType() == TreePartType.DEAD) k = 0.5f;
+                            float progress = (part.getLightAbsorption() - TREE_PART_MIN_ABSORPTION)
+                                    / (float) (TREE_PART_MAX_ABSORPTION - TREE_PART_MIN_ABSORPTION);
+                            float o = MathUtils.lerp(0.5f, 1f, progress);
                             if (o > 1f) o = 1f;
                             shapeRenderer.setColor(
                                     (k * treeColor.r - MID_COLOR.r) * o + MID_COLOR.r,

@@ -3,8 +3,10 @@ package com.gordonfromblumberg.games.core.evotree.model;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.utils.Pool;
+import com.gordonfromblumberg.games.core.common.factory.AbstractFactory;
 import com.gordonfromblumberg.games.core.common.log.LogManager;
 import com.gordonfromblumberg.games.core.common.log.Logger;
+import com.gordonfromblumberg.games.core.common.utils.ConfigManager;
 import com.gordonfromblumberg.games.core.evotree.world.EvoTreeWorld;
 
 public class TreePart extends LivingCellObject {
@@ -17,9 +19,15 @@ public class TreePart extends LivingCellObject {
     };
     private static final ObjectSet<Gene> PROCESSED_GENES = new ObjectSet<>(DNA.SPROUT_GENES_COUNT);
 
-    private static final int MIN_ABSORPTION = 4;
-    private static final int MAX_ABSORPTION = 50;
+    private static final int MIN_ABSORPTION;
+    private static final int MAX_ABSORPTION;
     static final int ENERGY_CONSUMPTION = 10;
+
+    static {
+        ConfigManager configManager = AbstractFactory.getInstance().configManager();
+        MIN_ABSORPTION = configManager.getInteger("treePart.minAbsorption");
+        MAX_ABSORPTION = configManager.getInteger("treePart.maxAbsorption");
+    }
 
     Tree tree;
     TreePart parent;

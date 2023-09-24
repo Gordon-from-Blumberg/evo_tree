@@ -21,8 +21,9 @@ import java.util.Iterator;
 
 public class GameWorld implements EvoTreeWorld, Disposable {
     private static final Logger log = LogManager.create(GameWorld.class);
-    private static final int MIN_GAME_OBJECTS = 20;
-    private static final int ADD_RANDOM_SEED_DELAY = 30;
+    private static final int LIGHT_SOURCE_MOVE_DELAY = 10;
+    private static final int MIN_GAME_OBJECTS = 30;
+    private static final int ADD_RANDOM_SEED_DELAY = 50;
     private static int nextTreeId = 1;
     private static int nextSeedId = 1;
     private int turn = 0;
@@ -91,7 +92,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
                 seed.init();
                 cellGrid.addCellObject(seed, i, RandomGen.INSTANCE.nextInt(cellGrid.getHeight() / 2));
                 seed.setGeneration(1);
-                seed.setEnergy(400);
+                seed.setEnergy(4000);
                 addSeed(seed);
             }
         }
@@ -171,7 +172,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
                 }
             }
 
-            if (turn % 40 == 0) {
+            if (turn % LIGHT_SOURCE_MOVE_DELAY == 0) {
                 cellGrid.moveLightSources();
             }
             cellGrid.updateSunLight(lightDistribution);
@@ -201,7 +202,7 @@ public class GameWorld implements EvoTreeWorld, Disposable {
             Seed seed = Seed.getInstance();
             seed.initRandom();
             seed.setGeneration(1);
-            seed.setEnergy(RandomGen.INSTANCE.nextInt(300, 600));
+            seed.setEnergy(4000);
             addSeed(seed);
             int x = RandomGen.INSTANCE.nextInt(cellGrid.getWidth());
             Cell cell = cellGrid.cells[x][y];

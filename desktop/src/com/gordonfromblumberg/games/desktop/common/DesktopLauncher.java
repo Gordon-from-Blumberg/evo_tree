@@ -13,7 +13,7 @@ import java.io.File;
 public class DesktopLauncher {
 	public static void main (String[] args) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-//		config.foregroundFPS = 0;
+		config.foregroundFPS = 64;
 //		config.vSyncEnabled = false;
 		config.title = Main.NAME;
 
