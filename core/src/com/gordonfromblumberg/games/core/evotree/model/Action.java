@@ -75,6 +75,7 @@ public enum Action {
             } else {
                 --treePart.tree.shootCount;
             }
+            treePart.die();
             return true;
         }
     },

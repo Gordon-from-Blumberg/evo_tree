@@ -50,7 +50,8 @@ public class GameWorldRenderer extends AbstractRenderer {
         TREE_PART_MIN_ABSORPTION = configManager.getInteger("treePart.minAbsorption");
         TREE_PART_MAX_ABSORPTION = configManager.getInteger("treePart.maxAbsorption");
 
-        MAX_SUN_LIGHT = 0.6f * configManager.getInteger("world.lightSourceStrength");
+//        MAX_SUN_LIGHT = 0.6f * configManager.getInteger("world.lightSourceStrength");
+        MAX_SUN_LIGHT = 400;
         configManager.getColor("seed.color", SEED_COLOR);
 
         // lighting test
@@ -143,13 +144,16 @@ public class GameWorldRenderer extends AbstractRenderer {
                             TreePart part = (TreePart) cellObject;
                             Color treeColor = part.getTree().getColor();
 
-                            float k = 1;
-                            if (part.getType() == TreePartType.SHOOT) k = 1.3f;
-                            else if (part.getType() == TreePartType.DEAD) k = 0.5f;
                             float progress = (part.getLightAbsorption() - TREE_PART_MIN_ABSORPTION)
                                     / (float) (TREE_PART_MAX_ABSORPTION - TREE_PART_MIN_ABSORPTION);
                             float o = MathUtils.lerp(0.5f, 1f, progress);
                             if (o > 1f) o = 1f;
+                            float k = 1;
+                            if (part.getType() == TreePartType.SHOOT) k = 1.3f;
+                            else if (part.getType() == TreePartType.DEAD) {
+                                k = 0.4f;
+                                o *= 1.2f;
+                            }
                             shapeRenderer.setColor(
                                     (k * treeColor.r - MID_COLOR.r) * o + MID_COLOR.r,
                                     (k * treeColor.g - MID_COLOR.g) * o + MID_COLOR.g,

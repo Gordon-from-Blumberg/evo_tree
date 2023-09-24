@@ -53,6 +53,11 @@ public class TreePart extends LivingCellObject {
             return --turnsToDisappear == 0;
         }
 
+        if (calcLight(grid) >= lightToDie()) {
+            die();
+            return false;
+        }
+
         GeneticRules rules = world.getGeneticRules();
         if (rules.hasActiveConditions()) {
             Gene gene = activeGene;
@@ -117,6 +122,17 @@ public class TreePart extends LivingCellObject {
                     addChild(shoot);
                 }
             }
+        }
+    }
+
+    int lightToDie() {
+        return (120 - lightAbsorption) * 3;
+    }
+
+    void die() {
+        type = TreePartType.DEAD;
+        for (TreePart child : children) {
+            child.die();
         }
     }
 
