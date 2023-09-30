@@ -47,10 +47,11 @@ public class GameWorldRenderer extends AbstractRenderer {
         configManager.getColor("world.lightSource.color", LIGHT_SOURCE_COLOR);
 //        MID_COLOR.set(DARK_COLOR).lerp(LIGHT_COLOR, configManager.getFloat("world.midColor"));
 
-        TREE_PART_MIN_ABSORPTION = configManager.getInteger("treePart.minAbsorption");
-        TREE_PART_MAX_ABSORPTION = configManager.getInteger("treePart.maxAbsorption");
+        TREE_PART_MIN_ABSORPTION = configManager.getInteger("treePart.minAbsorption")
+                + configManager.getInteger("treePart.absorptionShift");
+        TREE_PART_MAX_ABSORPTION = configManager.getInteger("treePart.maxAbsorption")
+                + configManager.getInteger("treePart.absorptionShift");
 
-//        MAX_SUN_LIGHT = 0.6f * configManager.getInteger("world.lightSourceStrength");
         MAX_SUN_LIGHT = 400;
         configManager.getColor("seed.color", SEED_COLOR);
 
@@ -151,7 +152,7 @@ public class GameWorldRenderer extends AbstractRenderer {
                             float k = 1;
                             if (part.getType() == TreePartType.SHOOT) k = 1.3f;
                             else if (part.getType() == TreePartType.DEAD) {
-                                k = 0.4f;
+                                k = 0.5f;
                                 o *= 1.2f;
                             }
                             shapeRenderer.setColor(

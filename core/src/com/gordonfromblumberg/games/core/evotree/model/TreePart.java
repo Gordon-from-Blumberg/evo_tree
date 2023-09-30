@@ -21,12 +21,15 @@ public class TreePart extends LivingCellObject {
 
     private static final int MIN_ABSORPTION;
     private static final int MAX_ABSORPTION;
+    private static final int ABSORPTION_SHIFT;
     static final int ENERGY_CONSUMPTION = 10;
+    private static final int[] PUSH_SEED_COST = new int[] { 5, 3, 0, 3 };
 
     static {
         ConfigManager configManager = AbstractFactory.getInstance().configManager();
         MIN_ABSORPTION = configManager.getInteger("treePart.minAbsorption");
         MAX_ABSORPTION = configManager.getInteger("treePart.maxAbsorption");
+        ABSORPTION_SHIFT = configManager.getInteger("treePart.absorptionShift");
     }
 
     Tree tree;
@@ -91,42 +94,83 @@ public class TreePart extends LivingCellObject {
             PROCESSED_GENES.clear();
         }
 
-        int requiredEnergy = calcSproutCost(grid);
-        if (requiredEnergy < tree.energy) {
-            tree.energy -= requiredEnergy;
-            sprout(grid, newShoots);
-            if (!isBlocked(grid)) {
-                becomeWood();
-            }
+//        int requiredEnergy = calcSproutCost(grid);
+//        if (requiredEnergy < tree.energy) {
+//            tree.energy -= requiredEnergy;
+//            sprout(grid, newShoots);
+//            if (!isBlocked(grid)) {
+//                becomeWood();
+//            }
+//        }
+
+        if (sprout(grid, newShoots)) {
+            becomeWood();
         }
 
         return false;
     }
 
-    void sprout(CellGrid grid, Array<TreePart> newShoots) {
+    boolean sprout(CellGrid grid, Array<TreePart> newShoots) {
         Cell cell = this.cell;
+        boolean sprouted = false;
 
         for (Direction dir : Direction.ALL) {
             int nextActiveGene = activeGene.getValue(dir);
             if (0 <= nextActiveGene && nextActiveGene < DNA.SPROUT_GENES_COUNT) {
+                int seedsToPush = countSeedsToPush(grid, dir, cell);
+                if (seedsToPush == -1)
+                    continue;
+
+                int requiredEnergy = PUSH_SEED_COST[dir.getCode()] * seedsToPush + calcSproutCost(nextActiveGene);
+                if (requiredEnergy >= tree.energy)
+                    continue;
+
+                tree.energy -= requiredEnergy;
+                sprouted = true;
+
                 Cell neib = grid.getCell(cell, dir);
-                if (neib != null && neib.object == null) {
-                    TreePart shoot = getInstance();
-                    shoot.type = TreePartType.SHOOT;
-                    grid.addCellObject(shoot, neib);
-                    newShoots.add(shoot);
-                    shoot.activeGene = tree.dna.getGene(nextActiveGene);
-                    shoot.lightAbsorption = calcLightAbsorption(shoot.activeGene.getValue(Gene.LIGHT_ABSORPTION));
-                    shoot.buffer.set(this.buffer);
-                    shoot.isBufferFilled = this.isBufferFilled;
-                    addChild(shoot);
+
+                Cell targetCell = grid.getCell(neib, dir);
+                CellObject seedToPush = neib.object;
+                CellObject nextSeed = targetCell != null ? targetCell.object : null;
+                while (seedsToPush-- > 0 && targetCell != null) {
+                    grid.moveCellObjectTo(seedToPush, targetCell);
+                    targetCell = grid.getCell(targetCell, dir);
+                    seedToPush = nextSeed;
+                    nextSeed = targetCell != null ? targetCell.object : null;
                 }
+
+                TreePart shoot = getInstance();
+                shoot.type = TreePartType.SHOOT;
+                grid.addCellObject(shoot, neib);
+                newShoots.add(shoot);
+                shoot.activeGene = tree.dna.getGene(nextActiveGene);
+                shoot.lightAbsorption = calcLightAbsorption(shoot.activeGene.getValue(Gene.LIGHT_ABSORPTION));
+                shoot.buffer.set(this.buffer);
+                shoot.isBufferFilled = this.isBufferFilled;
+                addChild(shoot);
             }
         }
+
+        return sprouted;
+    }
+
+    int countSeedsToPush(CellGrid grid, Direction dir, Cell shootCell) {
+        int count = 0;
+        Cell cell = shootCell;
+        while ((cell = grid.getCell(cell, dir)) != null) {
+            CellObject object = cell.object;
+            if (object == null)
+                return count;
+            if (!(object instanceof Seed))
+                return -1;
+            ++count;
+        }
+        return -1;
     }
 
     int lightToDie() {
-        return (120 - lightAbsorption) * 3;
+        return (120 - lightAbsorption + ABSORPTION_SHIFT) * 3;
     }
 
     void die() {
@@ -149,13 +193,18 @@ public class TreePart extends LivingCellObject {
             if (0 <= nextGene && nextGene < DNA.SPROUT_GENES_COUNT) {
                 Cell neib = grid.getCell(cell, dir);
                 if (neib != null && neib.object == null) {
-                    int x = calcLightAbsorption(tree.dna.getGene(nextGene).getValue(Gene.LIGHT_ABSORPTION)) - 4;
-                    result += x * x / 2 + 4;
+//                    int x = calcLightAbsorption(tree.dna.getGene(nextGene).getValue(Gene.LIGHT_ABSORPTION)) - 4;
+//                    result += x * x / 2 + 4;
 //                    result += 3 * calcLightAbsorption(tree.dna.getGene(nextGene).getValue(Gene.LIGHT_ABSORPTION));
+                    result += calcSproutCost(nextGene);
                 }
             }
         }
         return result;
+    }
+
+    int calcSproutCost(int nextGene) {
+        return 4 * (calcLightAbsorption(tree.dna.getGene(nextGene).getValue(Gene.LIGHT_ABSORPTION)));
     }
 
     boolean isBlocked(CellGrid grid) {
@@ -187,7 +236,7 @@ public class TreePart extends LivingCellObject {
     }
 
     public int calcAbsorbedLight(CellGrid grid) {
-        return Math.min(calcLight(grid), getLightAbsorption());
+        return Math.min(calcLight(grid), getLightAbsorption() - ABSORPTION_SHIFT);
     }
 
     public int calcEnergy(CellGrid grid) {
@@ -196,7 +245,7 @@ public class TreePart extends LivingCellObject {
 
     protected static int calcLightAbsorption(int geneValue) {
         int absorption = geneValue < 0 ? MIN_ABSORPTION : MIN_ABSORPTION + geneValue;
-        return absorption > MAX_ABSORPTION ? MAX_ABSORPTION : absorption;
+        return (absorption > MAX_ABSORPTION ? MAX_ABSORPTION : absorption) + ABSORPTION_SHIFT;
     }
 
     public Tree getTree() {

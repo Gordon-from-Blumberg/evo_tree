@@ -106,11 +106,13 @@ public class Tree implements Poolable {
                 return false;
             }
 
+            int newEnergy = energy;
             for (TreePart treePart : treeParts) {
-                energy += treePart.calcEnergy(grid);
+                if (treePart.getType() != TreePartType.DEAD) {
+                    newEnergy += treePart.calcEnergy(grid) - TreePart.ENERGY_CONSUMPTION;
+                }
             }
-
-            energy -= getSize() * TreePart.ENERGY_CONSUMPTION;
+            energy = newEnergy;
 
             if (energy <= 0) {
                 log.debug("Tree #" + id + " has no energy and dies");
