@@ -21,7 +21,7 @@ import java.util.Iterator;
 
 public class GameWorld implements EvoTreeWorld, Disposable {
     private static final Logger log = LogManager.create(GameWorld.class);
-    private static final int LIGHT_SOURCE_MOVE_DELAY = 10;
+    private static final int LIGHT_SOURCE_MOVE_DELAY = 7;
     private static final int MIN_GAME_OBJECTS = 30;
     private static final int ADD_RANDOM_SEED_DELAY = 50;
     private static int nextTreeId = 1;
@@ -189,6 +189,13 @@ public class GameWorld implements EvoTreeWorld, Disposable {
                 addRandomSeeds(dropRandomSeeds > 0 ? dropRandomSeeds : 1);
                 lastSeedAddedTurn = turn;
             }
+
+            int generation = 0;
+            for (Tree tree : trees) {
+                if (tree.getGeneration() > generation)
+                    generation = tree.getGeneration();
+            }
+            maxGeneration = generation;
 
             if (seeds.isEmpty() && trees.isEmpty() && !Main.LIGHTING_TEST) {
                 running = false;

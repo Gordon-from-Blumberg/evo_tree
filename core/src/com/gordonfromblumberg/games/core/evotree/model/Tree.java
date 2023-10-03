@@ -301,6 +301,10 @@ public class Tree implements Poolable {
         return maxHeight - root.y + 1;
     }
 
+    public int getGeneration() {
+        return generation;
+    }
+
     public DNA getDna() {
         return dna;
     }

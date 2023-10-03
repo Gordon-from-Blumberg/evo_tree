@@ -158,7 +158,7 @@ public class TreePart extends LivingCellObject {
     int countSeedsToPush(CellGrid grid, Direction dir, Cell shootCell) {
         int count = 0;
         Cell cell = shootCell;
-        while ((cell = grid.getCell(cell, dir)) != null) {
+        while ((cell = grid.getCell(cell, dir)) != null && cell != shootCell) {
             CellObject object = cell.object;
             if (object == null)
                 return count;
