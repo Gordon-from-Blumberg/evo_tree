@@ -56,7 +56,7 @@ public class Gene {
     }
 
     void reset() {
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < VALUE_COUNT; ++i) {
             values[i] = -1;
         }
     }
