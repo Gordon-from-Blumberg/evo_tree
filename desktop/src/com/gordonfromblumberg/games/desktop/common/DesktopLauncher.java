@@ -17,6 +17,8 @@ public class DesktopLauncher {
 //		config.vSyncEnabled = false;
 		config.title = Main.NAME;
 
+		config.preferencesDirectory = config.preferencesDirectory + Main.NAME + '/';
+
 		DesktopFactory.init();
 
 		for (String arg : args) {
